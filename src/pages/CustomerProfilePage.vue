@@ -1,7 +1,7 @@
 <template>
   <div class="profile-page">
     <!-- 상단바 -->
-    <TopBar />
+    <CustomerTopBar />
     
     <!-- 메인 콘텐츠 -->
     <main class="profile-page__content">
@@ -16,23 +16,23 @@
     </main>
     
     <!-- 하단 네비게이션 -->
-    <BottomNavigation />
+    <CustomerBottomNavigation />
   </div>
 </template>
 
 <script>
-import TopBar from '@/components/TopBar.vue'
-import BottomNavigation from '@/components/BottomNavigation.vue'
+import CustomerTopBar from '@/components/CustomerTopBar.vue'
+import CustomerBottomNavigation from '@/components/CustomerBottomNavigation.vue'
 
 export default {
   name: 'ProfilePage',
   components: {
-    TopBar,
-    BottomNavigation
+    CustomerTopBar,
+    CustomerBottomNavigation
   }
 }
 </script>
 
 <style>
-@import '../styles/profile-page.css';
+@import '../styles/customer-profile-page.css';
 </style>

@@ -24,5 +24,5 @@ export default {
 </script>
 
 <style>
-@import '../styles/top-bar.css';
+@import '../styles/customer-top-bar.css';
 </style>

@@ -1,27 +1,27 @@
-import HomePage from '@/pages/HomePage.vue'
-import SearchPage from '@/pages/SearchPage.vue'
-import CouponPage from '@/pages/CouponPage.vue'
-import ProfilePage from '@/pages/ProfilePage.vue'
+import CustomerHomePage from '@/pages/CustomerHomePage.vue'
+import CustomerSearchPage from '@/pages/CustomerSearchPage.vue'
+import CustomerCouponPage from '@/pages/CustomerCouponPage.vue'
+import CustomerProfilePage from '@/pages/CustomerProfilePage.vue'
 
 export default [
   {
     path: '/',
     name: 'home',
-    component: HomePage,
+    component: CustomerHomePage,
   },
   {
     path: '/search',
     name: 'search',
-    component: SearchPage,
+    component: CustomerSearchPage,
   },
   {
     path: '/coupon',
     name: 'coupon',
-    component: CouponPage,
+    component: CustomerCouponPage,
   },
   {
     path: '/profile',
     name: 'profile',
-    component: ProfilePage,
+    component: CustomerProfilePage,
   },
 ]

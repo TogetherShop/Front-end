@@ -1,7 +1,7 @@
 <template>
   <div class="coupon-page">
     <!-- 상단바 -->
-    <TopBar />
+    <CustomerTopBar />
 
     <!-- 탭 리스트 -->
       <div class="container-fluid px-5 py-3">
@@ -47,7 +47,7 @@
         <div v-else-if="activeTab === 'available'">
           <!-- 백소정 모란점 -->
           <h4 class="coupon-page__section-title fw-bold mb-3">백소정 모란점</h4>
-          <CouponCard 
+          <CustomerCouponCard 
             v-for="coupon in availableCoupons.filter(c => c.storeGroup === '백소정 모란점')" 
             :key="coupon.id"
             :coupon="coupon"
@@ -57,7 +57,7 @@
           
           <!-- 훠궈야 고양 스타필드점 -->
           <h4 class="coupon-page__section-title fw-bold mb-3 mt-4">훠궈야 고양 스타필드점</h4>
-          <CouponCard 
+          <CustomerCouponCard 
             v-for="coupon in availableCoupons.filter(c => c.storeGroup === '훠궈야 고양 스타필드점')" 
             :key="coupon.id"
             :coupon="coupon"
@@ -82,7 +82,7 @@
           
           <!-- 받은 쿠폰 목록 -->
           <div class="coupon-page__received-coupons">
-            <ReceivedCouponCard 
+            <CustomerReceivedCouponCard 
               v-for="coupon in filteredReceivedCoupons" 
               :key="coupon.id"
               :coupon="coupon"
@@ -94,10 +94,10 @@
     </div>
 
     <!-- 하단 네비게이션 바 -->
-    <BottomNavigation />
+    <CustomerBottomNavigation />
 
     <!-- 쿠폰 발급 모달 -->
-    <CouponModal 
+    <CustomerCouponModal 
       :is-visible="showModal"
       :coupon="selectedCoupon"
       @close="closeModal"
@@ -105,7 +105,7 @@
     />
 
     <!-- 받은 쿠폰 상세 모달 -->
-    <ReceivedCouponDetailModal 
+    <CustomerReceivedCouponDetailModal 
       :is-visible="showReceivedCouponModal"
       :coupon="selectedReceivedCoupon"
       @close="closeReceivedCouponModal"
@@ -117,12 +117,12 @@
 
 <script>
 import { ref, onMounted, computed, watch } from 'vue'
-import TopBar from '@/components/TopBar.vue'
-import CouponCard from '@/components/CouponCard.vue'
-import ReceivedCouponCard from '@/components/ReceivedCouponCard.vue'
-import CouponModal from '@/components/CouponModal.vue'
-import ReceivedCouponDetailModal from '@/components/ReceivedCouponDetailModal.vue'
-import BottomNavigation from '@/components/BottomNavigation.vue'
+import CustomerTopBar from '@/components/CustomerTopBar.vue'
+import CustomerCouponCard from '@/components/CustomerCouponCard.vue'
+import CustomerReceivedCouponCard from '@/components/CustomerReceivedCouponCard.vue'
+import CustomerCouponModal from '@/components/CustomerCouponModal.vue'
+import CustomerReceivedCouponDetailModal from '@/components/CustomerReceivedCouponDetailModal.vue'
+import CustomerBottomNavigation from '@/components/CustomerBottomNavigation.vue'
 import { 
   getAvailableCoupons, 
   getReceivedCoupons, 
@@ -131,17 +131,17 @@ import {
   checkCouponAvailability,
   getCouponHistory,
   getCouponStats
-} from '@/api/coupon.js'
+} from '@/api/customer-coupon.js'
 
 export default {
   name: 'CouponPage',
   components: {
-    TopBar,
-    CouponCard,
-    ReceivedCouponCard,
-    CouponModal,
-    ReceivedCouponDetailModal,
-    BottomNavigation
+    CustomerTopBar,
+    CustomerCouponCard,
+    CustomerReceivedCouponCard,
+    CustomerCouponModal,
+    CustomerReceivedCouponDetailModal,
+    CustomerBottomNavigation
   },
   setup() {
     const activeTab = ref('available')
@@ -431,5 +431,5 @@ export default {
 </script>
 
 <style>
-@import '../styles/coupon.css';
+@import '../styles/customer-coupon.css';
 </style>

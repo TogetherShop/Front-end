@@ -75,5 +75,5 @@ export default {
 </script>
 
 <style>
-@import '../styles/couponmodal.css';
+@import '../styles/customer-couponmodal.css';
 </style>

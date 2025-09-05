@@ -70,5 +70,5 @@ export default {
 </script>
 
 <style>
-@import '../styles/bottom-navigation.css';
+@import '../styles/customer-bottom-navigation.css';
 </style>

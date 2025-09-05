@@ -198,5 +198,5 @@ export default {
 </script>
 
 <style>
-@import '../styles/received-coupon-detail-modal.css';
+@import '../styles/customer-received-coupon-detail-modal.css';
 </style>

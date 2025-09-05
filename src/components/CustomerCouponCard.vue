@@ -80,7 +80,7 @@
     </div>
     
     <!-- CouponModal 컴포넌트 -->
-    <CouponModal
+    <CustomerCouponModal
       :isVisible="showModal"
       :coupon="coupon"
       @close="closeModal"
@@ -91,12 +91,12 @@
 
 <script>
 import { ref } from 'vue'
-import CouponModal from './CouponModal.vue'
+import CustomerCouponModal from './CustomerCouponModal.vue'
 
 export default {
   name: 'CouponCard',
   components: {
-    CouponModal
+    CustomerCouponModal
   },
   props: {
     coupon: {

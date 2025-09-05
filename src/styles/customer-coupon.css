@@ -1,0 +1,473 @@
+/* 쿠폰 페이지 전용 스타일 */
+
+/* Material Icons 폰트 로딩 */
+@import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200');
+
+/* Figma 디자인 색상 변수 */
+:root {
+  --main-color: #017f58;
+  --gray-0: #6f797a;
+  --gray-3: #f3f3f7;
+  --text-color: #555555;
+  --text-dark: #222222;
+  --text-light: #3a3a3a;
+}
+
+/* 쿠폰 페이지 전체 레이아웃 */
+.coupon-page {
+  background: #ffffff;
+  min-height: 100vh;
+}
+
+
+/* 탭 섹션 스타일 */
+.coupon-page__tab-section {
+  background-color: white;
+  border-bottom: 1px solid var(--gray-3);
+}
+
+.coupon-page__tab-container {
+  background: var(--gray-3);
+  border-radius: 8px;
+  height: 36px;
+  position: relative;
+  padding: 3.5px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.coupon-page__tab-button {
+  background: transparent;
+  border: none;
+  border-radius: 6px;
+  color: var(--text-light);
+  font-family: 'Pretendard', sans-serif;
+  font-size: 12px;
+  font-weight: 500;
+  height: 29px;
+  padding: 0 16px;
+  transition: all 0.3s ease;
+  z-index: 1;
+  flex: 1;
+  margin: 0 2px;
+}
+
+.coupon-page__tab-button--active {
+  background: white;
+  box-shadow: 0px 1px 3px 0px rgba(0,0,0,0.1), 0px 1px 2px -1px rgba(0,0,0,0.1);
+  color: var(--text-light);
+  z-index: 2;
+}
+
+/* 쿠폰 카드 스타일 */
+.coupon-card {
+  animation: fadeInUp 0.6s ease-out;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.coupon-card__container {
+  background: white;
+  border: 1px solid var(--main-color);
+  border-radius: 12px;
+  box-shadow: 0px 1px 3px 0px rgba(0,0,0,0.1), 0px 1px 2px -1px rgba(0,0,0,0.1);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+
+.coupon-card__body {
+  padding: 0;
+}
+
+
+.coupon-card__header {
+  margin-bottom: 8px;
+}
+
+.coupon-card__store-name {
+  color: #000;
+
+  font-family: Pretendard;
+  font-size: 16px;
+  font-style: normal;
+  font-weight: 600;
+  line-height: 24px;
+}
+
+.coupon-card__category-badge {
+  color: var(--, #555);
+  font-family: Pretendard;
+  font-size: 11px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: 16px; 
+}
+
+.coupon-card__coupon-info {
+  margin-bottom: 8px;
+}
+
+.coupon-card__coupon-info .material-symbols-outlined {
+  color: var(--text-color);
+}
+
+.coupon-card__coupon-icon {
+  color: var(--main-color) !important;
+}
+
+.coupon-card__coupon-title {
+  color: var(--, #555);
+  font-family: Pretendard;
+  font-size: 12px;
+  font-style: normal;
+  font-weight: 500;
+  line-height: 16px;
+}
+
+.coupon-card__expiry .material-symbols-outlined {
+  color: var(--text-color);
+  
+}
+
+.coupon-card__expiry-date {
+  color: var(--, #555);
+  font-family: Pretendard;
+  font-size: 10px;
+  font-style: normal;
+  font-weight: 500;
+  line-height: normal;
+}
+
+/* 쿠폰 액션 영역 */
+.coupon-card__action-area {
+  background: var(--main-color);
+  border-radius: 0 12px 12px 0;
+  height: 90px;
+  position: relative;
+  overflow: hidden;
+}
+
+.coupon-card__action-area--clickable {
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+
+.coupon-card__remaining-icon {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 1;
+}
+
+.coupon-card__remaining-icon .material-symbols-outlined {
+  color: white;
+}
+
+.coupon-card__remaining-label-container {
+  padding-bottom: 8px;
+  z-index: 2;
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100%;
+  text-align: center;
+}
+
+.coupon-card__remaining-count .material-symbols-outlined {
+  color: white;
+}
+
+.coupon-card__remaining-label {
+  color: white;
+  font-size: 10px;
+  font-weight: 500;
+}
+
+
+
+.coupon-card__claimed-status {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.coupon-card__claimed-text {
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.coupon-card__out-of-stock {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.coupon-card__out-of-stock-text {
+  font-size: 12px;
+}
+
+.coupon-card__claim-button {
+  background: var(--main-color);
+  border: none;
+  border-radius: 20px;
+  color: white;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 6px 16px;
+  transition: all 0.3s ease;
+}
+
+
+.coupon-card__claim-button:disabled {
+  opacity: 0.7;
+}
+
+
+/* 안내 메시지 박스 */
+.coupon-page__info-box {
+  background: #F0FDF4;
+  border: 1px solid #B9F8CF;
+  border-radius: 12px;
+  padding: 15px;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.10), 0 1px 2px -1px rgba(0, 0, 0, 0.10);
+}
+
+.coupon-page__info-text {
+  color: var(--, #555);
+  font-family: Pretendard;
+  font-size: 12px;
+  font-style: normal;
+  font-weight: 500;
+  line-height: 20px; /* 166.667% */
+}
+
+/* 쿠폰 페이지 섹션 제목 */
+.coupon-page__section-title {
+  color: #222;
+  font-family: Pretendard;
+  font-size: 14px;
+  font-style: normal;
+  font-weight: 600;
+  line-height: 20px; /* 142.857% */
+}
+
+/* 쿠폰 목록 섹션 */
+.coupon-page__coupon-list {
+  padding-bottom: 100px; /* 하단 네비게이션 바 공간 확보 */
+}
+
+/* 반응형 디자인 */
+@media (max-width: 576px) {
+  .coupon-page .container-fluid {
+    padding-left: 15px;
+    padding-right: 15px;
+  }
+  
+  .coupon-page__tab-button {
+    font-size: 11px;
+    padding: 0 12px;
+  }
+  
+
+  
+  .coupon-card__action-area {
+    min-height: 80px;
+  }
+}
+
+/* 로딩 애니메이션 */
+@keyframes pulse {
+  0% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+.coupon-card__claim-button:disabled {
+  animation: pulse 1.5s infinite;
+}
+
+/* 받은 쿠폰 검색바 */
+.coupon-page__search-container {
+  padding: 0px 15px 10px 15px;
+}
+
+.coupon-page__search-box {
+  position: relative;
+  background: white;
+  border: 1px solid #f8f8f8;
+  border-radius: 5px;
+  box-shadow: 0px 1px 2px 0px rgba(0,0,0,0.2);
+  height: 41px;
+  display: flex;
+  align-items: center;
+  padding: 0 15px;
+}
+
+.coupon-page__search-icon {
+  color: #b0b1b3;
+  font-size: 20px;
+  margin-right: 8px;
+}
+
+.coupon-page__search-input {
+  border: none;
+  outline: none;
+  flex: 1;
+  color: var(--, #B0B1B3);
+  font-family: Pretendard;
+  font-size: 15px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: normal;
+}
+
+.coupon-page__search-input::placeholder {
+  color: #b0b1b3;
+  font-family: Pretendard;
+  font-size: 15px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: normal;
+}
+
+/* 받은 쿠폰 카드 */
+.received-coupon-card {
+  animation: fadeInUp 0.6s ease-out;
+}
+
+.received-coupon-card__container {
+  background: white;
+  border: 1px solid var(--main-color);
+  border-radius: 12px;
+  box-shadow: 0px 1px 3px 0px rgba(0,0,0,0.1), 0px 1px 2px -1px rgba(0,0,0,0.1);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  cursor: pointer;
+}
+
+
+.received-coupon-card__body {
+  padding: 0;
+  position: relative;
+}
+
+.received-coupon-card__header {
+  margin-bottom: 8px;
+}
+
+.received-coupon-card__store-name {
+  color: #000;
+  font-family: Pretendard;
+  font-size: 16px;
+  font-style: normal;
+  font-weight: 600;
+  line-height: 24px; /* 150% */
+}
+
+.received-coupon-card__category-badge {
+  color: var(--, #555);
+  font-family: Pretendard;
+  font-size: 11px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: 16px; /* 145.455% */
+}
+
+.received-coupon-card__coupon-info {
+  margin-bottom: 8px;
+}
+
+.received-coupon-card__coupon-icon {
+  color: var(--main-color) !important;
+}
+
+.received-coupon-card__coupon-title {
+  color: var(--, #555);
+  font-family: Pretendard;
+  font-size: 12px;
+  font-style: normal;
+  font-weight: 500;
+  line-height: 16px; /* 133.333% */
+}
+
+.received-coupon-card__expiry .material-symbols-outlined {
+  color: var(--text-color);
+}
+
+.received-coupon-card__expiry-date {
+  color: var(--text-color);
+  font-size: 11px;
+  font-weight: 600;
+}
+
+
+.received-coupon-card__days-text {
+  color: var(--main-color);
+  font-family: Pretendard;
+  font-size: 14px;
+  font-style: normal;
+  font-weight: 600;
+  line-height: normal;
+}
+
+.received-coupon-card__expiry-right {
+  position: absolute;
+  bottom: 15px;
+  right: 15px;
+  display: flex;
+  align-items: center;
+  z-index: 2;
+}
+
+.received-coupon-card__expiry-right .material-symbols-outlined {
+  color: var(--text-color);
+  font-size: 16px;
+}
+
+.received-coupon-card__expiry-right .received-coupon-card__expiry-date {
+  color: var(--, #555);
+  font-family: Pretendard;
+  font-size: 10px;
+  font-style: normal;
+  font-weight: 500;
+  line-height: normal;
+}
+
+/* 스크롤바 스타일링 */
+.coupon-page__coupon-list::-webkit-scrollbar {
+  width: 4px;
+}
+
+.coupon-page__coupon-list::-webkit-scrollbar-track {
+  background: #ffffff;
+  border-radius: 2px;
+}
+
+.coupon-page__coupon-list::-webkit-scrollbar-thumb {
+  background: #ffffff;
+  border-radius: 2px;
+}
+
+.coupon-page__coupon-list::-webkit-scrollbar-thumb:hover {
+  background: #ffffff;
+}

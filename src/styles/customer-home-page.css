@@ -1,0 +1,61 @@
+/* 홈 페이지 스타일 */
+.home-page {
+  background: #ffffff;
+  min-height: 100vh;
+  padding-bottom: 72px; /* 하단 네비게이션 높이만큼 여백 */
+}
+
+.home-page__content {
+  min-height: calc(100vh - 122px); /* 전체 높이 - 상단바(50px) - 하단바(72px) */
+}
+
+.home-page__title {
+  color: var(--text-dark);
+  font-size: 28px;
+  font-weight: 700;
+  margin-bottom: 16px;
+}
+
+.home-page__description {
+  color: var(--gray-0);
+  font-size: 16px;
+  line-height: 1.6;
+  margin-bottom: 0;
+}
+
+/* 반응형 디자인 */
+@media (max-width: 768px) {
+  .home-page {
+    padding-bottom: 68px;
+  }
+  
+  .home-page__content {
+    min-height: calc(100vh - 116px);
+  }
+  
+  .home-page__title {
+    font-size: 24px;
+  }
+  
+  .home-page__description {
+    font-size: 15px;
+  }
+}
+
+@media (max-width: 480px) {
+  .home-page {
+    padding-bottom: 64px;
+  }
+  
+  .home-page__content {
+    min-height: calc(100vh - 110px);
+  }
+  
+  .home-page__title {
+    font-size: 22px;
+  }
+  
+  .home-page__description {
+    font-size: 14px;
+  }
+}

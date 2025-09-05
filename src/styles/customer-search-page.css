@@ -158,6 +158,8 @@ line-height: 17.5px; /* 125% */
   font-size: 12px;
   transform: scale(0.7);
   transform-origin: center;
+  color: #ffc107 !important;
+  font-variation-settings: 'FILL' 1;
 }
 .customer-search__hotplace-card-address-icon {
   font-size: 12px;
@@ -427,6 +429,7 @@ line-height: 16px; /* 133.333% */
   fill: var(--, #017F58);
   font-size: 16px;
   color: #017f58;
+  font-variation-settings: 'FILL' 1;
 }
 
 .customer-search__result-category {

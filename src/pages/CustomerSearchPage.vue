@@ -50,7 +50,7 @@
                   <h4 class="customer-search__result-name">{{ store.name }}</h4>
                   <span class="customer-search__result-status">{{ store.isOnline ? '온라인' : '오프라인' }}</span>
                   <div class="customer-search__result-rating" v-if="store.rating">
-                    <i class="material-symbols-outlined">star</i>
+                    <i class="material-symbols-outlined customer-search__star-icon">star</i>
                     <span>{{ store.rating }}</span>
                   </div>
                 </div>

@@ -21,11 +21,17 @@ import { onMounted } from 'vue'
 </script>
 
 <template>
-  <div class="relative min-h-screen">
-    <div class="max-w-md mx-auto bg-white min-h-screen shadow-lg">
+  <div class="position-relative min-vh-100">
+    <div class="container d-flex flex-column bg-white min-vh-100 shadow mx-auto app-wrapper p-0">
       <RouterView />
     </div>
     <!-- 알림 토스트 컴포넌트가 있다면 남김 -->
     <!-- <BaseToast /> -->
   </div>
 </template>
+
+<style>
+.app-wrapper {
+  max-width: 430px; /* 원하는 앱 크기로 제한 */
+}
+</style>

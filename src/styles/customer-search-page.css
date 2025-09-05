@@ -243,7 +243,22 @@ line-height: 16px; /* 133.333% */
 
 .customer-search__related-card-progress-bar {
   height: 6px;
+  background-color: #edeef2;
+  border-radius: 3px;
 }
+
+.customer-search__related-card-progress-fill {
+  height: 100%;
+  border-radius: 3px;
+  background-color: #017f58 !important;
+}
+
+.customer-search__related-card-progress-fill.bg-primary {
+  background-color: #017f58 !important;
+}
+
+
+
 
 .customer-search__related-card-category {
   color: var(--, #017F58);
@@ -252,15 +267,26 @@ line-height: 16px; /* 133.333% */
   font-style: normal;
   font-weight: 500;
   line-height: 16px; /* 133.333% */
+  padding: 4px 8px;
+  border-radius: 12px;
+}
+
+.customer-search__related-card-category.bg-light-green {
+  background-color: #f0f9f4;
+  color: #017F58;
 }
 
 .customer-search__related-card-percentage {
   color: var(--, #017F58);
-font-family: Geist;
-font-size: 12px;
-font-style: normal;
-font-weight: 600;
-line-height: 16px; /* 133.333% */
+  font-family: Geist;
+  font-size: 12px;
+  font-style: normal;
+  font-weight: 600;
+  line-height: 16px; /* 133.333% */
+}
+
+.customer-search__related-card-percentage.text-primary {
+  color: #017f58;
 }
 
 .bg-light-green {

@@ -132,23 +132,20 @@
             <div class="d-flex justify-content-between align-items-center mb-2">
               <h3 class="customer-search__related-card-name fw-bold text-dark mb-0">{{ store.name }}</h3>
               <span 
-                class="badge customer-search__related-card-category"
-                :class="store.category === '샐러드' ? 'bg-dark-green text-white' : 'bg-light-green text-primary'"
+                class="badge customer-search__related-card-category bg-light-green text-primary"
               >{{ store.category || '매장' }}</span>
             </div>
             <div class="d-flex justify-content-between align-items-center">
               <div class="customer-search__related-card-progress flex-grow-1 me-3">
                 <div class="progress customer-search__related-card-progress-bar">
                   <div 
-                    class="progress-bar customer-search__related-card-progress-fill"
-                    :class="store.category === '샐러드' ? 'bg-gradient-primary' : 'bg-primary'"
+                    class="progress-bar customer-search__related-card-progress-fill bg-primary"
                     :style="{ width: `${store.matchPercentage || 0}%` }"
                   ></div>
                 </div>
               </div>
               <span 
-                class="fw-semibold customer-search__related-card-percentage"
-                :class="store.category === '샐러드' ? 'text-dark-green' : 'text-primary'"
+                class="fw-semibold customer-search__related-card-percentage text-primary"
               >{{ store.matchPercentage || 0 }}%</span>
             </div>
           </div>

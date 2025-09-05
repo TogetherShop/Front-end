@@ -108,6 +108,14 @@
 
     <!-- 하단 네비게이션 바 -->
     <BottomNavigation />
+
+    <!-- 쿠폰 발급 모달 -->
+    <CouponModal 
+      :is-visible="showModal"
+      :coupon="selectedCoupon"
+      @close="closeModal"
+      @download="handleDownload"
+    />
   </div>
 </template>
 
@@ -115,6 +123,7 @@
 import { ref, onMounted, computed, watch } from 'vue'
 import CouponCard from '@/components/CouponCard.vue'
 import ReceivedCouponCard from '@/components/ReceivedCouponCard.vue'
+import CouponModal from '@/components/CouponModal.vue'
 import BottomNavigation from '@/components/BottomNavigation.vue'
 import { 
   getAvailableCoupons, 
@@ -132,12 +141,15 @@ export default {
   components: {
     CouponCard,
     ReceivedCouponCard,
+    CouponModal,
     BottomNavigation
   },
   setup() {
     const activeTab = ref('available')
     const loading = ref(false)
     const searchQuery = ref('')
+    const showModal = ref(false)
+    const selectedCoupon = ref(null)
     
     const availableCoupons = ref([
       {
@@ -257,24 +269,46 @@ export default {
       }
     }
 
-    // 쿠폰 발급 처리
-    const handleClaimCoupon = async (couponId) => {
+    // 쿠폰 발급 처리 (모달 열기)
+    const handleClaimCoupon = (couponId) => {
       const coupon = availableCoupons.value.find(c => c.id === couponId)
       if (coupon && coupon.remainingCount > 0) {
-        try {
-          // 실제 API 호출
-          await claimCoupon(couponId)
-          
-          // 성공 시 로컬 상태 업데이트
-          coupon.remainingCount--
-          console.log('쿠폰 발급 성공:', coupon.title)
-          
-          // 받은 쿠폰 목록 새로고침
-          await loadReceivedCoupons()
-        } catch (error) {
-          console.error('쿠폰 발급 실패:', error)
-          // 에러 처리 (토스트 메시지 등)
+        selectedCoupon.value = {
+          ...coupon,
+          storeAvatar: 'http://localhost:3845/assets/4f7728b6d02dc64fde3fb8a6f0b1d01507e046a5.svg' // 기본 아바타
         }
+        showModal.value = true
+      }
+    }
+
+    // 모달 닫기
+    const closeModal = () => {
+      showModal.value = false
+      selectedCoupon.value = null
+    }
+
+    // 쿠폰 다운로드 처리
+    const handleDownload = async (coupon) => {
+      try {
+        // 실제 API 호출
+        await claimCoupon(coupon.id)
+        
+        // 성공 시 로컬 상태 업데이트
+        const couponIndex = availableCoupons.value.findIndex(c => c.id === coupon.id)
+        if (couponIndex !== -1) {
+          availableCoupons.value[couponIndex].remainingCount--
+        }
+        
+        console.log('쿠폰 다운로드 성공:', coupon.title)
+        
+        // 모달 닫기
+        closeModal()
+        
+        // 받은 쿠폰 목록 새로고침
+        await loadReceivedCoupons()
+      } catch (error) {
+        console.error('쿠폰 다운로드 실패:', error)
+        // 에러 처리 (토스트 메시지 등)
       }
     }
 
@@ -337,11 +371,15 @@ export default {
       activeTab,
       loading,
       searchQuery,
+      showModal,
+      selectedCoupon,
       availableCoupons,
       receivedCoupons,
       filteredReceivedCoupons,
       handleClaimCoupon,
       handleReceivedCouponClick,
+      closeModal,
+      handleDownload,
       loadReceivedCoupons,
       loadCoupons
     }

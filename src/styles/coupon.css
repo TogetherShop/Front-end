@@ -19,32 +19,6 @@
   min-height: 100vh;
 }
 
-/* 상단바 스타일 */
-.coupon-page__top-bar {
-  background-color: white !important;
-  height: 50px;
-}
-
-.coupon-page__profile-image {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  transition: transform 0.2s ease-in-out;
-}
-
-.coupon-page__profile-image:hover {
-  transform: scale(1.05);
-}
-
-.coupon-page__title {
-  color: var(--text-dark);
-  font-size: 16px;
-  font-weight: 600;
-}
-
-.coupon-page__logo {
-  width: 50px;
-  height: 50px;
-  object-fit: contain;
-}
 
 /* 탭 섹션 스타일 */
 .coupon-page__tab-section {

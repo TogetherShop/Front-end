@@ -1,22 +1,7 @@
 <template>
   <div class="coupon-page">
     <!-- 상단바 -->
-    <header class="coupon-page__top-bar bg-white">
-      <div class="container-fluid px-3 py-2">
-        <div class="row align-items-center">
-          <div class="col-6 d-flex align-items-center">
-            <img 
-              src="@/assets/images/togethershop_logo.png" 
-              alt="Togethershop Logo" 
-              class="coupon-page__logo"
-            />
-          </div>
-          <div class="col-6 d-flex justify-content-end">
-            <i class="material-symbols-outlined fs-2">notifications</i>
-          </div>
-        </div>
-      </div>
-    </header>
+    <TopBar />
 
     <!-- 탭 리스트 -->
       <div class="container-fluid px-5 py-3">
@@ -132,6 +117,7 @@
 
 <script>
 import { ref, onMounted, computed, watch } from 'vue'
+import TopBar from '@/components/TopBar.vue'
 import CouponCard from '@/components/CouponCard.vue'
 import ReceivedCouponCard from '@/components/ReceivedCouponCard.vue'
 import CouponModal from '@/components/CouponModal.vue'
@@ -150,6 +136,7 @@ import {
 export default {
   name: 'CouponPage',
   components: {
+    TopBar,
     CouponCard,
     ReceivedCouponCard,
     CouponModal,

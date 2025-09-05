@@ -10,9 +10,9 @@
           @click="navigateTo(item.route)"
         >
           <div class="bottom-navigation__icon mb-1">
-            <i class="material-symbols-outlined" :class="item.iconClass">{{ item.icon }}</i>
+            <i class="material-symbols-outlined">{{ item.icon }}</i>
           </div>
-          <span class="bottom-navigation__label small" :class="item.textClass">{{ item.name }}</span>
+          <span class="bottom-navigation__label small">{{ item.name }}</span>
         </div>
       </div>
     </div>
@@ -33,30 +33,22 @@ export default {
       {
         name: '홈',
         icon: 'home',
-        route: '/',
-        iconClass: 'text-muted',
-        textClass: 'text-muted'
+        route: '/'
       },
       {
         name: '매장찾기',
         icon: 'search',
-        route: '/search',
-        iconClass: 'text-muted',
-        textClass: 'text-muted'
+        route: '/search'
       },
       {
         name: '쿠폰',
         icon: 'redeem',
-        route: '/coupon',
-        iconClass: 'text-primary',
-        textClass: 'text-primary'
+        route: '/coupon'
       },
       {
         name: '내정보',
         icon: 'person_outline',
-        route: '/profile',
-        iconClass: 'text-muted',
-        textClass: 'text-muted'
+        route: '/profile'
       }
     ]
     

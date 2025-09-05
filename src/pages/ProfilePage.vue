@@ -1,15 +1,15 @@
 <template>
-  <div class="home-page">
+  <div class="profile-page">
     <!-- 상단바 -->
     <TopBar />
     
     <!-- 메인 콘텐츠 -->
-    <main class="home-page__content">
+    <main class="profile-page__content">
       <div class="container-fluid px-4 py-5">
         <div class="row">
           <div class="col-12">
-            <h1 class="home-page__title">홈</h1>
-            <p class="home-page__description">환영합니다! Togethershop에 오신 것을 환영합니다.</p>
+            <h1 class="profile-page__title">내정보</h1>
+            <p class="profile-page__description">내 정보를 확인하고 관리하세요.</p>
           </div>
         </div>
       </div>
@@ -25,7 +25,7 @@ import TopBar from '@/components/TopBar.vue'
 import BottomNavigation from '@/components/BottomNavigation.vue'
 
 export default {
-  name: 'HomePage',
+  name: 'ProfilePage',
   components: {
     TopBar,
     BottomNavigation
@@ -34,5 +34,5 @@ export default {
 </script>
 
 <style>
-@import '../styles/home-page.css';
+@import '../styles/profile-page.css';
 </style>

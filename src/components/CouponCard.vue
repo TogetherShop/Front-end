@@ -4,25 +4,25 @@
       <div class="coupon-card__body">
         <div class="row g-0">
           <!-- 쿠폰 정보 영역 -->
-          <div class="col-8 p-3">
-            <div class="coupon-card__header d-flex align-items-center mb-2">
+          <div class="coupon-card__info-area col-9 p-2 mb-1">
+            <div class="coupon-card__header d-flex align-items-center mb-1 ms-2" >
               <h6 class="coupon-card__store-name mb-0 fw-bold">{{ coupon.storeName }}</h6>
-              <span class="coupon-card__category-badge ms-1">{{ coupon.category }}</span>
+              <span class="coupon-card__category-badge ms-2">{{ coupon.category }}</span>
             </div>
 
-            <div class="coupon-card__coupon-info d-flex align-items-center mb-2">
+            <div class="coupon-card__coupon-info d-flex align-items-center mb-1 ms-2">
               <i class="material-symbols-outlined me-2 coupon-card__coupon-icon" style="font-size: 16px">local_play</i>
-              <span class="coupon-card__coupon-title fw-semibold">{{ coupon.title }}</span>
+              <span class="coupon-card__coupon-title ">{{ coupon.title }}</span>
             </div>
 
-            <div class="coupon-card__expiry d-flex align-items-center">
+            <div class="coupon-card__expiry d-flex align-items-center ms-2">
               <i class="material-symbols-outlined me-1" style="font-size: 14px">access_time</i>
               <small class="coupon-card__expiry-date">{{ coupon.expiryDate }}</small>
             </div>
           </div>
 
           <!-- 쿠폰 액션 영역 -->
-          <div class="col-4 p-0">
+          <div class="col-3 p-0">
             <div
               class="coupon-card__action-area h-100 d-flex flex-column justify-content-between align-items-center position-relative"
               @click="handleClaim"

@@ -44,13 +44,13 @@
     <div v-if="activeTab === 'available'" class="container-fluid px-4 pb-3">
       <div class="coupon-page__info-box">
         <p class="coupon-page__info-text mb-0">결제한 내역에 따라 쿠폰이 발행됩니다.</p>
-        <p class="coupon-page__info-text">제휴 가게 중에서 한 개의 쿠폰만 발급 및 사용이 가능합니다.</p>
+        <p class="coupon-page__info-text mb-0">제휴 가게 중에서 한 개의 쿠폰만 발급 및 사용이 가능합니다.</p>
       </div>
     </div>
 
     <!-- 쿠폰 목록 -->
     <div class="coupon-page__coupon-list">
-      <div class="container-fluid px-4 py-3">
+      <div class="container-fluid px-4 py-3" :class="{ 'py-0': activeTab === 'received' }">
         <!-- 로딩 상태 -->
         <div v-if="loading" class="text-center py-5">
           <div class="spinner-border text-primary" role="status">
@@ -80,13 +80,28 @@
         </div>
         
         <div v-else>
-          <h4 class="coupon-page__section-title fw-bold mb-3">받은 쿠폰</h4>
-          <CouponCard 
-            v-for="coupon in receivedCoupons" 
-            :key="coupon.id"
-            :coupon="coupon"
-            :is-received="true"
-          />
+          <!-- 검색바 -->
+          <div class="coupon-page__search-container px-1 mb-3">
+            <div class="coupon-page__search-box">
+              <i class="material-symbols-outlined coupon-page__search-icon">search</i>
+              <input 
+                type="text" 
+                placeholder="쿠폰 검색" 
+                class="coupon-page__search-input"
+                v-model="searchQuery"
+              />
+            </div>
+          </div>
+          
+          <!-- 받은 쿠폰 목록 -->
+          <div class="coupon-page__received-coupons">
+            <ReceivedCouponCard 
+              v-for="coupon in filteredReceivedCoupons" 
+              :key="coupon.id"
+              :coupon="coupon"
+              @click="handleReceivedCouponClick"
+            />
+          </div>
         </div>
       </div>
     </div>
@@ -97,20 +112,32 @@
 </template>
 
 <script>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed, watch } from 'vue'
 import CouponCard from '@/components/CouponCard.vue'
+import ReceivedCouponCard from '@/components/ReceivedCouponCard.vue'
 import BottomNavigation from '@/components/BottomNavigation.vue'
-import { getAvailableCoupons, getReceivedCoupons, claimCoupon } from '@/api/coupon.js'
+import { 
+  getAvailableCoupons, 
+  getReceivedCoupons, 
+  claimCoupon, 
+  getCouponDetail,
+  useCoupon,
+  checkCouponAvailability,
+  getCouponHistory,
+  getCouponStats
+} from '@/api/coupon.js'
 
 export default {
   name: 'CouponPage',
   components: {
     CouponCard,
+    ReceivedCouponCard,
     BottomNavigation
   },
   setup() {
     const activeTab = ref('available')
     const loading = ref(false)
+    const searchQuery = ref('')
     
     const availableCoupons = ref([
       {
@@ -159,11 +186,47 @@ export default {
     const receivedCoupons = ref([
       {
         id: 5,
-        storeName: '스타벅스 강남점',
+        storeName: '피자마루',
+        category: '음식점',
+        title: '10% 할인쿠폰',
+        expiryDate: '2025.10.31',
+        daysLeft: 'D-30',
+        isClaimed: true
+      },
+      {
+        id: 6,
+        storeName: '언더라인',
         category: '카페',
-        title: '아메리카노 20% 할인',
-        expiryDate: '2025.12.31',
-        remainingCount: 0,
+        title: '20% 할인쿠폰',
+        expiryDate: '2025.9.30',
+        daysLeft: 'D-26',
+        isClaimed: true
+      },
+      {
+        id: 7,
+        storeName: '조마루 감자탕',
+        category: '음식점',
+        title: '10% 할인쿠폰',
+        expiryDate: '2025.10.31',
+        daysLeft: 'D-30',
+        isClaimed: true
+      },
+      {
+        id: 8,
+        storeName: '하이디라오',
+        category: '음식점',
+        title: '5% 할인쿠폰',
+        expiryDate: '2025.10.31',
+        daysLeft: 'D-30',
+        isClaimed: true
+      },
+      {
+        id: 9,
+        storeName: '피자마루',
+        category: '음식점',
+        title: '10% 할인쿠폰',
+        expiryDate: '2025.10.31',
+        daysLeft: 'D-30',
         isClaimed: true
       }
     ])
@@ -172,16 +235,23 @@ export default {
     const loadCoupons = async () => {
       loading.value = true
       try {
-        // 추후 실제 API 호출로 대체
-        // const availableData = await getAvailableCoupons()
-        // const receivedData = await getReceivedCoupons()
-        // availableCoupons.value = availableData
-        // receivedCoupons.value = receivedData
+        // 실제 API 호출
+        const availableData = await getAvailableCoupons()
+        const receivedData = await getReceivedCoupons()
         
-        // 현재는 예시 데이터 사용
-        console.log('API 통신 준비 완료 - 추후 실제 API 호출로 대체')
+        // API 응답 데이터로 업데이트
+        if (availableData && availableData.data) {
+          availableCoupons.value = availableData.data
+        }
+        if (receivedData && receivedData.data) {
+          receivedCoupons.value = receivedData.data
+        }
+        
+        console.log('쿠폰 데이터 로드 완료')
       } catch (error) {
         console.error('쿠폰 데이터 로드 실패:', error)
+        // API 실패 시 예시 데이터 사용 (개발용)
+        console.log('API 실패로 인해 예시 데이터 사용')
       } finally {
         loading.value = false
       }
@@ -192,17 +262,71 @@ export default {
       const coupon = availableCoupons.value.find(c => c.id === couponId)
       if (coupon && coupon.remainingCount > 0) {
         try {
-          // 추후 실제 API 호출로 대체
-          // await claimCoupon(couponId)
+          // 실제 API 호출
+          await claimCoupon(couponId)
           
-          // 현재는 로컬 상태만 업데이트
+          // 성공 시 로컬 상태 업데이트
           coupon.remainingCount--
-          console.log('쿠폰 발급:', coupon.title)
+          console.log('쿠폰 발급 성공:', coupon.title)
+          
+          // 받은 쿠폰 목록 새로고침
+          await loadReceivedCoupons()
         } catch (error) {
           console.error('쿠폰 발급 실패:', error)
+          // 에러 처리 (토스트 메시지 등)
         }
       }
     }
+
+    // 검색 필터링
+    const filteredReceivedCoupons = computed(() => {
+      if (!searchQuery.value) {
+        return receivedCoupons.value
+      }
+      return receivedCoupons.value.filter(coupon => 
+        coupon.storeName.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
+        coupon.title.toLowerCase().includes(searchQuery.value.toLowerCase())
+      )
+    })
+
+    // 받은 쿠폰 목록 로드
+    const loadReceivedCoupons = async () => {
+      try {
+        const params = {
+          search: searchQuery.value,
+          page: 1,
+          limit: 50
+        }
+        const receivedData = await getReceivedCoupons(params)
+        
+        if (receivedData && receivedData.data) {
+          receivedCoupons.value = receivedData.data
+        }
+      } catch (error) {
+        console.error('받은 쿠폰 목록 로드 실패:', error)
+      }
+    }
+
+    // 받은 쿠폰 카드 클릭 핸들러
+    const handleReceivedCouponClick = async (couponId) => {
+      try {
+        // 쿠폰 상세 정보 조회
+        const couponDetail = await getCouponDetail(couponId)
+        console.log('쿠폰 상세 정보:', couponDetail)
+        
+        // 추후 쿠폰 상세 페이지로 이동하거나 사용 처리
+        // router.push(`/coupons/${couponId}`)
+      } catch (error) {
+        console.error('쿠폰 상세 정보 조회 실패:', error)
+      }
+    }
+
+    // 검색어 변경 시 받은 쿠폰 목록 새로고침
+    watch(searchQuery, () => {
+      if (activeTab.value === 'received') {
+        loadReceivedCoupons()
+      }
+    })
 
     // 컴포넌트 마운트 시 데이터 로드
     onMounted(() => {
@@ -212,9 +336,14 @@ export default {
     return {
       activeTab,
       loading,
+      searchQuery,
       availableCoupons,
       receivedCoupons,
-      handleClaimCoupon
+      filteredReceivedCoupons,
+      handleClaimCoupon,
+      handleReceivedCouponClick,
+      loadReceivedCoupons,
+      loadCoupons
     }
   }
 }

@@ -5,7 +5,7 @@
       <div class="coupon-modal__header">
         <div class="coupon-modal__store-info">
           <div class="coupon-modal__store-avatar">
-            <img :src="coupon.storeAvatar" :alt="coupon.storeName" />
+            <img :src="coupon.storeAvatar" />
           </div>
           <div class="coupon-modal__store-details">
             <h3 class="coupon-modal__store-name">{{ coupon.storeName }}</h3>

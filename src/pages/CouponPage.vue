@@ -67,6 +67,7 @@
             :key="coupon.id"
             :coupon="coupon"
             @claim="handleClaimCoupon"
+            @download="handleDownload"
           />
           
           <!-- 훠궈야 고양 스타필드점 -->
@@ -76,6 +77,7 @@
             :key="coupon.id"
             :coupon="coupon"
             @claim="handleClaimCoupon"
+            @download="handleDownload"
           />
         </div>
         

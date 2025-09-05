@@ -4,7 +4,11 @@
       <div class="coupon-card__body">
         <div class="row g-0">
           <!-- 쿠폰 정보 영역 -->
-          <div class="coupon-card__info-area col-9 p-2 mb-1">
+          <div 
+            class="coupon-card__info-area col-9 p-2 mb-1"
+            @click="openModal"
+            style="cursor: pointer;"
+          >
             <div class="coupon-card__header d-flex align-items-center mb-1 ms-2" >
               <h6 class="coupon-card__store-name mb-0 fw-bold">{{ coupon.storeName }}</h6>
               <span class="coupon-card__category-badge ms-2">{{ coupon.category }}</span>
@@ -25,7 +29,7 @@
           <div class="col-3 p-0">
             <div
               class="coupon-card__action-area h-100 d-flex flex-column justify-content-between align-items-center position-relative"
-              @click="handleClaim"
+              @click="handleDownload"
               :class="{ 'coupon-card__action-area--clickable': !isReceived && coupon.remainingCount > 0 }"
             >
               <!-- 남은 수량 아이콘 (중심) -->
@@ -74,14 +78,26 @@
         </div>
       </div>
     </div>
+    
+    <!-- CouponModal 컴포넌트 -->
+    <CouponModal
+      :isVisible="showModal"
+      :coupon="coupon"
+      @close="closeModal"
+      @download="handleModalDownload"
+    />
   </div>
 </template>
 
 <script>
 import { ref } from 'vue'
+import CouponModal from './CouponModal.vue'
 
 export default {
   name: 'CouponCard',
+  components: {
+    CouponModal
+  },
   props: {
     coupon: {
       type: Object,
@@ -92,9 +108,10 @@ export default {
       default: false,
     },
   },
-  emits: ['claim'],
+  emits: ['claim', 'download'],
   setup(props, { emit }) {
     const isClaiming = ref(false)
+    const showModal = ref(false)
 
     const handleClaim = async () => {
       if (props.coupon.remainingCount <= 0) return
@@ -112,9 +129,43 @@ export default {
       }
     }
 
+    const handleDownload = async () => {
+      if (props.coupon.remainingCount <= 0) return
+
+      isClaiming.value = true
+
+      try {
+        // 실제로는 API 호출
+        await new Promise((resolve) => setTimeout(resolve, 1000))
+        emit('download', props.coupon)
+      } catch (error) {
+        console.error('쿠폰 다운로드 실패:', error)
+      } finally {
+        isClaiming.value = false
+      }
+    }
+
+    const openModal = () => {
+      showModal.value = true
+    }
+
+    const closeModal = () => {
+      showModal.value = false
+    }
+
+    const handleModalDownload = (coupon) => {
+      emit('download', coupon.id)
+      closeModal()
+    }
+
     return {
       isClaiming,
+      showModal,
       handleClaim,
+      handleDownload,
+      openModal,
+      closeModal,
+      handleModalDownload,
     }
   },
 }

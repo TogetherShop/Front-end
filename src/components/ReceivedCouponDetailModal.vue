@@ -71,6 +71,28 @@
         </button>
       </div>
     </div>
+
+    <!-- 사용 완료 확인 알림창 -->
+    <div v-if="showConfirmModal" class="use-confirm-modal-overlay" @click="closeConfirmModal">
+      <div class="use-confirm-modal" @click.stop>
+        <div class="use-confirm-modal__content">
+          <h3 class="use-confirm-modal__title">직원 전용 확인 버튼입니다</h3>
+          <p class="use-confirm-modal__message">
+            확인 버튼 클릭 시 쿠폰이 즉시 사용처리 되며,<br>
+            다시 되돌릴 수 없습니다.
+          </p>
+          <div class="use-confirm-modal__buttons">
+
+            <button class="use-confirm-modal__confirm-btn" @click="handleConfirmUse">
+              확인
+            </button>
+            <button class="use-confirm-modal__cancel-btn" @click="closeConfirmModal">
+              취소
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -100,6 +122,7 @@ export default {
   emits: ['close', 'showQR', 'useCoupon'],
   setup(props, { emit }) {
     const showQRView = ref(false)
+    const showConfirmModal = ref(false)
     const remainingTime = ref(5 * 60) // 5분을 초 단위로 저장
     let timeInterval = null
 
@@ -125,12 +148,21 @@ export default {
       }, 1000)
     }
 
-    // 사용 완료 확인
+    // 사용 완료 확인 모달 열기
     const confirmUse = () => {
-      if (confirm('정말로 쿠폰을 사용하시겠습니까?')) {
-        emit('useCoupon', props.coupon)
-        closeModal()
-      }
+      showConfirmModal.value = true
+    }
+
+    // 확인 모달 닫기
+    const closeConfirmModal = () => {
+      showConfirmModal.value = false
+    }
+
+    // 실제 사용 완료 처리
+    const handleConfirmUse = () => {
+      emit('useCoupon', props.coupon)
+      closeConfirmModal()
+      closeModal()
     }
 
     // 모달 닫기
@@ -152,10 +184,13 @@ export default {
 
     return {
       showQRView,
+      showConfirmModal,
       remainingTime,
       formattedTime,
       showQRCode,
       confirmUse,
+      closeConfirmModal,
+      handleConfirmUse,
       closeModal
     }
   }

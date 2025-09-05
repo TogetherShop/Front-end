@@ -342,3 +342,131 @@ flex-shrink: 0;
     right: 20px;
   }
 }
+
+/* 사용 완료 확인 모달 */
+.use-confirm-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 10000;
+}
+
+.use-confirm-modal {
+  width: 313px;
+  height: 189px;
+  border-radius: 12px;
+  background: #017F58;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.use-confirm-modal__content {
+  width: 100%;
+  height: 100%;
+  padding: 20px 0 20px 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  position: relative;
+}
+
+.use-confirm-modal__title {
+  font-family: 'Pretendard', sans-serif;
+  font-weight: 600;
+  font-size: 20px;
+  color: white;
+  margin: 15px 0 10px 0;
+}
+
+.use-confirm-modal__message {
+  font-family: 'Pretendard', sans-serif;
+  font-weight: 500;
+  font-size: 15px;
+  color: #e1e2e6;
+  margin: 15px 0 20px 0;
+}
+
+
+
+.use-confirm-modal__buttons {
+  width: 100%;
+  border-top: 1px solid #ffffff23;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.use-confirm-modal__cancel-btn,
+.use-confirm-modal__confirm-btn {
+  background: none;
+  border: none;
+  color: white;
+  font-family: 'Pretendard', sans-serif;
+  font-weight: 700;
+  font-size: 17px;
+  cursor: pointer;
+  padding: 12px 0;
+  transition: opacity 0.2s ease;
+  flex: 1;
+  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.use-confirm-modal__cancel-btn:hover,
+.use-confirm-modal__confirm-btn:hover {
+  opacity: 0.8;
+}
+
+.use-confirm-modal__cancel-btn:active,
+.use-confirm-modal__confirm-btn:active {
+  opacity: 0.6;
+}
+
+/* 반응형 디자인 - 확인 모달 */
+@media (max-width: 390px) {
+  .use-confirm-modal {
+    width: calc(100vw - 40px);
+    max-width: 313px;
+    height: 180px;
+  }
+  
+  .use-confirm-modal__content {
+    padding: 16px 0 16px 0;
+  }
+  
+  .use-confirm-modal__title {
+    font-size: 18px;
+    margin-bottom: 12px;
+  }
+  
+  .use-confirm-modal__message {
+    font-size: 14px;
+    margin-bottom: 16px;
+  }
+  
+  .use-confirm-modal__divider {
+    margin-bottom: 16px;
+  }
+  
+  .use-confirm-modal__buttons {
+    gap: 0;
+  }
+  
+  .use-confirm-modal__cancel-btn,
+  .use-confirm-modal__confirm-btn {
+    font-size: 16px;
+    padding: 10px 0;
+  }
+}

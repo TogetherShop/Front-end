@@ -1,141 +1,141 @@
 import axios from '@/libs/axios'
 
-// ÄíÆù °ü·Ã API ÇÔ¼öµé
+// ê³ ê° ì¿ í° API í•¨ìˆ˜ë“¤
 
 /**
- * ¹ß±Ş °¡´ÉÇÑ ÄíÆù ¸ñ·Ï Á¶È¸
- * @param {Object} params - Äõ¸® ÆÄ¶ó¹ÌÅÍ (¼±ÅÃ»çÇ×)
- * @param {string} params.storeGroup - ¸ÅÀå ±×·ì ÇÊÅÍ
- * @param {string} params.category - Ä«Å×°í¸® ÇÊÅÍ
- * @param {number} params.page - ÆäÀÌÁö ¹øÈ£
- * @param {number} params.limit - ÆäÀÌÁö´ç ¾ÆÀÌÅÛ ¼ö
- * @returns {Promise<Object>} ÄíÆù ¸ñ·Ï µ¥ÀÌÅÍ
+ * ë°œê¸‰ ê°€ëŠ¥í•œ ì¿ í° ëª©ë¡ ì¡°íšŒ
+ * @param {Object} params - ì¿¼ë¦¬ íŒŒë¼ë¯¸í„° (ì„ íƒì‚¬í•­)
+ * @param {string} params.storeGroup - ë§¤ì¥ ê·¸ë£¹ ì´ë¦„
+ * @param {string} params.category - ì¹´í…Œê³ ë¦¬ ì´ë¦„
+ * @param {number} params.page - í˜ì´ì§€ ë²ˆí˜¸
+ * @param {number} params.limit - í˜ì´ì§€ë‹¹ í•­ëª© ìˆ˜
+ * @returns {Promise<Object>} ì¿ í° ëª©ë¡ ë°ì´í„°
  */
 export const getAvailableCoupons = async (params = {}) => {
   try {
     const response = await axios.get('/api/coupons/available', { params })
     return response.data
   } catch (error) {
-    console.error('¹ß±Ş °¡´ÉÇÑ ÄíÆù Á¶È¸ ½ÇÆĞ:', error)
+    console.error('ë°œê¸‰ ê°€ëŠ¥í•œ ì¿ í° ëª©ë¡ ì¡°íšŒ ì‹¤íŒ¨:', error)
     throw error
   }
 }
 
 /**
- * ¹ŞÀº ÄíÆù ¸ñ·Ï Á¶È¸
- * @param {Object} params - Äõ¸® ÆÄ¶ó¹ÌÅÍ (¼±ÅÃ»çÇ×)
- * @param {string} params.search - °Ë»ö¾î
- * @param {string} params.status - ÄíÆù »óÅÂ (active, expired, used)
- * @param {number} params.page - ÆäÀÌÁö ¹øÈ£
- * @param {number} params.limit - ÆäÀÌÁö´ç ¾ÆÀÌÅÛ ¼ö
- * @returns {Promise<Object>} ¹ŞÀº ÄíÆù ¸ñ·Ï µ¥ÀÌÅÍ
+ * ë°›ì€ ì¿ í° ëª©ë¡ ì¡°íšŒ
+ * @param {Object} params - ì¿¼ë¦¬ íŒŒë¼ë¯¸í„° (ì„ íƒì‚¬í•­)
+ * @param {string} params.search - ê²€ìƒ‰ì–´
+ * @param {string} params.status - ì¿ í° ìƒíƒœ (active, expired, used)
+ * @param {number} params.page - í˜ì´ì§€ ë²ˆí˜¸
+ * @param {number} params.limit - í˜ì´ì§€ë‹¹ í•­ëª© ìˆ˜
+ * @returns {Promise<Object>} ë°›ì€ ì¿ í° ëª©ë¡ ë°ì´í„°
  */
 export const getReceivedCoupons = async (params = {}) => {
   try {
     const response = await axios.get('/api/coupons/received', { params })
     return response.data
   } catch (error) {
-    console.error('¹ŞÀº ÄíÆù Á¶È¸ ½ÇÆĞ:', error)
+    console.error('ë°›ì€ ì¿ í° ëª©ë¡ ì¡°íšŒ ì‹¤íŒ¨:', error)
     throw error
   }
 }
 
 /**
- * ÄíÆù ¹ß±Ş ¿äÃ»
- * @param {number} couponId - ÄíÆù ID
- * @returns {Promise<Object>} ¹ß±Ş °á°ú
+ * ì¿ í° ë°œê¸‰ ìš”ì²­
+ * @param {number} couponId - ì¿ í° ID
+ * @returns {Promise<Object>} ë°œê¸‰ ê²°ê³¼
  */
 export const claimCoupon = async (couponId) => {
   try {
     const response = await axios.post(`/api/coupons/${couponId}/claim`)
     return response.data
   } catch (error) {
-    console.error(`ÄíÆù ¹ß±Ş ½ÇÆĞ (ID: ${couponId}):`, error)
+    console.error(`ì¿ í° ë°œê¸‰ ì‹¤íŒ¨ (ID: ${couponId}):`, error)
     throw error
   }
 }
 
 /**
- * ÄíÆù »ç¿ë
- * @param {number} couponId - ÄíÆù ID
- * @param {Object} data - »ç¿ë µ¥ÀÌÅÍ (¼±ÅÃ»çÇ×)
- * @param {string} data.storeId - »ç¿ë ¸ÅÀå ID
- * @param {number} data.amount - »ç¿ë ±İ¾×
- * @returns {Promise<Object>} »ç¿ë °á°ú
+ * ì¿ í° ì‚¬ìš©
+ * @param {number} couponId - ì¿ í° ID
+ * @param {Object} data - ì‚¬ìš© ë°ì´í„° (ì„ íƒì‚¬í•­)
+ * @param {string} data.storeId - ë§¤ì¥ ID
+ * @param {number} data.amount - ì‚¬ìš© ê¸ˆì•¡
+ * @returns {Promise<Object>} ì‚¬ìš© ê²°ê³¼
  */
 export const useCoupon = async (couponId, data = {}) => {
   try {
     const response = await axios.post(`/api/coupons/${couponId}/use`, data)
     return response.data
   } catch (error) {
-    console.error(`ÄíÆù »ç¿ë ½ÇÆĞ (ID: ${couponId}):`, error)
+    console.error(`ì¿ í° ì‚¬ìš© ì‹¤íŒ¨ (ID: ${couponId}):`, error)
     throw error
   }
 }
 
 /**
- * ÄíÆù »ó¼¼ Á¤º¸ Á¶È¸
- * @param {number} couponId - ÄíÆù ID
- * @returns {Promise<Object>} ÄíÆù »ó¼¼ Á¤º¸
+ * ì¿ í° ìƒì„¸ ì •ë³´ ì¡°íšŒ
+ * @param {number} couponId - ì¿ í° ID
+ * @returns {Promise<Object>} ì¿ í° ìƒì„¸ ì •ë³´
  */
 export const getCouponDetail = async (couponId) => {
   try {
     const response = await axios.get(`/api/coupons/${couponId}`)
     return response.data
   } catch (error) {
-    console.error(`ÄíÆù »ó¼¼ Á¤º¸ Á¶È¸ ½ÇÆĞ (ID: ${couponId}):`, error)
+    console.error(`ì¿ í° ìƒì„¸ ì •ë³´ ì¡°íšŒ ì‹¤íŒ¨ (ID: ${couponId}):`, error)
     throw error
   }
 }
 
 /**
- * ÄíÆù »ç¿ë °¡´É ¿©ºÎ È®ÀÎ
- * @param {number} couponId - ÄíÆù ID
- * @param {Object} data - È®ÀÎ µ¥ÀÌÅÍ
- * @param {string} data.storeId - ¸ÅÀå ID
- * @param {number} data.amount - ÁÖ¹® ±İ¾×
- * @returns {Promise<Object>} »ç¿ë °¡´É ¿©ºÎ
+ * ì¿ í° ì‚¬ìš© ê°€ëŠ¥ ì—¬ë¶€ í™•ì¸
+ * @param {number} couponId - ì¿ í° ID
+ * @param {Object} data - í™•ì¸ ë°ì´í„°
+ * @param {string} data.storeId - ë§¤ì¥ ID
+ * @param {number} data.amount - ì£¼ë¬¸ ê¸ˆì•¡
+ * @returns {Promise<Object>} ì‚¬ìš© ê°€ëŠ¥ ì—¬ë¶€
  */
 export const checkCouponAvailability = async (couponId, data) => {
   try {
     const response = await axios.post(`/api/coupons/${couponId}/check`, data)
     return response.data
   } catch (error) {
-    console.error(`ÄíÆù »ç¿ë °¡´É ¿©ºÎ È®ÀÎ ½ÇÆĞ (ID: ${couponId}):`, error)
+    console.error(`ì¿ í° ì‚¬ìš© ê°€ëŠ¥ ì—¬ë¶€ í™•ì¸ ì‹¤íŒ¨ (ID: ${couponId}):`, error)
     throw error
   }
 }
 
 /**
- * ÄíÆù È÷½ºÅä¸® Á¶È¸
- * @param {Object} params - Äõ¸® ÆÄ¶ó¹ÌÅÍ
- * @param {string} params.type - È÷½ºÅä¸® Å¸ÀÔ (claim, use, expire)
- * @param {string} params.startDate - ½ÃÀÛ ³¯Â¥
- * @param {string} params.endDate - Á¾·á ³¯Â¥
- * @param {number} params.page - ÆäÀÌÁö ¹øÈ£
- * @param {number} params.limit - ÆäÀÌÁö´ç ¾ÆÀÌÅÛ ¼ö
- * @returns {Promise<Object>} ÄíÆù È÷½ºÅä¸® µ¥ÀÌÅÍ
+ * ì¿ í° ì´ë ¥ ëª©ë¡ ì¡°íšŒ
+ * @param {Object} params - ì¿¼ë¦¬ íŒŒë¼ë¯¸í„°
+ * @param {string} params.type - ì´ë ¥ íƒ€ì… (claim, use, expire)
+ * @param {string} params.startDate - ì‹œì‘ ë‚ ì§œ
+ * @param {string} params.endDate - ì¢…ë£Œ ë‚ ì§œ
+ * @param {number} params.page - í˜ì´ì§€ ë²ˆí˜¸
+ * @param {number} params.limit - í˜ì´ì§€ë‹¹ í•­ëª© ìˆ˜
+ * @returns {Promise<Object>} ì¿ í° ì´ë ¥ ëª©ë¡ ë°ì´í„°
  */
 export const getCouponHistory = async (params = {}) => {
   try {
     const response = await axios.get('/api/coupons/history', { params })
     return response.data
   } catch (error) {
-    console.error('ÄíÆù È÷½ºÅä¸® Á¶È¸ ½ÇÆĞ:', error)
+    console.error('ì¿ í° ì´ë ¥ ëª©ë¡ ì¡°íšŒ ì‹¤íŒ¨:', error)
     throw error
   }
 }
 
 /**
- * ÄíÆù Åë°è Á¶È¸
- * @returns {Promise<Object>} ÄíÆù Åë°è µ¥ÀÌÅÍ
+ * ì¿ í° í†µê³„ ì¡°íšŒ
+ * @returns {Promise<Object>} ì¿ í° í†µê³„ ë°ì´í„°
  */
 export const getCouponStats = async () => {
   try {
     const response = await axios.get('/api/coupons/stats')
     return response.data
   } catch (error) {
-    console.error('ÄíÆù Åë°è Á¶È¸ ½ÇÆĞ:', error)
+    console.error('ì¿ í° í†µê³„ ì¡°íšŒ ì‹¤íŒ¨:', error)
     throw error
   }
 }

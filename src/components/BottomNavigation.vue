@@ -77,6 +77,6 @@ export default {
 }
 </script>
 
-<style scoped>
-/* 하단 네비게이션 바 스타일은 coupon.css에서 관리 */
+<style>
+@import '../styles/bottom-navigation.css';
 </style>

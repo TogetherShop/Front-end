@@ -1,0 +1,101 @@
+/* 하단 네비게이션 바 스타일 */
+.bottom-navigation {
+  background-color: white !important;
+  border-top: 1px solid var(--gray-3) !important;
+  height: 72px;
+  z-index: 100;
+}
+
+.bottom-navigation__item {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  min-height: 72px;
+  cursor: pointer;
+}
+
+
+
+.bottom-navigation__item--active .bottom-navigation__icon .material-symbols-outlined {
+  color: var(--main-color) !important;
+}
+
+.bottom-navigation__item--active .bottom-navigation__label {
+  color: var(--main-color) !important;
+  font-weight: 600;
+}
+
+.bottom-navigation__icon {
+  width: 20px;
+  height: 17px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 4px;
+}
+
+.bottom-navigation__icon .material-symbols-outlined {
+  color: var(--gray-0);
+  font-size: 24px;
+  transition: all 0.3s ease;
+}
+
+
+
+.bottom-navigation__item--active .bottom-navigation__icon .material-symbols-outlined {
+  transform: scale(1.15);
+}
+
+.bottom-navigation__label {
+  color: var(--gray-0);
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 24px;
+  transition: all 0.3s ease;
+}
+
+/* 반응형 디자인 */
+@media (max-width: 768px) {
+  .bottom-navigation {
+    height: 68px;
+  }
+  
+  .bottom-navigation__item {
+    min-height: 68px;
+  }
+  
+  .bottom-navigation__icon {
+    width: 20px;
+    height: 17px;
+  }
+  
+  .bottom-navigation__icon .material-symbols-outlined {
+    font-size: 22px;
+  }
+  
+  .bottom-navigation__label {
+    font-size: 13px;
+  }
+}
+
+@media (max-width: 480px) {
+  .bottom-navigation {
+    height: 64px;
+  }
+  
+  .bottom-navigation__item {
+    min-height: 64px;
+  }
+  
+  .bottom-navigation__icon {
+    width: 20px;
+    height: 20px;
+  }
+  
+  .bottom-navigation__icon .material-symbols-outlined {
+    font-size: 20px;
+  }
+  
+  .bottom-navigation__label {
+    font-size: 12px;
+  }
+}

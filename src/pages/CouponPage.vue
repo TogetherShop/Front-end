@@ -6,7 +6,7 @@
         <div class="row align-items-center">
           <div class="col-6 d-flex align-items-center">
             <img 
-              src="http://localhost:3845/assets/5889b11eee82de89d5c2367880c047acbf719b0c.png" 
+              src="@/assets/images/togethershop_logo.png" 
               alt="Togethershop Logo" 
               class="coupon-page__logo"
             />
@@ -118,6 +118,15 @@
       @close="closeModal"
       @download="handleDownload"
     />
+
+    <!-- 받은 쿠폰 상세 모달 -->
+    <ReceivedCouponDetailModal 
+      :is-visible="showReceivedCouponModal"
+      :coupon="selectedReceivedCoupon"
+      @close="closeReceivedCouponModal"
+      @showQR="handleShowQR"
+      @useCoupon="handleUseCoupon"
+    />
   </div>
 </template>
 
@@ -126,12 +135,12 @@ import { ref, onMounted, computed, watch } from 'vue'
 import CouponCard from '@/components/CouponCard.vue'
 import ReceivedCouponCard from '@/components/ReceivedCouponCard.vue'
 import CouponModal from '@/components/CouponModal.vue'
+import ReceivedCouponDetailModal from '@/components/ReceivedCouponDetailModal.vue'
 import BottomNavigation from '@/components/BottomNavigation.vue'
 import { 
   getAvailableCoupons, 
   getReceivedCoupons, 
   claimCoupon, 
-  getCouponDetail,
   useCoupon,
   checkCouponAvailability,
   getCouponHistory,
@@ -144,6 +153,7 @@ export default {
     CouponCard,
     ReceivedCouponCard,
     CouponModal,
+    ReceivedCouponDetailModal,
     BottomNavigation
   },
   setup() {
@@ -152,6 +162,8 @@ export default {
     const searchQuery = ref('')
     const showModal = ref(false)
     const selectedCoupon = ref(null)
+    const showReceivedCouponModal = ref(false)
+    const selectedReceivedCoupon = ref(null)
     
     const availableCoupons = ref([
       {
@@ -344,16 +356,53 @@ export default {
     }
 
     // 받은 쿠폰 카드 클릭 핸들러
-    const handleReceivedCouponClick = async (couponId) => {
+    const handleReceivedCouponClick = (couponId) => {
+      // 로컬 데이터로만 모달 열기
+      const coupon = receivedCoupons.value.find(c => c.id === couponId)
+      if (coupon) {
+        selectedReceivedCoupon.value = {
+          ...coupon,
+          storeAvatar: 'http://localhost:3845/assets/4f7728b6d02dc64fde3fb8a6f0b1d01507e046a5.svg' // 기본 아바타
+        }
+        showReceivedCouponModal.value = true
+      }
+    }
+
+    // 받은 쿠폰 모달 닫기
+    const closeReceivedCouponModal = () => {
+      showReceivedCouponModal.value = false
+      selectedReceivedCoupon.value = null
+    }
+
+    // QR 코드 표시
+    const handleShowQR = (coupon) => {
+      console.log('QR 코드 표시:', coupon)
+      // 추후 QR 코드 모달이나 페이지로 이동
+    }
+
+    // 쿠폰 사용 처리
+    const handleUseCoupon = async (coupon) => {
       try {
-        // 쿠폰 상세 정보 조회
-        const couponDetail = await getCouponDetail(couponId)
-        console.log('쿠폰 상세 정보:', couponDetail)
+        // 실제 API 호출
+        await useCoupon(coupon.id)
         
-        // 추후 쿠폰 상세 페이지로 이동하거나 사용 처리
-        // router.push(`/coupons/${couponId}`)
+        // 성공 시 로컬 상태 업데이트
+        const couponIndex = receivedCoupons.value.findIndex(c => c.id === coupon.id)
+        if (couponIndex !== -1) {
+          // 쿠폰을 사용된 상태로 변경하거나 목록에서 제거
+          receivedCoupons.value.splice(couponIndex, 1)
+        }
+        
+        console.log('쿠폰 사용 완료:', coupon.title)
+        
+        // 모달 닫기
+        closeReceivedCouponModal()
+        
+        // 받은 쿠폰 목록 새로고침
+        await loadReceivedCoupons()
       } catch (error) {
-        console.error('쿠폰 상세 정보 조회 실패:', error)
+        console.error('쿠폰 사용 실패:', error)
+        // 에러 처리 (토스트 메시지 등)
       }
     }
 
@@ -375,6 +424,8 @@ export default {
       searchQuery,
       showModal,
       selectedCoupon,
+      showReceivedCouponModal,
+      selectedReceivedCoupon,
       availableCoupons,
       receivedCoupons,
       filteredReceivedCoupons,
@@ -382,6 +433,9 @@ export default {
       handleReceivedCouponClick,
       closeModal,
       handleDownload,
+      closeReceivedCouponModal,
+      handleShowQR,
+      handleUseCoupon,
       loadReceivedCoupons,
       loadCoupons
     }

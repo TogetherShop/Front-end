@@ -18,6 +18,7 @@ export const customerLogin = async (username, password) => {
     )
     localStorage.setItem('access_token', response.data.accessToken)
     localStorage.setItem('refresh_token', response.data.refreshToken)
+    localStorage.setItem('user_type', 'customer')
     return response.data
   } catch (err) {
     throw err.response?.data?.error || '로그인 실패'

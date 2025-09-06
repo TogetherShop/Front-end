@@ -11,35 +11,32 @@ import ChatUserListView from '@/pages/ChatUserListView.vue'
 import ChatRoomView from '@/pages/ChatRoomView.vue'
 import CustomerHomePage from '@/pages/CustomerHomePage.vue'
 import BusinessHomePage from '@/pages/BusinessHomePage.vue'
+import ChattingHomePage from '@/pages/ChattingHomePage.vue'
 
-export default [
-  {
-    path: '/',
-    name: 'home',
-    component: HomePage,
-  },
-  {
-    path: '/search',
-    name: 'search',
-    component: CustomerSearchPage,
-  },
-  {
-    path: '/coupon',
-    name: 'coupon',
-    component: CustomerCouponPage,
-  },
-  {
-    path: '/profile',
-    name: 'profile',
-    component: CustomerProfilePage,
-  },
+const routes = [
+  // 인증 필요 ❌
   { path: '/login', component: LoginView },
-  { path: '/signup', component: OnboardingView }, // 온보딩
-  { path: '/signup/customer', component: CustomerSignupView }, // 고객 회원가입
-  { path: '/signup/business', component: SignupView }, // 사업자 회원가입
-  { path: '/chats', component: ChatList },
-  { path: '/chats/new', component: ChatUserListView },
-  { path: '/chats/:roomId', component: ChatRoomView, props: true },
-  { path: '/customer', component: CustomerHomePage },
-  { path: '/business', component: BusinessHomePage },
+  { path: '/signup', component: OnboardingView },
+  { path: '/signup/customer', component: CustomerSignupView },
+  { path: '/signup/business', component: SignupView },
+
+  // 인증 필요 ⭕
+  { path: '/', name: 'home', component: HomePage, meta: { requiresAuth: true } },
+  {
+    path: '/customer',
+    component: CustomerHomePage,
+    meta: { requiresAuth: true, role: 'customer' },
+  },
+  {
+    path: '/business',
+    component: BusinessHomePage,
+    meta: { requiresAuth: true, role: 'business' },
+  },
+  {
+    path: '/business/chats',
+    component: ChattingHomePage,
+    meta: { requiresAuth: true, role: 'business' },
+  },
 ]
+
+export default routes

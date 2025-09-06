@@ -32,6 +32,7 @@ export async function login(username, password) {
   localStorage.setItem('access_token', data.accessToken)
   localStorage.setItem('refresh_token', data.refreshToken)
   localStorage.setItem('username', username)
+  localStorage.setItem('user_type', 'business')
   return data
 }
 

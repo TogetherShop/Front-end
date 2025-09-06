@@ -12,6 +12,23 @@ export default defineConfig({
       '@': fileURLToPath(new URL('./src', import.meta.url)),
     },
   },
+  server: {
+    port: 5173,
+    proxy: {
+      '/ws-chat': {
+        target: 'http://localhost:8080',
+        ws: true,
+        changeOrigin: true,
+      },
+      '/api': {
+        target: 'http://localhost:8080',
+        changeOrigin: true,
+      },
+    },
+    headers: {
+      'Access-Control-Allow-Origin': '*',
+    },
+  },
   define: {
     global: 'window',
   },

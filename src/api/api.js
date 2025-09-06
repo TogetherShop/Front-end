@@ -1,13 +1,14 @@
 import axios from 'axios'
+
 const token = localStorage.getItem('access_token')
 const api = axios.create({
   baseURL: '/', // Vite proxy 사용
   withCredentials: true,
   headers: token ? { Authorization: `Bearer ${token}` } : undefined,
 })
-let isRefreshing = false
 
-const refreshSubscribers = []
+let isRefreshing = false
+let refreshSubscribers = []
 
 function onRefreshed(token) {
   refreshSubscribers.forEach((cb) => cb(token))
@@ -30,9 +31,15 @@ api.interceptors.response.use(
   (res) => res,
   async (err) => {
     const originalRequest = err.config
+
     if (err.response?.status === 401 && !originalRequest._retry) {
       const refreshToken = localStorage.getItem('refresh_token')
       if (!refreshToken) return Promise.reject(err)
+
+      // 사용자 유형: originalRequest.userType에 'customer' 또는 'business' 지정
+      const userType = originalRequest.userType || 'business'
+      const refreshUrl =
+        userType === 'customer' ? '/api/customer/auth/refresh' : '/api/auth/refresh'
 
       if (isRefreshing) {
         return new Promise((resolve) => {
@@ -46,7 +53,7 @@ api.interceptors.response.use(
       originalRequest._retry = true
       isRefreshing = true
       try {
-        const { data } = await api.post('/api/auth/refresh', { refreshToken })
+        const { data } = await api.post(refreshUrl, { refreshToken })
         const newAccess = data.accessToken
         const newRefresh = data.refreshToken
 
@@ -64,6 +71,7 @@ api.interceptors.response.use(
         isRefreshing = false
       }
     }
+
     return Promise.reject(err)
   },
 )

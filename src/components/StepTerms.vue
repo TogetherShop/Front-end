@@ -2,98 +2,91 @@
   <div class="element">
     <div class="div">
       <!-- 헤더 -->
-      <div class="header">
-        <div class="back-icon" @click="goBack">
-          <i class="fa-regular fa-less-than"></i>
-        </div>
-        <div class="header-center">
-          <div class="heading-3">매장 회원가입</div>
-          <div class="text-wrapper-8">단계 {{ currentStep }}/4</div>
-        </div>
-      </div>
-
+      <AuthHeader :title="'매장 회원가입'" :subtitle="`단계 ${currentStep}/4`" />
       <!-- 프로그레스바 -->
-      <div class="background-wrapper">
-        <div class="background-2">
-          <div class="background-3" />
-        </div>
-      </div>
-
-      <!-- 아이콘 -->
-      <div class="SVG-wrapper">
-        <i class="SVG-icon fa-regular fa-file-lines"></i>
-      </div>
-
-      <!-- 타이틀 섹션 -->
-      <div class="title-section">
-        <div class="heading-2">서비스 이용약관</div>
-        <p class="text-wrapper-7">함께가게 서비스 이용을 위해 약관에 동의해주세요</p>
-      </div>
-
-      <!-- 약관 동의 섹션 -->
-      <div class="view-2">
-        <!-- 전체 동의 -->
-        <div class="background">
-          <input type="checkbox" v-model="allAgree" class="checkbox" />
-          <div class="label">전체 동의하기</div>
-        </div>
-
-        <div class="vertical-border">
-          <!-- 만 14세 이상 -->
-          <input type="checkbox" v-model="over14" class="checkbox-2" />
-          <p class="p">
-            <span class="span">만 14세 이상입니다 </span>
-            <span class="text-wrapper-2">(필수)</span>
-          </p>
-
-          <!-- 서비스 이용약관 -->
-          <input type="checkbox" v-model="terms" class="checkbox-3" />
-          <p class="label-2">
-            <span class="span">서비스 이용약관 </span>
-            <span class="text-wrapper-2">(필수)</span>
-          </p>
-
-          <div class="SVG">
-            <i class="fa-solid fa-greater-than vector"></i>
-          </div>
-
-          <!-- 개인정보 수집 및 이용 -->
-          <input type="checkbox" v-model="privacy" class="checkbox-4" />
-          <p class="label-3">
-            <span class="span">개인정보 수집 및 이용 </span>
-            <span class="text-wrapper-2">(필수)</span>
-          </p>
-
-          <div class="vector-wrapper">
-            <i class="fa-solid fa-greater-than vector"></i>
-          </div>
-
-          <!-- 광고 및 마케팅 수신 (선택) -->
-          <input type="checkbox" v-model="marketing" class="checkbox-5" />
-          <p class="label-4">
-            <span class="span">광고 및 마케팅 수신 </span>
-            <span class="text-wrapper-3">(선택)</span>
-          </p>
-
-          <div class="img-wrapper">
-            <i class="fa-solid fa-greater-than vector"></i>
+      <div class="scrollable-content">
+        <div class="background-wrapper">
+          <div class="background-2">
+            <div class="background-3" />
           </div>
         </div>
-      </div>
 
-      <!-- 하단 버튼 -->
-      <div class="view">
-        <button
-          class="button"
-          :disabled="!allRequiredChecked"
-          :style="{
-            backgroundColor: allRequiredChecked ? '#017F58' : '#b0b1b3',
-            opacity: allRequiredChecked ? 1 : 0.5,
-          }"
-          @click="nextStep"
-        >
-          <div class="text-wrapper">다음 단계</div>
-        </button>
+        <!-- 아이콘 -->
+        <div class="SVG-wrapper">
+          <i class="SVG-icon fa-regular fa-file-lines"></i>
+        </div>
+
+        <!-- 타이틀 섹션 -->
+        <div class="title-section">
+          <div class="heading-2">서비스 이용약관</div>
+          <p class="text-wrapper-7">함께가게 서비스 이용을 위해 약관에 동의해주세요</p>
+        </div>
+
+        <!-- 약관 동의 섹션 -->
+        <div class="view-2">
+          <!-- 전체 동의 -->
+          <div class="background">
+            <input type="checkbox" v-model="allAgree" class="checkbox" />
+            <div class="label">전체 동의하기</div>
+          </div>
+
+          <div class="vertical-border">
+            <!-- 만 14세 이상 -->
+            <input type="checkbox" v-model="over14" class="checkbox-2" />
+            <p class="p">
+              <span class="span">만 14세 이상입니다 </span>
+              <span class="text-wrapper-2">(필수)</span>
+            </p>
+
+            <!-- 서비스 이용약관 -->
+            <input type="checkbox" v-model="terms" class="checkbox-3" />
+            <p class="label-2">
+              <span class="span">서비스 이용약관 </span>
+              <span class="text-wrapper-2">(필수)</span>
+            </p>
+
+            <div class="SVG">
+              <i class="fa-solid fa-greater-than vector"></i>
+            </div>
+
+            <!-- 개인정보 수집 및 이용 -->
+            <input type="checkbox" v-model="privacy" class="checkbox-4" />
+            <p class="label-3">
+              <span class="span">개인정보 수집 및 이용 </span>
+              <span class="text-wrapper-2">(필수)</span>
+            </p>
+
+            <div class="vector-wrapper">
+              <i class="fa-solid fa-greater-than vector"></i>
+            </div>
+
+            <!-- 광고 및 마케팅 수신 (선택) -->
+            <input type="checkbox" v-model="marketing" class="checkbox-5" />
+            <p class="label-4">
+              <span class="span">광고 및 마케팅 수신 </span>
+              <span class="text-wrapper-3">(선택)</span>
+            </p>
+
+            <div class="img-wrapper">
+              <i class="fa-solid fa-greater-than vector"></i>
+            </div>
+          </div>
+        </div>
+
+        <!-- 하단 버튼 -->
+        <div class="view">
+          <button
+            class="button"
+            :disabled="!allRequiredChecked"
+            :style="{
+              backgroundColor: allRequiredChecked ? '#017F58' : '#b0b1b3',
+              opacity: allRequiredChecked ? 1 : 0.5,
+            }"
+            @click="nextStep"
+          >
+            <div class="text-wrapper">다음 단계</div>
+          </button>
+        </div>
       </div>
     </div>
   </div>
@@ -102,6 +95,7 @@
 <script setup>
 import { ref, watch, computed } from 'vue'
 import { useRouter } from 'vue-router'
+import AuthHeader from './AuthHeader.vue'
 const emit = defineEmits(['next', 'prev'])
 
 const props = defineProps({
@@ -158,12 +152,24 @@ const goBack = () => {
   background-color: #ffffff;
   display: flex;
   flex-direction: column;
-  padding: 24px 24px 16px 24px;
-  box-sizing: border-box;
-  gap: 16px;
   font-family: 'Pretendard', Helvetica, sans-serif;
+  overflow: hidden;
 }
 
+/* 스크롤 가능한 메인 컨텐츠 */
+.element .scrollable-content {
+  flex: 1;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding: 24px;
+}
+
+.element .scrollable-content::-webkit-scrollbar {
+  display: none;
+  width: 0;
+}
 /* 헤더 */
 .header {
   display: flex;

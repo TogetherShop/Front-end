@@ -2,111 +2,110 @@
   <div class="element">
     <div class="div">
       <!-- 헤더 -->
-      <div class="header">
-        <div class="back-icon" @click="goBack">
-          <i class="fa-regular fa-less-than"></i>
-        </div>
-        <div class="header-center">
-          <div class="heading-3">매장 회원가입</div>
-          <div class="text-wrapper-8">단계 {{ currentStep }}/4</div>
-        </div>
-      </div>
+      <AuthHeader
+        :title="'매장 회원가입'"
+        :subtitle="`단계 ${currentStep}/4`"
+        backMode="emit"
+        @back="goBack"
+      />
 
-      <!-- 프로그레스바 -->
-      <div class="background-wrapper">
-        <div class="background-2">
-          <div class="background-3" />
-        </div>
-      </div>
-
-      <!-- 아이콘 -->
-      <div class="SVG-wrapper">
-        <i class="SVG-icon fa-regular fa-file-lines"></i>
-      </div>
-
-      <!-- 타이틀 섹션 -->
-      <div class="title-section">
-        <div class="heading-2">회원 정보 등록</div>
-        <p class="text-wrapper-7">회원 가입을 위한 정보를 입력해주세요</p>
-      </div>
-
-      <!-- 폼 섹션 -->
-      <div class="form-section">
-        <!-- 아이디 입력 -->
-        <div class="form-group">
-          <p class="p">
-            <span class="span">아이디 </span>
-            <span class="text-wrapper-5">*</span>
-          </p>
-          <input
-            class="container-wrapper"
-            type="text"
-            placeholder="아이디를 입력하세요"
-            v-model="userId"
-          />
-        </div>
-
-        <!-- 이메일 입력 -->
-        <div class="form-group">
-          <p class="label">
-            <span class="span">이메일 </span>
-            <span class="text-wrapper-5">*</span>
-          </p>
-          <input
-            class="container-wrapper"
-            type="email"
-            placeholder="example@email.com"
-            v-model="email"
-          />
-          <div v-if="emailError" class="text-wrapper-2">{{ emailError }}</div>
-        </div>
-
-        <!-- 비밀번호 입력 -->
-        <div class="form-group">
-          <p class="label">
-            <span class="span">비밀번호 </span>
-            <span class="text-wrapper-5">*</span>
-          </p>
-          <input
-            class="container-wrapper"
-            type="password"
-            placeholder="8자 이상 입력하세요"
-            v-model="password"
-          />
-          <div v-if="passwordError" class="text-wrapper-2">{{ passwordError }}</div>
-        </div>
-
-        <!-- 비밀번호 확인 -->
-        <div class="form-group">
-          <p class="label">
-            <span class="span">비밀번호 확인 </span>
-            <span class="text-wrapper-5">*</span>
-          </p>
-          <input
-            class="container-wrapper"
-            type="password"
-            placeholder="비밀번호를 다시 입력하세요"
-            v-model="confirmPassword"
-          />
-          <div v-if="password && confirmPassword && !passwordsMatch" class="text-wrapper-2">
-            비밀번호가 일치하지 않습니다
+      <div class="scrollable-content">
+        <!-- 프로그레스바 -->
+        <div class="background-wrapper">
+          <div class="background-2">
+            <div class="background-3" />
           </div>
         </div>
-      </div>
 
-      <!-- 하단 버튼 -->
-      <div class="view">
-        <button
-          class="button"
-          :disabled="!allRequiredChecked"
-          :style="{
-            backgroundColor: allRequiredChecked ? '#017F58' : '#b0b1b3',
-            opacity: allRequiredChecked ? 1 : 0.5,
-          }"
-          @click="nextStep"
-        >
-          <div class="text-wrapper">회원가입 완료</div>
-        </button>
+        <!-- 아이콘 -->
+        <div class="SVG-wrapper">
+          <i class="SVG-icon fa-solid fa-user-plus"></i>
+        </div>
+
+        <!-- 타이틀 섹션 -->
+        <div class="title-section">
+          <div class="heading-2">회원 정보 등록</div>
+          <p class="text-wrapper-7">회원 가입을 위한 정보를 입력해주세요</p>
+        </div>
+
+        <!-- 폼 섹션 -->
+        <div class="form-section">
+          <!-- 아이디 입력 -->
+          <div class="form-group">
+            <p class="p">
+              <span class="span">아이디 </span>
+              <span class="text-wrapper-5">*</span>
+            </p>
+            <input
+              class="container-wrapper"
+              type="text"
+              placeholder="아이디를 입력하세요"
+              v-model="userId"
+            />
+          </div>
+
+          <!-- 이메일 입력 -->
+          <div class="form-group">
+            <p class="label">
+              <span class="span">이메일 </span>
+              <span class="text-wrapper-5">*</span>
+            </p>
+            <input
+              class="container-wrapper"
+              type="email"
+              placeholder="example@email.com"
+              v-model="email"
+            />
+            <div v-if="emailError" class="text-wrapper-2">{{ emailError }}</div>
+          </div>
+
+          <!-- 비밀번호 입력 -->
+          <div class="form-group">
+            <p class="label">
+              <span class="span">비밀번호 </span>
+              <span class="text-wrapper-5">*</span>
+            </p>
+            <input
+              class="container-wrapper"
+              type="password"
+              placeholder="8자 이상 입력하세요"
+              v-model="password"
+            />
+            <div v-if="passwordError" class="text-wrapper-2">{{ passwordError }}</div>
+          </div>
+
+          <!-- 비밀번호 확인 -->
+          <div class="form-group">
+            <p class="label">
+              <span class="span">비밀번호 확인 </span>
+              <span class="text-wrapper-5">*</span>
+            </p>
+            <input
+              class="container-wrapper"
+              type="password"
+              placeholder="비밀번호를 다시 입력하세요"
+              v-model="confirmPassword"
+            />
+            <div v-if="password && confirmPassword && !passwordsMatch" class="text-wrapper-2">
+              비밀번호가 일치하지 않습니다
+            </div>
+          </div>
+        </div>
+
+        <!-- 하단 버튼 -->
+        <div class="view">
+          <button
+            class="button"
+            :disabled="!allRequiredChecked"
+            :style="{
+              backgroundColor: allRequiredChecked ? '#017F58' : '#b0b1b3',
+              opacity: allRequiredChecked ? 1 : 0.5,
+            }"
+            @click="nextStep"
+          >
+            <div class="text-wrapper">회원가입 완료</div>
+          </button>
+        </div>
       </div>
     </div>
   </div>
@@ -115,6 +114,7 @@
 <script setup>
 import { computed } from 'vue'
 import { useSignupStore } from '@/stores/signup'
+import AuthHeader from './AuthHeader.vue'
 
 const signupStore = useSignupStore()
 
@@ -193,10 +193,22 @@ const goBack = () => signupStore.prevStep()
   background-color: #ffffff;
   display: flex;
   flex-direction: column;
-  padding: 24px 24px 16px 24px;
-  box-sizing: border-box;
-  gap: 16px;
   font-family: 'Pretendard', Helvetica, sans-serif;
+  overflow: hidden;
+}
+/* 스크롤 가능한 메인 컨텐츠 */
+.element .scrollable-content {
+  flex: 1;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding: 24px;
+}
+
+.element .scrollable-content::-webkit-scrollbar {
+  display: none;
+  width: 0;
 }
 
 /* 헤더 */

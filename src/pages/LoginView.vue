@@ -7,6 +7,26 @@
     <h1 class="heading">함께가게</h1>
     <p class="text-wrapper-6">소상공인 상생 네트워크</p>
 
+    <!-- 고객/사업자 탭 추가 -->
+    <div class="user-type-tabs">
+      <button
+        class="tab-button"
+        :class="{ active: userType === 'customer' }"
+        @click="userType = 'customer'"
+      >
+        <span class="tab-icon">👤</span>
+        고객
+      </button>
+      <button
+        class="tab-button"
+        :class="{ active: userType === 'business' }"
+        @click="userType = 'business'"
+      >
+        <span class="tab-icon">🏪</span>
+        사업자
+      </button>
+    </div>
+
     <div class="background-shadow">
       <div class="tabpanel">
         <div class="view-3">
@@ -71,20 +91,28 @@
 import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { login } from '@/api/auth'
+import { customerLogin } from '@/api/customer-auth'
 import logo from '@/assets/images/togethershop_logo.png'
 
 const username = ref('')
 const password = ref('')
+const userType = ref('customer') // 기본값: 고객
 const router = useRouter()
 const canLogin = computed(() => username.value && password.value)
 
 const doLogin = async () => {
   if (!canLogin.value) return
   try {
-    await login(username.value, password.value)
-    router.push('/chats')
+    // 사용자 유형에 따라 다른 API 호출
+    if (userType.value === 'customer') {
+      await customerLogin(username.value, password.value)
+      router.push('/customer')
+    } else {
+      await login(username.value, password.value)
+      router.push('/business')
+    }
   } catch (e) {
-    alert('로그인 실패')
+    alert(typeof e === 'string' ? e : '로그인 실패')
   }
 }
 
@@ -129,6 +157,50 @@ const goSignup = () => {
   color: #495565;
   font-size: 14px;
   margin-top: 4px;
+}
+
+/* 탭 스타일 추가 */
+.user-type-tabs {
+  display: flex;
+  width: 100%;
+  margin-top: 24px;
+  margin-bottom: 8px;
+  background-color: #f8f8f8;
+  border-radius: 12px;
+  padding: 4px;
+  box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.06);
+}
+
+.tab-button {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px 16px;
+  border: none;
+  border-radius: 8px;
+  background-color: transparent;
+  color: #697282;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.tab-button.active {
+  background-color: #017f58;
+  color: #ffffff;
+  box-shadow: 0px 2px 4px rgba(1, 127, 88, 0.3);
+}
+
+.tab-button:hover:not(.active) {
+  background-color: #ffffff;
+  color: #017f58;
+}
+
+.tab-icon {
+  font-size: 16px;
 }
 
 .background-shadow {

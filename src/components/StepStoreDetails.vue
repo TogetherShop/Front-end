@@ -2,89 +2,88 @@
   <div class="element">
     <div class="div">
       <!-- 헤더 -->
-      <div class="header">
-        <div class="back-icon" @click="goBack">
-          <i class="fa-regular fa-less-than"></i>
-        </div>
-        <div class="header-center">
-          <div class="heading-3">매장 회원가입</div>
-          <div class="text-wrapper-8">단계 {{ currentStep }}/4</div>
-        </div>
-      </div>
+      <AuthHeader
+        :title="'매장 회원가입'"
+        :subtitle="`단계 ${currentStep}/4`"
+        backMode="emit"
+        @back="goBack"
+      />
 
-      <!-- 프로그레스바 -->
-      <div class="background-wrapper">
-        <div class="background-2">
-          <div class="background-3" />
-        </div>
-      </div>
-
-      <!-- 아이콘 -->
-      <div class="SVG-wrapper">
-        <i class="SVG-icon fa-solid fa-users"></i>
-      </div>
-
-      <!-- 타이틀 섹션 -->
-      <div class="title-section">
-        <div class="heading-2">내 가게 정보</div>
-        <p class="text-wrapper-7">맞춤형 제휴 추천을 위한 정보를 입력해주세요</p>
-      </div>
-
-      <!-- 폼 섹션 -->
-      <div class="form-section">
-        <!-- 협업 희망 업종 -->
-        <class class="form-group">
-          <p class="p">
-            <span class="span">협업 희망 업종 </span>
-            <span class="text-wrapper-5">*</span>
-          </p>
-          <SelectBox
-            v-model="businessType"
-            :options="['음식점', '카페', '편의점', '기타']"
-            placeholder="협업하고 싶은 업종을 선택하세요"
-          />
-        </class>
-
-        <!-- 주요 고객층 -->
-        <div class="form-group">
-          <p class="label">
-            <span class="span">주요 고객층 </span>
-            <span class="text-wrapper-5">*</span>
-          </p>
-          <SelectBox
-            v-model="collaborationCategory"
-            :options="['10대', '20대', '30대', '기타']"
-            placeholder="주요 고객층을 선택하세요"
-          />
+      <div class="scrollable-content">
+        <!-- 프로그레스바 -->
+        <div class="background-wrapper">
+          <div class="background-2">
+            <div class="background-3" />
+          </div>
         </div>
 
-        <!-- 업종 -->
-        <div class="form-group">
-          <p class="label">
-            <span class="span">업종 </span>
-            <span class="text-wrapper-5">*</span>
-          </p>
-          <SelectBox
-            v-model="businessCategory"
-            :options="['서비스', '제조', '판매', '기타']"
-            placeholder="업종을 선택하세요"
-          />
+        <!-- 아이콘 -->
+        <div class="SVG-wrapper">
+          <i class="SVG-icon fa-solid fa-users"></i>
         </div>
-      </div>
 
-      <!-- 하단 버튼 -->
-      <div class="view">
-        <button
-          class="button"
-          :disabled="!allRequiredChecked"
-          :style="{
-            backgroundColor: allRequiredChecked ? '#017F58' : '#b0b1b3',
-            opacity: allRequiredChecked ? 1 : 0.5,
-          }"
-          @click="nextStep"
-        >
-          <div class="text-wrapper">다음 단계</div>
-        </button>
+        <!-- 타이틀 섹션 -->
+        <div class="title-section">
+          <div class="heading-2">내 가게 정보</div>
+          <p class="text-wrapper-7">맞춤형 제휴 추천을 위한 정보를 입력해주세요</p>
+        </div>
+
+        <!-- 폼 섹션 -->
+        <div class="form-section">
+          <!-- 협업 희망 업종 -->
+          <class class="form-group">
+            <p class="p">
+              <span class="span">협업 희망 업종 </span>
+              <span class="text-wrapper-5">*</span>
+            </p>
+            <SelectBox
+              v-model="businessType"
+              :options="['음식점', '카페', '편의점', '기타']"
+              placeholder="협업하고 싶은 업종을 선택하세요"
+            />
+          </class>
+
+          <!-- 주요 고객층 -->
+          <div class="form-group">
+            <p class="label">
+              <span class="span">주요 고객층 </span>
+              <span class="text-wrapper-5">*</span>
+            </p>
+            <SelectBox
+              v-model="collaborationCategory"
+              :options="['10대', '20대', '30대', '기타']"
+              placeholder="주요 고객층을 선택하세요"
+            />
+          </div>
+
+          <!-- 업종 -->
+          <div class="form-group">
+            <p class="label">
+              <span class="span">업종 </span>
+              <span class="text-wrapper-5">*</span>
+            </p>
+            <SelectBox
+              v-model="businessCategory"
+              :options="['서비스', '제조', '판매', '기타']"
+              placeholder="업종을 선택하세요"
+            />
+          </div>
+        </div>
+
+        <!-- 하단 버튼 -->
+        <div class="view">
+          <button
+            class="button"
+            :disabled="!allRequiredChecked"
+            :style="{
+              backgroundColor: allRequiredChecked ? '#017F58' : '#b0b1b3',
+              opacity: allRequiredChecked ? 1 : 0.5,
+            }"
+            @click="nextStep"
+          >
+            <div class="text-wrapper">다음 단계</div>
+          </button>
+        </div>
       </div>
     </div>
   </div>
@@ -93,6 +92,7 @@
 <script setup>
 import { ref, computed } from 'vue'
 import SelectBox from './SelectBox.vue'
+import AuthHeader from './AuthHeader.vue'
 
 const props = defineProps(['businessType', 'businessCategory', 'collaborationCategory'])
 const emit = defineEmits(['next', 'prev'])
@@ -139,12 +139,24 @@ const goBack = () => {
   background-color: #ffffff;
   display: flex;
   flex-direction: column;
-  padding: 24px 24px 16px 24px;
-  box-sizing: border-box;
-  gap: 16px;
   font-family: 'Pretendard', Helvetica, sans-serif;
+  overflow: hidden;
 }
 
+/* 스크롤 가능한 메인 컨텐츠 */
+.element .scrollable-content {
+  flex: 1;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding: 24px;
+}
+
+.element .scrollable-content::-webkit-scrollbar {
+  display: none;
+  width: 0;
+}
 /* 헤더 */
 .header {
   display: flex;

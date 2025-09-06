@@ -2,96 +2,95 @@
   <div class="element">
     <div class="div">
       <!-- 헤더 -->
-      <div class="header">
-        <div class="back-icon" @click="goBack">
-          <i class="fa-regular fa-less-than"></i>
-        </div>
-        <div class="header-center">
-          <div class="heading-3">매장 회원가입</div>
-          <div class="text-wrapper-8">단계 {{ currentStep }}/4</div>
-        </div>
-      </div>
+      <AuthHeader
+        :title="'매장 회원가입'"
+        :subtitle="`단계 ${currentStep}/4`"
+        backMode="emit"
+        @back="goBack"
+      />
 
-      <!-- 프로그레스바 -->
-      <div class="background-wrapper">
-        <div class="background-2">
-          <div class="background-3" />
-        </div>
-      </div>
-
-      <!-- 아이콘 -->
-      <div class="SVG-wrapper">
-        <i class="SVG-icon fa-solid fa-user-shield"></i>
-      </div>
-
-      <!-- 타이틀 섹션 -->
-      <div class="title-section">
-        <div class="heading-2">가게 정보 입력</div>
-        <p class="text-wrapper-7">사업자 인증을 위한 기본 정보를 입력해주세요</p>
-      </div>
-
-      <!-- 폼 섹션 -->
-      <div class="form-section">
-        <!-- 상호명 -->
-        <div class="form-group">
-          <p class="p">
-            <span class="span">상호명 </span>
-            <span class="text-wrapper-5">*</span>
-          </p>
-          <input
-            class="container-wrapper"
-            type="text"
-            placeholder="사업자등록증에 기재된 상호명을 입력하세요"
-            v-model="businessName"
-          />
+      <div class="scrollable-content">
+        <!-- 프로그레스바 -->
+        <div class="background-wrapper">
+          <div class="background-2">
+            <div class="background-3" />
+          </div>
         </div>
 
-        <!-- 사업자등록번호 -->
-        <div class="form-group">
-          <p class="label">
-            <span class="span">사업자등록번호 </span>
-            <span class="text-wrapper-5">*</span>
-          </p>
-          <div class="input-with-button">
+        <!-- 아이콘 -->
+        <div class="SVG-wrapper">
+          <i class="SVG-icon fa-solid fa-user-shield"></i>
+        </div>
+
+        <!-- 타이틀 섹션 -->
+        <div class="title-section">
+          <div class="heading-2">가게 정보 입력</div>
+          <p class="text-wrapper-7">사업자 인증을 위한 기본 정보를 입력해주세요</p>
+        </div>
+
+        <!-- 폼 섹션 -->
+        <div class="form-section">
+          <!-- 상호명 -->
+          <div class="form-group">
+            <p class="p">
+              <span class="span">상호명 </span>
+              <span class="text-wrapper-5">*</span>
+            </p>
             <input
               class="input"
               type="text"
-              placeholder="000-00-00000"
-              v-model="businessRegistrationNumber"
+              placeholder="사업자등록증에 기재된 상호명을 입력하세요"
+              v-model="businessName"
             />
-            <button class="div-wrapper">
-              <div class="text-wrapper-3">인증</div>
-            </button>
           </div>
-          <div class="text-wrapper-2">사업자등록번호는 자동으로 검증됩니다</div>
-        </div>
-      </div>
 
-      <!-- 안내 박스 -->
-      <div class="view-2">
-        <div class="SVG">
-          <i class="vector fa-solid fa-shield"></i>
+          <!-- 사업자등록번호 -->
+          <div class="form-group">
+            <p class="label">
+              <span class="span">사업자등록번호 </span>
+              <span class="text-wrapper-5">*</span>
+            </p>
+            <div class="input-with-button">
+              <input
+                class="input"
+                type="text"
+                placeholder="000-00-00000"
+                v-model="businessRegistrationNumber"
+              />
+              <button class="div-wrapper">
+                <div class="text-wrapper-3">인증</div>
+              </button>
+            </div>
+            <div class="text-wrapper-2">사업자등록번호는 자동으로 검증됩니다</div>
+          </div>
         </div>
-        <p class="heading">신뢰할 수 있는 인증 시스템</p>
-        <p class="API">
-          공공 API를 통한 사업자등록 및 실명확인으로 안전한 거래 환<br />
-          경을 제공합니다
-        </p>
-      </div>
 
-      <!-- 하단 버튼 -->
-      <div class="view">
-        <button
-          class="button"
-          :disabled="!allRequiredChecked"
-          :style="{
-            backgroundColor: allRequiredChecked ? '#017F58' : '#b0b1b3',
-            opacity: allRequiredChecked ? 1 : 0.5,
-          }"
-          @click="nextStep"
-        >
-          <div class="text-wrapper">다음 단계</div>
-        </button>
+        <!-- 안내 박스 -->
+        <div class="view-2">
+          <div class="SVG">
+            <i class="vector fa-solid fa-shield"></i>
+          </div>
+          <p class="heading">신뢰할 수 있는 인증 시스템</p>
+          <p class="API">
+            공공 API를 통한 사업자등록 및 실명확인으로 안전한 거래 환<br />
+            경을 제공합니다
+          </p>
+        </div>
+
+        <!-- 하단 버튼 -->
+        <div class="view">
+          <button
+            class="button"
+            :disabled="!allRequiredChecked"
+            :style="{
+              backgroundColor: allRequiredChecked ? '#017F58' : '#b0b1b3',
+              opacity: allRequiredChecked ? 1 : 0.5,
+            }"
+            @click="nextStep"
+          >
+            <div class="text-wrapper">다음 단계</div>
+          </button>
+        </div>
       </div>
     </div>
   </div>
@@ -99,6 +98,7 @@
 
 <script setup>
 import { ref, computed } from 'vue'
+import AuthHeader from './AuthHeader.vue'
 
 const props = defineProps(['businessName', 'businessRegistrationNumber'])
 const emit = defineEmits(['next', 'prev'])
@@ -134,17 +134,28 @@ const goBack = () => {
   justify-items: center;
   width: 100vw;
 }
-
 .element .div {
   width: 390px;
   min-height: 844px;
   background-color: #ffffff;
   display: flex;
   flex-direction: column;
-  padding: 24px 24px 16px 24px;
-  box-sizing: border-box;
-  gap: 16px;
   font-family: 'Pretendard', Helvetica, sans-serif;
+  overflow: hidden;
+}
+/* 스크롤 가능한 메인 컨텐츠 */
+.element .scrollable-content {
+  flex: 1;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding: 24px;
+}
+
+.element .scrollable-content::-webkit-scrollbar {
+  display: none;
+  width: 0;
 }
 
 /* 헤더 */
@@ -313,9 +324,12 @@ const goBack = () => {
   border-radius: 8px;
   height: 50px;
   overflow: hidden;
-  flex: 1;
+  width: 100%;
+  padding: 0 16px;
+  font-family: 'Pretendard-Regular', Helvetica;
+  font-size: 16px;
+  box-sizing: border-box;
 }
-
 .div-wrapper {
   all: unset;
   background-color: #017f58;

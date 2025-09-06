@@ -1,61 +1,295 @@
-/* 내정보 페이지 스타일 */
-.profile-page {
-  background: #ffffff;
+/* CustomerProfile 페이지 전체 스타일 */
+.CustomerProfile {
+  background-color: #ffffff;
   min-height: 100vh;
-  padding-bottom: 72px; /* 하단 네비게이션 높이만큼 여백 */
+  padding-bottom: 72px; /* 하단 네비게이션 공간 확보 */
 }
 
-.profile-page__content {
-  min-height: calc(100vh - 122px); /* 전체 높이 - 상단바(50px) - 하단바(72px) */
+/* 상단바 */
+.CustomerProfile__top-bar {
+  height: 50px;
+  background-color: #ffffff;
+  border-bottom: 1px solid #f3f3f7;
 }
 
-.profile-page__title {
-  color: var(--text-dark);
-  font-size: 28px;
-  font-weight: 700;
-  margin-bottom: 16px;
+.CustomerProfile__logo {
+  width: 50px;
+  height: 50px;
 }
 
-.profile-page__description {
-  color: var(--gray-0);
+.CustomerProfile__logo-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.CustomerProfile__notification-icon {
+  font-size: 20px;
+}
+
+/* 섹션 공통 스타일 */
+.CustomerProfile__section-title {
+  color: #000;
+font-family: Pretendard;
+font-size: 15px;
+font-style: normal;
+font-weight: 600;
+line-height: 16px; /* 106.667% */
+}
+
+.CustomerProfile__view-all-text {
+  font-size: 13px;
+}
+
+.CustomerProfile__view-all-icon {
   font-size: 16px;
-  line-height: 1.6;
+}
+
+/* 프로필 정보 섹션 */
+.CustomerProfile__profile-card {
+  border: 1px solid #cecece;
+  height: 94px;
+  border-radius: 12px;
+background: #F8F8F8;
+box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+}
+
+.CustomerProfile__profile-content {
+  height: 100%;
+  display: flex;
+  align-items: center;
+  position: relative;
+}
+
+.CustomerProfile__profile-image {
+  width: 60px;
+  height: 60px;
+  flex-shrink: 0;
+}
+
+.CustomerProfile__profile-avatar {
+  width: 60px;
+  height: 60px;
+  object-fit: cover;
+  background-color: #cccccc;
+}
+
+.CustomerProfile__profile-info {
+  position: absolute;
+  left: 40%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+  width: 100px;
+}
+
+.CustomerProfile__profile-name {
+  color: #000;
+  text-align: left;
+  font-family: Pretendard;
+  font-size: 15px;
+  font-style: normal;
+  font-weight: 600;
+  line-height: 16px; /* 106.667% */
+}
+
+.CustomerProfile__profile-location {
+  color: #555;
+  text-align: left;
+  font-family: Pretendard;
+  font-size: 13px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: 16px; /* 123.077% */
+}
+
+.CustomerProfile__profile-actions {
+  position: absolute;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.CustomerProfile__logout-text{
+  color: #FB2C36;
+font-family: Pretendard;
+font-size: 13px;
+font-style: normal;
+font-weight: 600;
+line-height: 20px; /* 153.846% */
+}
+
+.CustomerProfile__logout-icon,
+.CustomerProfile__edit-icon {
+  font-size: 15px;
+  font-weight: 600;
+
+}
+
+.CustomerProfile__edit-text {
+  color: #000;
+font-family: Pretendard;
+font-size: 13px;
+font-style: normal;
+font-weight: 600;
+line-height: 12px; /* 123.077% */
+}
+
+/* 내 쿠폰함 섹션 */
+.CustomerProfile__coupon-list {
+  border: 1px solid #d9d9d9;
+  height: 186px;
+  border-radius: 12px;
+  background: #F8F8F8;
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  padding: 16px;
+}
+.CustomerProfile__view-all-link{
+  color: #555;
+font-family: Pretendard;
+font-size: 13px;
+font-style: normal;
+font-weight: 400;
+line-height: 16px; /* 123.077% */
+}
+
+.CustomerProfile__coupon-card {
+  position: relative;
+  background-color: rgba(217, 217, 217, 0.58) !important;
+  border: 1px solid #d9d9d9;
+  height: 71px;
+  border-radius: 3px;
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  padding: 0 7px;
+  /* 찢어낼 수 있는 쿠폰 효과 */
+  border-left: 3px dashed #d9d9d9;
+  border-right: 1px solid #d9d9d9;
+  border-top: 1px solid #d9d9d9;
+  border-bottom: 1px solid #d9d9d9;
+}
+
+.CustomerProfile__coupon-discount {
+  color: #00693B;
+  font-family: Pretendard;
+  font-size: 22px;
+  font-style: normal;
+  font-weight: 700;
+  line-height: 27px; /* 122.727% */
+}
+
+
+
+.CustomerProfile__coupon-info {
+  flex-grow: 1;
+  margin-right: 12px;
+}
+
+.CustomerProfile__coupon-title {
+  color: #000;
+  font-family: Pretendard;
+  font-size: 15px;
+  font-style: normal;
+  font-weight: 500;
+  line-height: 16px; /* 106.667% */
+}
+
+.CustomerProfile__coupon-store {
+  color: #555;
+  font-family: Pretendard;
+  font-size: 13px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: 16px; /* 123.077% */
+}
+
+.CustomerProfile__coupon-expiry {
+  font-size: 10px;
+  font-weight: 600;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  position: absolute;
+}
+
+.CustomerProfile__coupon-expiry--days {
+  color: #555555 !important;
+}
+
+.CustomerProfile__coupon-expiry.text-success {
+  color: #00693B !important;
+  font-family: Pretendard;
+  font-size: 10px;
+  font-style: normal;
+  font-weight: 600;
+  line-height: 16px; /* 160% */
+}
+.CustomerProfile__coupon-expiry.text-muted {
+  color: #555;
+  font-family: Pretendard;
+  font-size: 10px;
+  font-style: normal;
+  font-weight: 600;
+  line-height: 16px; /* 160% */
+}
+
+
+/* 내가 쓴 리뷰 섹션 */
+.CustomerProfile__review-list {
+  border: 1px solid #d9d9d9;
+  height: 200px;
+  border-radius: 12px;
+  background: #F8F8F8;
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  padding: 16px;
+}
+
+.CustomerProfile__review-card {
+  background-color: rgba(217, 217, 217, 0.58) !important;
+  border: 1px solid #d9d9d9;
+  height: 80px;
+  position: relative;
+}
+
+.CustomerProfile__review-card:last-child {
   margin-bottom: 0;
 }
 
-/* 반응형 디자인 */
-@media (max-width: 768px) {
-  .profile-page {
-    padding-bottom: 68px;
-  }
-  
-  .profile-page__content {
-    min-height: calc(100vh - 116px);
-  }
-  
-  .profile-page__title {
-    font-size: 24px;
-  }
-  
-  .profile-page__description {
-    font-size: 15px;
-  }
+.CustomerProfile__review-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
 }
 
-@media (max-width: 480px) {
-  .profile-page {
-    padding-bottom: 64px;
-  }
-  
-  .profile-page__content {
-    min-height: calc(100vh - 110px);
-  }
-  
-  .profile-page__title {
-    font-size: 22px;
-  }
-  
-  .profile-page__description {
-    font-size: 14px;
-  }
+.CustomerProfile__review-store {
+  color: #000;
+  font-family: Pretendard;
+  font-size: 15px;
+  font-style: normal;
+  font-weight: 600;
+  line-height: 16px; /* 106.667% */
+  margin: 0;
+  flex-shrink: 0;
 }
+
+.CustomerProfile__review-location {
+  color: #555;
+  font-family: Pretendard;
+  font-size: 9px;
+  font-style: normal;
+  font-weight: 500;
+  line-height: 16px; /* 177.778% */
+  flex-grow: 1;
+}
+
+.CustomerProfile__review-content {
+  color: #000;
+  font-family: Pretendard;
+  font-size: 10px;
+  font-style: normal;
+  font-weight: 400;
+}
+

@@ -139,3 +139,33 @@ export const getCouponStats = async () => {
     throw error
   }
 }
+
+/**
+ * 기한이 임박한 쿠폰 조회 (프로필 페이지용)
+ * @param {number} limit - 조회할 쿠폰 개수 (기본값: 2)
+ * @returns {Promise<Array>} 기한이 임박한 쿠폰 목록
+ */
+export const getExpiringCoupons = async (limit = 2) => {
+  try {
+    const response = await axios.get(`/api/coupons/expiring?limit=${limit}`)
+    return response.data
+  } catch (error) {
+    console.error('기한 임박 쿠폰 조회 실패:', error)
+    throw error
+  }
+}
+
+/**
+ * 최근 작성한 리뷰 조회 (프로필 페이지용)
+ * @param {number} limit - 조회할 리뷰 개수 (기본값: 2)
+ * @returns {Promise<Array>} 최근 리뷰 목록
+ */
+export const getRecentReviews = async (limit = 2) => {
+  try {
+    const response = await axios.get(`/api/reviews/recent?limit=${limit}`)
+    return response.data
+  } catch (error) {
+    console.error('최근 리뷰 조회 실패:', error)
+    throw error
+  }
+}

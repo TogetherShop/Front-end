@@ -18,13 +18,20 @@ router.beforeEach((to, from, next) => {
   const accessToken = localStorage.getItem('access_token')
   const userType = localStorage.getItem('user_type') // 'customer' or 'business'
 
-  if (to.meta.requiresAuth && !accessToken) {
-    return next('/login')
-  }
+  // 인증 필요 페이지 접근 시
+  if (to.meta.requiresAuth) {
+    // 토큰 없거나 만료된 경우 로그인으로
+    if (!accessToken || isTokenExpired(accessToken)) {
+      localStorage.removeItem('access_token')
+      localStorage.removeItem('refresh_token')
+      localStorage.removeItem('user_type')
+      return next('/login')
+    }
 
-  if (to.meta.role && to.meta.role !== userType) {
-    // 권한 없는 페이지 접근 시 홈으로 리다이렉트
-    return next(userType === 'customer' ? '/customer' : '/business')
+    // 권한(role) 체크
+    if (to.meta.role && to.meta.role !== userType) {
+      return next(userType === 'customer' ? '/customer' : '/business')
+    }
   }
 
   next()

@@ -54,7 +54,18 @@
           <div class="received-coupon-modal__qr-info">
             <h2 class="received-coupon-modal__qr-title">{{ coupon.title }}</h2>
             <div class="received-coupon-modal__qr-code">
-              <img src="@/assets/images/qr.png" alt="QR 코드" />
+              <!-- <img src="@/assets/images/qr.png" alt="QR 코드" /> -->
+              <div v-if="qrCodeLoading" class="qr-loading">
+                <div class="spinner-border text-primary" role="status">
+                  <span class="visually-hidden">QR 코드 생성 중...</span>
+                </div>
+                <p class="mt-2">QR 코드 생성 중...</p>
+              </div>
+              <img v-else-if="qrCodeData" :src="qrCodeData" alt="QR 코드" />
+              <div v-else class="qr-error">
+                <i class="material-symbols-outlined text-danger" style="font-size: 48px">error</i>
+                <p class="mt-2 text-danger">QR 코드 생성 실패</p>
+              </div>
             </div>
           </div>
         </div>
@@ -98,6 +109,7 @@
 
 <script>
 import { ref, computed, onMounted, onUnmounted } from 'vue'
+import { createQRcode } from '@/api/customer-coupon.js'
 
 export default {
   name: 'ReceivedCouponDetailModal',
@@ -124,6 +136,8 @@ export default {
     const showQRView = ref(false)
     const showConfirmModal = ref(false)
     const remainingTime = ref(5 * 60) // 5분을 초 단위로 저장
+    const qrCodeData = ref(null)
+    const qrCodeLoading = ref(false)
     let timeInterval = null
 
     // 남은 시간을 포맷된 문자열로 변환 (computed)
@@ -134,9 +148,13 @@ export default {
     })
 
     // QR 코드 보기
-    const showQRCode = () => {
+    const showQRCode = async () => {
       showQRView.value = true
       remainingTime.value = 5 * 60 // 5분으로 리셋
+      
+      // QR 코드 생성
+      await generateQRCode()
+      
       // 1초마다 시간 업데이트
       timeInterval = setInterval(() => {
         if (remainingTime.value > 0) {
@@ -146,6 +164,32 @@ export default {
           timeInterval = null
         }
       }, 1000)
+    }
+
+    // QR 코드 생성
+    const generateQRCode = async () => {
+      try {
+        qrCodeLoading.value = true
+        qrCodeData.value = null
+        
+        // 쿠폰 ID 사용 (couponId 또는 id)
+        const couponId = props.coupon.couponId || props.coupon.id
+        const response = await createQRcode(couponId)
+        
+        console.log('QR 코드 API 응답:', response)
+        
+        // API에서 이미 Base64 data URL로 변환된 데이터 사용
+        if (response && response.qrCodeData) {
+          qrCodeData.value = response.qrCodeData
+        } else {
+          console.error('QR 코드 데이터를 찾을 수 없습니다:', response)
+        }
+      } catch (error) {
+        console.error('QR 코드 생성 실패:', error)
+        qrCodeData.value = null
+      } finally {
+        qrCodeLoading.value = false
+      }
     }
 
     // 사용 완료 확인 모달 열기
@@ -168,6 +212,8 @@ export default {
     // 모달 닫기
     const closeModal = () => {
       showQRView.value = false
+      qrCodeData.value = null
+      qrCodeLoading.value = false
       if (timeInterval) {
         clearInterval(timeInterval)
         timeInterval = null
@@ -187,6 +233,8 @@ export default {
       showConfirmModal,
       remainingTime,
       formattedTime,
+      qrCodeData,
+      qrCodeLoading,
       showQRCode,
       confirmUse,
       closeConfirmModal,
@@ -199,4 +247,37 @@ export default {
 
 <style>
 @import '../styles/customer-received-coupon-detail-modal.css';
+
+/* QR 코드 로딩 및 에러 상태 스타일 */
+.qr-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  text-align: center;
+}
+
+.qr-loading .spinner-border {
+  width: 3rem;
+  height: 3rem;
+}
+
+.qr-error {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  text-align: center;
+}
+
+.qr-error i {
+  color: #dc3545;
+}
+
+.qr-error p {
+  margin: 0;
+  font-size: 0.9rem;
+}
 </style>

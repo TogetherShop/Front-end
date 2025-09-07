@@ -1,9 +1,10 @@
+import BusinessHomePage from '@/pages/BusinessHomePage.vue'
 import BusinessPartnershipPage from '@/pages/BusinessPartnershipPage.vue'
 export default [
   {
-    path: '/business',
+    path: '/business/home',
     name: 'business',
-    redirect: '/business/home'
+    component: BusinessHomePage,
   },
   {
     path: '/business/partnership',

@@ -1,0 +1,129 @@
+/* Material Icons 폰트 로딩 */
+@import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200');
+
+/* Figma 디자인 색상 변수 */
+:root {
+  --main-color: #017f58;
+  --gray-0: #6f797a;
+  --gray-3: #f3f3f7;
+  --text-color: #555555;
+  --text-dark: #222222;
+  --text-light: #3a3a3a;
+}
+
+/* 사업자 하단 네비게이션 바 스타일 */
+.business-bottom-navigation {
+  background-color: white !important;
+  border-top: 1px solid var(--gray-3) !important;
+  height: 72px;
+  z-index: 100;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  max-width: 430px;
+  margin: 0 auto;
+}
+
+.business-bottom-navigation__item {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  min-height: 72px;
+  cursor: pointer;
+  text-decoration: none;
+  color: var(--gray-0);
+  padding: 8px 4px;
+}
+
+.business-bottom-navigation__item--active {
+  color: var(--main-color) !important;
+}
+
+.business-bottom-navigation__item--active
+  .business-bottom-navigation__icon
+  .material-symbols-outlined {
+  color: var(--main-color) !important;
+  transform: scale(1.15);
+}
+
+.business-bottom-navigation__item--active .business-bottom-navigation__label {
+  color: var(--main-color) !important;
+  font-weight: 600;
+}
+
+.business-bottom-navigation__icon {
+  width: 20px;
+  height: 17px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 4px;
+}
+
+.business-bottom-navigation__icon .material-symbols-outlined {
+  color: var(--gray-0);
+  font-size: 24px;
+  font-weight: 400;
+  transition: all 0.3s ease;
+}
+
+.business-bottom-navigation__label {
+  color: var(--gray-0);
+  font-size: 0.75rem;
+  font-weight: 600;
+  line-height: 1;
+  transition: all 0.3s ease;
+  font-family:
+    'Pretendard',
+    -apple-system,
+    BlinkMacSystemFont,
+    system-ui,
+    sans-serif;
+}
+
+/* 반응형 디자인 */
+@media (max-width: 768px) {
+  .business-bottom-navigation {
+    height: 68px;
+  }
+
+  .business-bottom-navigation__item {
+    min-height: 68px;
+  }
+
+  .business-bottom-navigation__icon {
+    width: 20px;
+    height: 17px;
+  }
+
+  .business-bottom-navigation__icon .material-symbols-outlined {
+    font-size: 22px;
+  }
+
+  .business-bottom-navigation__label {
+    font-size: 13px;
+  }
+}
+
+@media (max-width: 480px) {
+  .business-bottom-navigation {
+    height: 64px;
+  }
+
+  .business-bottom-navigation__item {
+    min-height: 64px;
+  }
+
+  .business-bottom-navigation__icon {
+    width: 20px;
+    height: 20px;
+  }
+
+  .business-bottom-navigation__icon .material-symbols-outlined {
+    font-size: 20px;
+  }
+
+  .business-bottom-navigation__label {
+    font-size: 12px;
+  }
+}

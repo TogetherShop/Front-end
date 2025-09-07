@@ -1,0 +1,202 @@
+.business-store-card {
+  background: #f0fdf4;
+  border-radius: 12px;
+  border: 1px solid #dcfce7;
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+
+.business-store-card:hover {
+  border-color: #e5e7eb;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+.store-card-content {
+  display: flex;
+  align-items: center;
+  padding: 16px;
+  gap: 12px;
+}
+
+/* 매장 이미지 */
+.store-image {
+  flex-shrink: 0;
+}
+
+.store-img,
+.store-img-placeholder {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.store-img-placeholder {
+  background-color: #f3f4f6;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.store-img-placeholder .material-symbols-outlined {
+  font-size: 28px;
+  color: #9ca3af;
+}
+
+/* 매장 정보 */
+.store-info {
+  flex: 1;
+  min-width: 0; /* flexbox에서 텍스트 오버플로우 방지 */
+}
+
+.store-header {
+  margin-bottom: 8px;
+}
+
+.store-name-category {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.store-name {
+  font-size: 16px;
+  font-weight: 600;
+  color: #111827;
+  margin: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.store-category {
+  font-size: 14px;
+  color: #9ca3af;
+  font-weight: 400;
+}
+
+.store-details {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 8px;
+}
+
+.detail-item {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.detail-item .material-symbols-outlined {
+  font-size: 16px;
+  color: #9ca3af;
+}
+
+.star-icon {
+  color: #017f58 !important;
+  font-variation-settings: 'FILL' 1;
+}
+
+.detail-text {
+  font-size: 14px;
+  color: #6b7280;
+}
+
+.together-score {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+/* 쿠폰 정보 */
+.coupon-info {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.coupon-icon {
+  font-size: 18px;
+  color: #017f58;
+}
+
+.coupon-text {
+  font-size: 15px;
+  color: #111827;
+  font-weight: 500;
+}
+
+/* 액션 섹션 */
+.action-section {
+  flex-shrink: 0;
+}
+
+.request-button {
+  padding: 8px 16px;
+  border: 1px solid #017f58;
+  border-radius: 8px;
+  font-size: 17px;
+  font-weight: 1000;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  min-width: 60px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  justify-content: center;
+}
+
+.request-button:not(:disabled) {
+  background-color: white;
+  color: #017f58;
+}
+
+.request-button:not(:disabled):hover {
+  background-color: #017f58;
+  color: white;
+  transform: translateY(-1px);
+}
+
+.request-button:disabled {
+  background-color: #f3f4f6;
+  color: #9ca3af;
+  border-color: #e5e7eb;
+  cursor: not-allowed;
+}
+
+.request-icon {
+  font-size: 17px;
+  font-weight: 1000;
+}
+
+/* 반응형 디자인 */
+@media (max-width: 480px) {
+  .store-card-content {
+    padding: 12px;
+    gap: 10px;
+  }
+
+  .store-img,
+  .store-img-placeholder {
+    width: 56px;
+    height: 56px;
+  }
+
+  .store-img-placeholder .material-symbols-outlined {
+    font-size: 24px;
+  }
+
+  .store-name {
+    font-size: 15px;
+  }
+
+  .store-details {
+    gap: 12px;
+  }
+
+  .request-button {
+    padding: 6px 12px;
+    font-size: 12px;
+    min-width: 50px;
+  }
+}

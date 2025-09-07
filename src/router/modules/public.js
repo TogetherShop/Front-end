@@ -7,6 +7,7 @@ import BusinessGroupBuyPage from '@/pages/business/BusinessGroupBuyPage.vue'
 import BusinessHomePage from '@/pages/business/BusinessHomePage.vue'
 import BusinessProfilePage from '@/pages/business/BusinessProfilePage.vue'
 import BusinessStorePage from '@/pages/business/BusinessStorePage.vue'
+import BusinessCouponAnalysis from '@/pages/business/BusinessCouponAnalysis.vue'
 
 export default [
   {
@@ -53,5 +54,15 @@ export default [
     path: '/business/profile',
     name: 'business-profile',
     component: BusinessProfilePage,
+  },
+  {
+    path: '/business/profile',
+    name: 'business-profile',
+    component: BusinessProfilePage,
+  },
+  {
+    path: '/business/coupon/analysis',
+    name: 'BusinessCouponAnalysis',
+    component: BusinessCouponAnalysis,
   },
 ]

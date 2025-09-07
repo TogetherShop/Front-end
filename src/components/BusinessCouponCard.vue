@@ -16,12 +16,18 @@
           </div>
           <p class="business-coupon-card__description">{{ coupon.description }}</p>
         </div>
-        <span class="material-symbols-outlined business-coupon-card__chart-icon">bar_chart</span>
+        <span
+          class="material-symbols-outlined business-coupon-card__chart-icon"
+          @click="openAnalysis"
+          title="쿠폰 분석 보기"
+          style="cursor: pointer"
+          >bar_chart</span
+        >
       </div>
 
       <div class="business-coupon-card__stats">
         <div class="business-coupon-card__stat-item">
-          <span class="material-symbols-outlined">group</span>
+          <span class="material-symbols-outlined">file_download</span>
           <span>{{ coupon.participants }}/{{ coupon.maxParticipants }} 사용</span>
         </div>
         <div class="business-coupon-card__stat-item">
@@ -84,12 +90,18 @@
           </div>
           <p class="business-coupon-card__description">{{ coupon.description }}</p>
         </div>
-        <span class="material-symbols-outlined business-coupon-card__chart-icon">bar_chart</span>
+        <span
+          class="material-symbols-outlined business-coupon-card__chart-icon"
+          @click="openAnalysis"
+          title="쿠폰 분석 보기"
+          style="cursor: pointer"
+          >bar_chart</span
+        >
       </div>
 
       <div class="business-coupon-card__stats">
         <div class="business-coupon-card__stat-item">
-          <span class="material-symbols-outlined">group</span>
+          <span class="material-symbols-outlined">file_download</span>
           <span>{{ coupon.participants }}/{{ coupon.maxParticipants }} 사용</span>
         </div>
         <div class="business-coupon-card__stat-item">
@@ -123,14 +135,19 @@ export default {
       required: true,
     },
   },
-  emits: ['chatContinue'],
+  emits: ['chatContinue', 'openAnalysis'],
   setup(props, { emit }) {
     const handleChatContinue = () => {
       emit('chatContinue', props.coupon.id)
     }
+    const openAnalysis = () => {
+      // 가능한 여러 키를 고려: template_id / templateId / id
+      emit('openAnalysis', props.coupon)
+    }
 
     return {
       handleChatContinue,
+      openAnalysis,
     }
   },
 }

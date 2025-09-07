@@ -114,6 +114,7 @@
               :key="coupon.id"
               :coupon="coupon"
               @chatContinue="handleChatContinue"
+              @openAnalysis="handleOpenAnalysis"
             />
           </div>
 
@@ -124,6 +125,7 @@
               :key="coupon.id"
               :coupon="coupon"
               @chatContinue="handleChatContinue"
+              @openAnalysis="handleOpenAnalysis"
             />
           </div>
 
@@ -170,6 +172,7 @@
 
 <script>
 import { ref, computed, watch, nextTick } from 'vue'
+import { useRouter } from 'vue-router'
 import { useCouponsStore } from '@/stores/coupons'
 import BusinessTopBar from '@/components/BusinessTopBar.vue'
 import BusinessCouponCard from '@/components/BusinessCouponCard.vue'
@@ -183,6 +186,7 @@ export default {
     BusinessBottomNavigation,
   },
   setup() {
+    const router = useRouter()
     const couponsStore = useCouponsStore()
 
     const showFilter = ref(false)
@@ -287,6 +291,15 @@ export default {
       showFilter.value = !showFilter.value
     }
 
+    const handleOpenAnalysis = (coupon) => {
+      const templateId = coupon.template_id || coupon.templateId || coupon.id
+      // query로 전달 (URL에 남음, 새로고침 안전)
+      router.push({
+        name: 'BusinessCouponAnalysis', // 라우트 name 설정
+        query: { templateId: String(templateId) },
+      })
+    }
+
     return {
       activeTab,
       filters,
@@ -301,6 +314,7 @@ export default {
       visiblePages,
       currentPage,
       changePage,
+      handleOpenAnalysis,
     }
   },
 }

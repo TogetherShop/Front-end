@@ -1,4 +1,5 @@
 import axios from '@/libs/axios'
+import api from './api'
 
 // 고객 프로필 API 함수들
 
@@ -8,7 +9,10 @@ import axios from '@/libs/axios'
  */
 export const getCustomerProfile = async () => {
   try {
-    const response = await axios.get('/api/customer/profile')
+    const response = await api.get('/api/customer/profile', {
+      userType: 'customer',
+    })
+    console.log('고객 프로필 조회:', response.data)
     return response.data
   } catch (error) {
     console.error('고객 프로필 조회 실패:', error)

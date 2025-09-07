@@ -1,0 +1,203 @@
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 20px;
+}
+
+.participants-modal {
+  background: white;
+  border-radius: 16px;
+  width: 350px;
+  height: 500px;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+}
+
+.modal-content {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  padding: 20px;
+  overflow: hidden;
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.modal-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: #333;
+  margin: 0;
+}
+
+.close-button {
+  background: none;
+  border: none;
+  color: #666;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 50%;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.close-button:hover {
+  background: #f8f9fa;
+  color: #333;
+}
+
+.close-button .material-symbols-outlined {
+  font-size: 20px;
+}
+
+/* 안내 문구 */
+.info-notice {
+  font-size: 10px;
+  color: #999;
+  margin-bottom: 12px;
+  text-align: left;
+  flex-shrink: 0;
+}
+
+.participants-list {
+  flex: 1;
+  overflow-y: auto;
+  min-height: 0;
+}
+
+/* 참여자 아이템 */
+.participant-card {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 4px 0;
+  border-bottom: 1px solid #e9ecef;
+}
+
+.participant-card:last-child {
+  border-bottom: none;
+}
+
+.participant-info {
+  flex: 1;
+}
+
+.participant-name {
+  font-size: 14px;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 2px;
+}
+
+.participant-details {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.store-icon {
+  font-size: 12px;
+  color: #666;
+}
+
+.participant-service {
+  font-size: 12px;
+  color: #666;
+}
+
+.participant-amount {
+  font-size: 12px;
+  font-weight: 500;
+  color: #333;
+}
+
+.participant-actions {
+  flex-shrink: 0;
+}
+
+/* 승인 버튼 */
+.approve-btn {
+  background: var(--main-color);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 6px 12px;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  min-width: 40px;
+}
+
+.approve-btn:hover {
+  background: #218838;
+}
+
+/* 승인완료 버튼 */
+.approved-btn {
+  background: var(--gray-0);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 6px 12px;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: not-allowed;
+  min-width: 40px;
+}
+
+/* 스크롤바 스타일 */
+.participants-list::-webkit-scrollbar {
+  width: 6px;
+}
+
+.participants-list::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 3px;
+}
+
+.participants-list::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 3px;
+}
+
+.participants-list::-webkit-scrollbar-thumb:hover {
+  background: #a8a8a8;
+}
+
+/* 반응형 */
+@media (max-width: 480px) {
+  .modal-overlay {
+    padding: 16px;
+  }
+
+  .participants-modal {
+    max-height: 85vh;
+  }
+
+  .modal-content {
+  }
+
+  .modal-title {
+    font-size: 16px;
+  }
+
+  .participant-card {
+  }
+}

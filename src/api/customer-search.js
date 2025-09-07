@@ -44,7 +44,7 @@ export const getRecommendedStores = async (params = {}) => {
 // 관련 매장 추천 조회 (특정 매장 방문 고객들이 자주 가는 곳)
 export const getRelatedStores = async (storeId, params = {}) => {
   try {
-    const response = await axios.get(`/api/stores/${storeId}/related`, {
+    const response = await axios.get(`/api/stores/visit-pattern`, {
       params: {
         limit: params.limit || 10,
         ...params,
@@ -79,18 +79,4 @@ export const getStoreCategories = async () => {
   }
 }
 
-// 인기 검색어 조회
-export const getPopularSearchTerms = async (params = {}) => {
-  try {
-    const response = await axios.get('/api/stores/popular-search', {
-      params: {
-        limit: params.limit || 10,
-        ...params,
-      },
-    })
-    return response.data
-  } catch (error) {
-    console.error('인기 검색어 조회 실패:', error)
-    throw error
-  }
-}
+

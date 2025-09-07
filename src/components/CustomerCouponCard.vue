@@ -10,8 +10,8 @@
             style="cursor: pointer;"
           >
             <div class="coupon-card__header d-flex align-items-center mb-1 ms-2" >
-              <h6 class="coupon-card__store-name mb-0 fw-bold">{{ coupon.storeName }}</h6>
-              <span class="coupon-card__category-badge ms-2">{{ coupon.category }}</span>
+              <h6 class="coupon-card__store-name mb-0 fw-bold">{{ coupon.storeName || coupon.businessName }}</h6>
+              <span class="coupon-card__category-badge ms-2">{{ coupon.category || coupon.businessCategory }}</span>
             </div>
 
             <div class="coupon-card__coupon-info d-flex align-items-center mb-1 ms-2">
@@ -154,7 +154,7 @@ export default {
     }
 
     const handleModalDownload = (coupon) => {
-      emit('download', coupon.id)
+      emit('download', coupon)
       closeModal()
     }
 

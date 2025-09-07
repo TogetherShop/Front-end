@@ -1,5 +1,5 @@
 import axios from '@/libs/axios'
-
+import api from './api'
 // 고객 쿠폰 API 함수들
 
 /**
@@ -13,10 +13,28 @@ import axios from '@/libs/axios'
  */
 export const getAvailableCoupons = async (params = {}) => {
   try {
-    const response = await axios.get('/api/coupons/available', { params })
+    // 디버깅을 위한 토큰 확인
+    const token = localStorage.getItem('access_token')
+    console.log('getAvailableCoupons 요청 전 토큰 확인:', {
+      hasToken: !!token,
+      tokenLength: token?.length,
+      userType: localStorage.getItem('user_type'),
+    })
+
+    const response = await api.get('/api/customer/coupons/available', {
+      params,
+      userType: 'customer',
+    })
+    console.log('발급 가능한 쿠폰 목록 조회:', response.data)
     return response.data
   } catch (error) {
     console.error('발급 가능한 쿠폰 목록 조회 실패:', error)
+    console.error('에러 상세 정보:', {
+      status: error.response?.status,
+      statusText: error.response?.statusText,
+      data: error.response?.data,
+      headers: error.response?.headers,
+    })
     throw error
   }
 }
@@ -32,7 +50,11 @@ export const getAvailableCoupons = async (params = {}) => {
  */
 export const getReceivedCoupons = async (params = {}) => {
   try {
-    const response = await axios.get('/api/coupons/received', { params })
+    const response = await api.get('/api/customer/coupons/received', {
+      params,
+      userType: 'customer',
+    })
+    console.log('받은 쿠폰 목록 조회:', response.data)
     return response.data
   } catch (error) {
     console.error('받은 쿠폰 목록 조회 실패:', error)
@@ -47,7 +69,14 @@ export const getReceivedCoupons = async (params = {}) => {
  */
 export const claimCoupon = async (couponId) => {
   try {
-    const response = await axios.post(`/api/coupons/${couponId}/claim`)
+    const response = await api.post(
+      `/api/customer/coupons/${couponId}/claim`,
+      {},
+      {
+        userType: 'customer',
+      },
+    )
+    console.log('쿠폰 발급 요청:', response.data)
     return response.data
   } catch (error) {
     console.error(`쿠폰 발급 실패 (ID: ${couponId}):`, error)
@@ -65,7 +94,10 @@ export const claimCoupon = async (couponId) => {
  */
 export const useCoupon = async (couponId, data = {}) => {
   try {
-    const response = await axios.post(`/api/coupons/${couponId}/use`, data)
+    const response = await api.post(`/api/customer/coupons/${couponId}/use`, data, {
+      userType: 'customer',
+    })
+    console.log('쿠폰 사용:', response.data)
     return response.data
   } catch (error) {
     console.error(`쿠폰 사용 실패 (ID: ${couponId}):`, error)
@@ -80,7 +112,10 @@ export const useCoupon = async (couponId, data = {}) => {
  */
 export const getCouponDetail = async (couponId) => {
   try {
-    const response = await axios.get(`/api/coupons/${couponId}`)
+    const response = await api.get(`/api/customer/coupons/${couponId}`, {
+      userType: 'customer',
+    })
+    console.log('쿠폰 상세 정보 조회:', response.data)
     return response.data
   } catch (error) {
     console.error(`쿠폰 상세 정보 조회 실패 (ID: ${couponId}):`, error)
@@ -98,44 +133,13 @@ export const getCouponDetail = async (couponId) => {
  */
 export const checkCouponAvailability = async (couponId, data) => {
   try {
-    const response = await axios.post(`/api/coupons/${couponId}/check`, data)
+    const response = await api.post(`/api/customer/coupons/${couponId}/check`, data, {
+      userType: 'customer',
+    })
+    console.log('쿠폰 사용 가능 여부 확인:', response.data)
     return response.data
   } catch (error) {
     console.error(`쿠폰 사용 가능 여부 확인 실패 (ID: ${couponId}):`, error)
-    throw error
-  }
-}
-
-/**
- * 쿠폰 이력 목록 조회
- * @param {Object} params - 쿼리 파라미터
- * @param {string} params.type - 이력 타입 (claim, use, expire)
- * @param {string} params.startDate - 시작 날짜
- * @param {string} params.endDate - 종료 날짜
- * @param {number} params.page - 페이지 번호
- * @param {number} params.limit - 페이지당 항목 수
- * @returns {Promise<Object>} 쿠폰 이력 목록 데이터
- */
-export const getCouponHistory = async (params = {}) => {
-  try {
-    const response = await axios.get('/api/coupons/history', { params })
-    return response.data
-  } catch (error) {
-    console.error('쿠폰 이력 목록 조회 실패:', error)
-    throw error
-  }
-}
-
-/**
- * 쿠폰 통계 조회
- * @returns {Promise<Object>} 쿠폰 통계 데이터
- */
-export const getCouponStats = async () => {
-  try {
-    const response = await axios.get('/api/coupons/stats')
-    return response.data
-  } catch (error) {
-    console.error('쿠폰 통계 조회 실패:', error)
     throw error
   }
 }
@@ -147,7 +151,10 @@ export const getCouponStats = async () => {
  */
 export const getExpiringCoupons = async (limit = 2) => {
   try {
-    const response = await axios.get(`/api/coupons/expiring?limit=${limit}`)
+    const response = await api.get(`/api/customer/coupons/expiring?limit=${limit}`, {
+      userType: 'customer',
+    })
+    console.log('기한 임박 쿠폰 조회:', response.data)
     return response.data
   } catch (error) {
     console.error('기한 임박 쿠폰 조회 실패:', error)
@@ -162,10 +169,31 @@ export const getExpiringCoupons = async (limit = 2) => {
  */
 export const getRecentReviews = async (limit = 2) => {
   try {
-    const response = await axios.get(`/api/reviews/recent?limit=${limit}`)
+    const response = await api.get(`/api/customer/reviews`, {
+      userType: 'customer',
+    })
+    console.log('최근 리뷰 조회:', response.data)
     return response.data
   } catch (error) {
     console.error('최근 리뷰 조회 실패:', error)
+    throw error
+  }
+}
+
+/**
+ * 내가 발급한 쿠폰 QR 코드 생성
+ * @param {number} couponId - 쿠폰 ID
+ * @returns {Promise<Object>} QR 코드 데이터
+ */
+export const createQRcode = async (couponId) => {
+  try {
+    const response = await api.get(`/api/customer/coupons/${couponId}/qr-code`, {
+      userType: 'customer',
+    })
+    console.log('내가 발급한 쿠폰 QR 코드 생성:', response.data)
+    return response.data
+  } catch (error) {
+    console.error(`쿠폰 QR 코드 생성 실패 (ID: ${couponId}):`, error)
     throw error
   }
 }

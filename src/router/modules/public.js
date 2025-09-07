@@ -29,6 +29,21 @@ const routes = [
     meta: { requiresAuth: true, role: 'customer' },
   },
   {
+    path: '/customer/search',
+    component: CustomerSearchPage,
+    meta: { requiresAuth: true, role: 'customer' },
+  },
+  {
+    path: '/customer/coupon',
+    component: CustomerCouponPage,
+    meta: { requiresAuth: true, role: 'customer' },
+  },
+  {
+    path: '/customer/profile',
+    component: CustomerProfilePage,
+    meta: { requiresAuth: true, role: 'customer' },
+  },
+  {
     path: '/business',
     component: BusinessHomePage,
     meta: { requiresAuth: true, role: 'business' },

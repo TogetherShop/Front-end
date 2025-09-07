@@ -33,22 +33,22 @@ export default {
       {
         name: '홈',
         icon: 'home',
-        route: '/'
+        route: '/customer'
       },
       {
         name: '매장찾기',
         icon: 'search',
-        route: '/search'
+        route: '/customer/search'
       },
       {
         name: '쿠폰',
         icon: 'redeem',
-        route: '/coupon'
+        route: '/customer/coupon'
       },
       {
         name: '내정보',
         icon: 'person_outline',
-        route: '/profile'
+        route: '/customer/profile'
       }
     ]
     

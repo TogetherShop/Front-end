@@ -161,53 +161,7 @@ export default {
       return `${date.getFullYear()}.${String(date.getMonth() + 1).padStart(2, '0')}.${String(date.getDate()).padStart(2, '0')}`
     }
 
-    const receivedCoupons = ref([
-      {
-        id: 5,
-        storeName: '피자마루',
-        category: '음식점',
-        title: '10% 할인쿠폰',
-        expiryDate: '2025.10.31',
-        daysLeft: 'D-30',
-        isClaimed: true,
-      },
-      {
-        id: 6,
-        storeName: '언더라인',
-        category: '카페',
-        title: '20% 할인쿠폰',
-        expiryDate: '2025.9.30',
-        daysLeft: 'D-26',
-        isClaimed: true,
-      },
-      {
-        id: 7,
-        storeName: '조마루 감자탕',
-        category: '음식점',
-        title: '10% 할인쿠폰',
-        expiryDate: '2025.10.31',
-        daysLeft: 'D-30',
-        isClaimed: true,
-      },
-      {
-        id: 8,
-        storeName: '하이디라오',
-        category: '음식점',
-        title: '5% 할인쿠폰',
-        expiryDate: '2025.10.31',
-        daysLeft: 'D-30',
-        isClaimed: true,
-      },
-      {
-        id: 9,
-        storeName: '피자마루',
-        category: '음식점',
-        title: '10% 할인쿠폰',
-        expiryDate: '2025.10.31',
-        daysLeft: 'D-30',
-        isClaimed: true,
-      },
-    ])
+    const receivedCoupons = ref([])
 
     // API에서 데이터 로드
     const loadCoupons = async () => {
@@ -331,8 +285,40 @@ export default {
           })
           availableCoupons.value = allFlattenedCoupons
         }
-        if (receivedData && receivedData.data) {
-          receivedCoupons.value = receivedData.data
+        
+        // 받은 쿠폰 데이터 처리
+        console.log('receivedData:', receivedData)
+        if (receivedData && Array.isArray(receivedData) && receivedData.length > 0) {
+          // 받은 쿠폰 데이터를 CustomerReceivedCouponCard에 맞는 형태로 변환
+          receivedCoupons.value = receivedData.map(coupon => {
+            // 만료일까지 남은 일수 계산
+            const calculateDaysLeft = (expireDate) => {
+              if (!expireDate) return 'D-0'
+              const today = new Date()
+              const expire = new Date(expireDate)
+              const diffTime = expire - today
+              const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
+              return diffDays > 0 ? `D-${diffDays}` : '만료됨'
+            }
+
+            return {
+              id: coupon.couponId,
+              couponId: coupon.couponId,
+              templateId: coupon.templateId,
+              couponCode: coupon.couponCode,
+              storeName: coupon.businessName,
+              category: coupon.businessCategory,
+              title: `${coupon.description} 쿠폰`,
+              expiryDate: formatDate(coupon.expireDate),
+              daysLeft: calculateDaysLeft(coupon.expireDate),
+              isClaimed: true,
+              status: coupon.status,
+              issueDate: coupon.issueDate,
+              usedDate: coupon.usedDate,
+              pinCode: coupon.pinCode,
+              qrCodeData: coupon.qrCodeData
+            }
+          })
         }
 
         console.log('쿠폰 데이터 로드 완료')
@@ -452,8 +438,38 @@ export default {
         }
         const receivedData = await getReceivedCoupons(params)
 
-        if (receivedData && receivedData.data) {
-          receivedCoupons.value = receivedData.data
+        console.log('loadReceivedCoupons receivedData:', receivedData)
+        if (receivedData && Array.isArray(receivedData) && receivedData.length > 0) {
+          // 받은 쿠폰 데이터를 CustomerReceivedCouponCard에 맞는 형태로 변환
+          receivedCoupons.value = receivedData.map(coupon => {
+            // 만료일까지 남은 일수 계산
+            const calculateDaysLeft = (expireDate) => {
+              if (!expireDate) return 'D-0'
+              const today = new Date()
+              const expire = new Date(expireDate)
+              const diffTime = expire - today
+              const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
+              return diffDays > 0 ? `D-${diffDays}` : '만료됨'
+            }
+
+            return {
+              id: coupon.couponId,
+              couponId: coupon.couponId,
+              templateId: coupon.templateId,
+              couponCode: coupon.couponCode,
+              storeName: coupon.businessName,
+              category: coupon.businessCategory,
+              title: `${coupon.description} 쿠폰`,
+              expiryDate: formatDate(coupon.expireDate),
+              daysLeft: calculateDaysLeft(coupon.expireDate),
+              isClaimed: true,
+              status: coupon.status,
+              issueDate: coupon.issueDate,
+              usedDate: coupon.usedDate,
+              pinCode: coupon.pinCode,
+              qrCodeData: coupon.qrCodeData
+            }
+          })
         }
       } catch (error) {
         console.error('받은 쿠폰 목록 로드 실패:', error)

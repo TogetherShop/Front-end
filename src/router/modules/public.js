@@ -12,6 +12,7 @@ import ChatRoomView from '@/pages/ChatRoomView.vue'
 import CustomerHomePage from '@/pages/CustomerHomePage.vue'
 import BusinessHomePage from '@/pages/BusinessHomePage.vue'
 import ChattingHomePage from '@/pages/ChattingHomePage.vue'
+import BusinessPartnershipPage from '@/pages/BusinessPartnershipPage.vue'
 
 const routes = [
   // 인증 필요 ❌
@@ -50,7 +51,28 @@ const routes = [
   },
   {
     path: '/business/chats',
-    component: ChattingHomePage,
+    component: ChatList,
+    meta: { requiresAuth: true, role: 'business' },
+  },
+  {
+    path: '/business/chats',
+    component: ChatList,
+    meta: { requiresAuth: true, role: 'business' },
+  },
+  {
+    path: '/business/chats/new',
+    component: ChatUserListView,
+    meta: { requiresAuth: true, role: 'business' },
+  },
+  {
+    path: '/business/chats/:roomId',
+    component: ChatRoomView,
+    meta: { requiresAuth: true, role: 'business' },
+    props: true,
+  },
+  {
+    path: '/business/partnership',
+    component: BusinessPartnershipPage,
     meta: { requiresAuth: true, role: 'business' },
   },
 ]

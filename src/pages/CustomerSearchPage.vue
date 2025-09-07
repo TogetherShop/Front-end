@@ -35,7 +35,7 @@
         <div class="customer-search__results-list d-flex flex-column gap-3">
           <div 
             v-for="store in searchResults" 
-            :key="store.id"
+            :key="store.businessId"
             class="customer-search__result-item"
           >
             <div class="customer-search__result-content">
@@ -47,14 +47,14 @@
               </div>
               <div class="customer-search__result-info">
                 <div class="customer-search__result-header">
-                  <h4 class="customer-search__result-name">{{ store.name }}</h4>
-                  <span class="customer-search__result-status">{{ store.isOnline ? '온라인' : '오프라인' }}</span>
-                  <div class="customer-search__result-rating" v-if="store.rating">
+                  <h4 class="customer-search__result-name">{{ store.businessName }}</h4>
+                  <span class="customer-search__result-status">{{ store.addressType || '오프라인' }}</span>
+                  <div class="customer-search__result-rating" v-if="store.averageRating">
                     <i class="material-symbols-outlined customer-search__star-icon">star</i>
-                    <span>{{ store.rating }}</span>
+                    <span>{{ formatRating(store.averageRating) }}</span>
                   </div>
                 </div>
-                <span class="customer-search__result-category">{{ store.category }}</span>
+                <span class="customer-search__result-category">{{ store.businessCategory }}</span>
                 <div class="customer-search__result-address" v-if="store.address">
                   <i class="material-symbols-outlined">location_on</i>
                   <span>{{ store.address }}</span>
@@ -177,7 +177,7 @@
 import { ref, computed, onMounted } from 'vue'
 import CustomerTopBar from '@/components/CustomerTopBar.vue'
 import CustomerBottomNavigation from '@/components/CustomerBottomNavigation.vue'
-import { getRecommendedStores, getRelatedStores } from '@/api/customer-search.js'
+import { getRecommendedStores, getRelatedStores, searchStores } from '@/api/customer-search.js'
 
 export default {
   name: 'SearchPage',
@@ -391,8 +391,7 @@ export default {
       }
     }
 
-    // 전체 매장 데이터 (검색용)
-    const allStores = computed(() => [...recommendedStores.value, ...relatedStores.value])
+    // 전체 매장 데이터는 더 이상 사용하지 않음 (API 검색으로 대체)
 
     const popularSearchTerms = ref([
       '스타벅스',
@@ -408,8 +407,8 @@ export default {
     // 검색 결과가 있는지 확인하는 computed
     const hasSearchResults = computed(() => searchResults.value.length > 0)
 
-    // 매장 검색 (더미 데이터에서 필터링)
-    const searchStoresHandler = () => {
+    // 매장 검색 (BusinessSearchDTO)
+    const searchStoresHandler = async () => {
       if (!searchQuery.value.trim()) {
         searchResults.value = []
         return
@@ -417,19 +416,54 @@ export default {
 
       isSearching.value = true
       
-      // 더미 검색 로직
-      setTimeout(() => {
-        const query = searchQuery.value.toLowerCase()
+      try {
+        console.log('매장 검색 API 호출 시작...', { query: searchQuery.value })
+        const response = await searchStores({ 
+          query: searchQuery.value,
+          limit: 20 
+        })
+        console.log('매장 검색 API 응답:', response)
         
-        searchResults.value = allStores.value.filter(store => 
-          store.name.toLowerCase().includes(query) ||
-          store.category.toLowerCase().includes(query) ||
-          (store.description && store.description.toLowerCase().includes(query)) ||
-          (store.address && store.address.toLowerCase().includes(query))
-        )
+        if (response && Array.isArray(response)) {
+          // BusinessSearchDTO 배열을 직접 받는 경우
+          searchResults.value = response.map(store => ({
+            businessId: store.businessId,
+            businessName: store.businessName,
+            businessCategory: store.businessCategory,
+            address: store.address,
+            averageRating: store.averageRating,
+            addressType: store.addressType
+          }))
+        } else if (response && response.data && Array.isArray(response.data)) {
+          // 응답이 { data: [...] } 형태인 경우
+          searchResults.value = response.data.map(store => ({
+            businessId: store.businessId,
+            businessName: store.businessName,
+            businessCategory: store.businessCategory,
+            address: store.address,
+            averageRating: store.averageRating,
+            addressType: store.addressType
+          }))
+        } else {
+          console.warn('매장 검색 API 응답 형식이 예상과 다릅니다:', response)
+          searchResults.value = []
+        }
         
+        console.log('매장 검색 결과 설정 완료:', searchResults.value)
+      } catch (error) {
+        console.error('매장 검색 실패:', error)
+        
+        // 403 오류인 경우 특별 처리
+        if (error.response?.status === 403) {
+          console.warn('403 Forbidden - 매장 검색 API 권한이 없거나 구현되지 않았을 수 있습니다.')
+          searchResults.value = []
+        } else {
+          // 다른 에러의 경우 빈 결과로 처리
+          searchResults.value = []
+        }
+      } finally {
         isSearching.value = false
-      }, 500)
+      }
     }
 
     // 검색어 변경 감지 (디바운싱)

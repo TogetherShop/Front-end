@@ -5,12 +5,12 @@ import api from './api'
  * 매장 찾기 관련 API
  */
 
-// 매장 검색
+// 매장 검색 (BusinessSearchDTO)
 export const searchStores = async (params = {}) => {
   try {
     const response = await api.get('/api/stores/search', {
       params: {
-        query: params.query || '',
+        keyword: params.query || '',
         category: params.category || '',
         location: params.location || '',
         page: params.page || 1,
@@ -19,10 +19,20 @@ export const searchStores = async (params = {}) => {
       },
       userType: 'customer',
     })
-    console.log('매장 검색:', response.data)
+    console.log('매장 검색 응답:', {
+      status: response.status,
+      data: response.data,
+      headers: response.headers,
+    })
     return response.data
   } catch (error) {
     console.error('매장 검색 실패:', error)
+    console.error('에러 상세:', {
+      status: error.response?.status,
+      statusText: error.response?.statusText,
+      data: error.response?.data,
+      message: error.message,
+    })
     throw error
   }
 }

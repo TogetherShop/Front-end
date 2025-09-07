@@ -31,12 +31,12 @@
 }
 
 .nav-item:hover {
-  color: #059669;
+  color: #017f58;
   background-color: rgba(5, 150, 105, 0.05);
 }
 
 .nav-item.active {
-  color: #059669;
+  color: #017f58;
 }
 
 .nav-icon {

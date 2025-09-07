@@ -2,10 +2,10 @@ import { createRouter, createWebHistory } from 'vue-router'
 import { jwtDecode } from 'jwt-decode'
 
 import businessRoutes from './modules/business'
-import routes from './modules/public'
+import publicRoutes from './modules/public'
 
-const routes: [...publicRoutes, ...businessRoutes]
-  
+const routes = [...publicRoutes, ...businessRoutes]
+
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes,

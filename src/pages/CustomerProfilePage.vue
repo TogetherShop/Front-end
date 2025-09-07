@@ -9,7 +9,7 @@
       <div class="CustomerProfile__profile-card rounded-3 p-3 shadow-sm">
         <div class="CustomerProfile__profile-content">
           <div class="CustomerProfile__profile-image">
-            <img src="https://via.placeholder.com/60x60/cccccc/ffffff?text=프로필" class="CustomerProfile__profile-avatar rounded-circle">
+            <img :src="togethershopLogo" class="CustomerProfile__profile-avatar rounded-circle">
           </div>
           <div class="CustomerProfile__profile-info">
             <div v-if="profileLoading" class="text-center py-2">
@@ -60,28 +60,29 @@
         <div v-else-if="coupons.length > 0">
           <div 
             v-for="coupon in coupons" 
-            :key="coupon.id"
+            :key="coupon.couponId"
             class="CustomerProfile__coupon-card d-flex align-items-center bg-light rounded mb-2 p-3 position-relative"
           >
             <div class="CustomerProfile__coupon-discount fw-bold text-success me-3">
-              {{ coupon.discount }}
+              {{ formatDiscount(coupon.discountValue) }}
             </div>
             <div class="CustomerProfile__coupon-info flex-grow-1 me-3">
               <h4 class="CustomerProfile__coupon-title mb-1">
-                {{ coupon.title }}
+                {{ coupon.businessName }} 쿠폰
               </h4>
               <p class="CustomerProfile__coupon-store mb-0">
-                {{ coupon.storeName }}
+                {{ coupon.businessCategory }}
               </p>
             </div>
             <div 
               class="CustomerProfile__coupon-expiry position-absolute"
               :class="{
-                'text-success': coupon.expiryType === 'today',
-                'text-muted': coupon.expiryType === 'days'
+                'text-danger': coupon.daysLeft <= 1,
+                'text-warning': coupon.daysLeft <= 3 && coupon.daysLeft > 1,
+                'text-muted': coupon.daysLeft > 3
               }"
             >
-              {{ coupon.expiryStatus }}
+              {{ formatDaysLeft(coupon.daysLeft) }}
             </div>
           </div>
         </div>
@@ -150,6 +151,7 @@ import CustomerTopBar from '@/components/CustomerTopBar.vue'
 import CustomerBottomNavigation from '@/components/CustomerBottomNavigation.vue'
 import { getExpiringCoupons, getRecentReviews } from '@/api/customer-coupon.js'
 import { getCustomerProfile } from '@/api/customer-profile.js'
+import togethershopLogo from '@/assets/images/togethershop_logo.png'
 
 export default {
   name: 'CustomerProfilePage',
@@ -173,25 +175,27 @@ export default {
     const reviews = ref([])
     const reviewsLoading = ref(false)
 
-    // 더미 쿠폰 데이터 (기한이 임박한 2개)
+    // 더미 쿠폰 데이터 (기한이 임박한 2개) - ExpiringCouponDTO 형식
     const dummyCoupons = [
       {
-        id: 1,
-        discount: '15%',
-        title: '15% 할인 쿠폰',
-        storeName: '신마루 감자탕',
-        expiryStatus: '오늘만료',
-        expiryType: 'today',
-        category: '할인'
+        couponId: 1,
+        couponCode: 'COUPON001',
+        expireDate: '2024-01-20T23:59:59',
+        templateId: 101,
+        discountValue: 1500,
+        businessName: '신마루 감자탕',
+        businessCategory: '한식',
+        daysLeft: 1
       },
       {
-        id: 2,
-        discount: '10%',
-        title: '10% 음료 할인 쿠폰',
-        storeName: '달콤카페',
-        expiryStatus: '5일남음',
-        expiryType: 'days',
-        category: '할인'
+        couponId: 2,
+        couponCode: 'COUPON002',
+        expireDate: '2024-01-25T23:59:59',
+        templateId: 102,
+        discountValue: 2000,
+        businessName: '달콤카페',
+        businessCategory: '카페',
+        daysLeft: 5
       }
     ]
 
@@ -230,6 +234,19 @@ export default {
       })
     }
 
+    // 할인 금액 포맷팅 함수
+    const formatDiscount = (discountValue) => {
+      if (!discountValue) return '할인'
+      return `${discountValue.toLocaleString()}%`
+    }
+
+    // 남은 일수 포맷팅 함수
+    const formatDaysLeft = (daysLeft) => {
+      if (daysLeft <= 0) return '만료됨'
+      if (daysLeft === 1) return '오늘만료'
+      return `D-${daysLeft}`
+    }
+
     // 프로필 데이터 로드
     const loadProfile = async () => {
       profileLoading.value = true
@@ -261,16 +278,51 @@ export default {
     const loadCoupons = async () => {
       loading.value = true
       try {
-        // 실제 API 호출 (현재는 주석 처리)
-        // const response = await getExpiringCoupons(2)
-        // coupons.value = response.data
+        console.log('기한 임박 쿠폰 API 호출 시작...')
+        const response = await getExpiringCoupons(2)
+        console.log('기한 임박 쿠폰 API 응답:', response)
         
-        // 현재는 더미 데이터 사용 (API 준비되면 위 주석 해제)
-        coupons.value = dummyCoupons
+        if (response && Array.isArray(response)) {
+          // ExpiringCouponDTO 배열을 직접 받는 경우 - 최대 2개로 제한
+          coupons.value = response.slice(0, 2).map(coupon => ({
+            couponId: coupon.couponId,
+            couponCode: coupon.couponCode,
+            expireDate: coupon.expireDate,
+            templateId: coupon.templateId,
+            discountValue: coupon.discountValue,
+            businessName: coupon.businessName,
+            businessCategory: coupon.businessCategory,
+            daysLeft: coupon.daysLeft
+          }))
+        } else if (response && response.data && Array.isArray(response.data)) {
+          // 응답이 { data: [...] } 형태인 경우 - 최대 2개로 제한
+          coupons.value = response.data.slice(0, 2).map(coupon => ({
+            couponId: coupon.couponId,
+            couponCode: coupon.couponCode,
+            expireDate: coupon.expireDate,
+            templateId: coupon.templateId,
+            discountValue: coupon.discountValue,
+            businessName: coupon.businessName,
+            businessCategory: coupon.businessCategory,
+            daysLeft: coupon.daysLeft
+          }))
+        } else {
+          console.warn('기한 임박 쿠폰 API 응답 형식이 예상과 다릅니다:', response)
+          coupons.value = []
+        }
+        
+        console.log('기한 임박 쿠폰 데이터 설정 완료:', coupons.value)
       } catch (error) {
-        console.error('쿠폰 데이터 로드 실패:', error)
-        // 에러 발생 시 더미 데이터로 fallback
-        coupons.value = dummyCoupons
+        console.error('기한 임박 쿠폰 데이터 로드 실패:', error)
+        
+        // 403 오류인 경우 특별 처리
+        if (error.response?.status === 403) {
+          console.warn('403 Forbidden - 기한 임박 쿠폰 API 권한이 없거나 구현되지 않았을 수 있습니다.')
+          coupons.value = []
+        } else {
+          // 다른 에러의 경우 더미 데이터로 fallback
+          coupons.value = dummyCoupons
+        }
       } finally {
         loading.value = false
       }
@@ -352,7 +404,10 @@ export default {
       loading,
       reviews,
       reviewsLoading,
-      formatDate
+      formatDate,
+      formatDiscount,
+      formatDaysLeft,
+      togethershopLogo
     }
   }
 }

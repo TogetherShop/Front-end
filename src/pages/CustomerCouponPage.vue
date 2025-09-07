@@ -131,6 +131,7 @@ import {
   claimCoupon,
   useCoupon,
 } from '@/api/customer-coupon.js'
+import togethershopLogo from '@/assets/images/togethershop_logo.png'
 
 export default {
   name: 'CouponPage',
@@ -368,8 +369,10 @@ export default {
       if (coupon && coupon.remainingCount > 0) {
         selectedCoupon.value = {
           ...coupon,
-          storeAvatar: 'http://localhost:3845/assets/4f7728b6d02dc64fde3fb8a6f0b1d01507e046a5.svg', // 기본 아바타
+          storeAvatar: togethershopLogo, // Togethershop 로고
         }
+        console.log('selectedCoupon:', selectedCoupon.value)
+        console.log('storeAvatar:', selectedCoupon.value.storeAvatar)
         showModal.value = true
       }
     }
@@ -500,7 +503,7 @@ export default {
       if (coupon) {
         selectedReceivedCoupon.value = {
           ...coupon,
-          storeAvatar: 'http://localhost:3845/assets/4f7728b6d02dc64fde3fb8a6f0b1d01507e046a5.svg', // 기본 아바타
+          storeAvatar: togethershopLogo, // Togethershop 로고
         }
         showReceivedCouponModal.value = true
       }

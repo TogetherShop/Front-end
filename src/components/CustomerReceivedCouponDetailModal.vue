@@ -110,6 +110,7 @@
 <script>
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { createQRcode } from '@/api/customer-coupon.js'
+import togethershopLogo from '@/assets/images/togethershop_logo.png'
 
 export default {
   name: 'ReceivedCouponDetailModal',
@@ -126,7 +127,7 @@ export default {
         category: '',
         title: '',
         expiryDate: '',
-        storeAvatar: '',
+        storeAvatar: togethershopLogo,
         daysLeft: ''
       })
     }

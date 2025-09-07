@@ -3,9 +3,9 @@
     <div class="success-toast">
       <div class="toast-content">
         <div class="success-icon">
-          <span class="material-symbols-outlined">check_circle</span>
+          <span class="material-symbols-outlined">check</span>
         </div>
-        <span class="success-message">제휴 요청 되었습니다!</span>
+        <span class="success-message">{{ message }}</span>
       </div>
     </div>
   </div>
@@ -18,6 +18,10 @@ const props = defineProps({
   show: {
     type: Boolean,
     default: false
+  },
+  message: {
+    type: String,
+    default: '완료되었습니다!'
   },
   duration: {
     type: Number,

@@ -14,7 +14,7 @@
         </div>
       </div>
     </main>
-    
+
     <!-- 하단 네비게이션 -->
     <CustomerBottomNavigation />
   </div>
@@ -23,7 +23,6 @@
 <script>
 import CustomerTopBar from '@/components/CustomerTopBar.vue'
 import CustomerBottomNavigation from '@/components/CustomerBottomNavigation.vue'
-
 export default {
   name: 'HomePage',
   components: {

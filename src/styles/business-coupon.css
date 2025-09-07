@@ -1,0 +1,540 @@
+/* Material Icons 폰트 로딩 */
+@import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200');
+
+/* Figma 디자인 색상 변수 */
+:root {
+  --main-color: #017f58;
+  --gray-0: #6f797a;
+  --gray-3: #f3f3f7;
+  --text-color: #555555;
+  --text-dark: #222222;
+  --text-light: #3a3a3a;
+  --active-bg: #f0fdf4;
+  --active-border: #b9f8cf;
+  --active-progress: #017f58;
+  --active-badge-border: #b9f8cf;
+  --active-badge-bg: #dcfce7;
+  --active-badge-text: #017f58;
+  --exchanging-bg: #fff7ed;
+  --exchanging-border: #ffd6a7;
+  --exchanging-badge-border: #ffd6a7;
+  --exchanging-badge-bg: #ffedd4;
+  --exchanging-badge-text: #9f2d00;
+  --expired-bg: #f8f8f8;
+  --expired-border: #cecece;
+  --expired-progress: #017f58;
+  --expired-badge-border: #cecece;
+  --expired-badge-bg: #cecece;
+  --expired-badge-text: #3a3a3a;
+  --filter-bg: #f5f5f5;
+}
+
+/* 사업자 쿠폰 페이지 전체 레이아웃 */
+.business-coupon-page {
+  background: #ffffff;
+  min-height: 100vh;
+}
+
+.business-coupon-page__app-wrapper {
+  max-width: 430px;
+}
+
+/* 탭 섹션 스타일 */
+.business-coupon-page__tab-section {
+  margin-bottom: 16px;
+  display: flex;
+  justify-content: center;
+}
+
+.business-coupon-page__tab-container {
+  width: 100%;
+  max-width: 320px;
+  background-color: #f2f2f2;
+  border-radius: 8px;
+  padding: 4px;
+  display: flex;
+  position: relative;
+}
+
+.business-coupon-page__tab-button {
+  flex: 1;
+  padding: 10px 16px;
+  background: transparent;
+  border: none;
+  font-family: 'Pretendard', sans-serif;
+  font-size: 12px;
+  font-weight: 500;
+  color: #666;
+  line-height: 1.2;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+  cursor: pointer;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.business-coupon-page__tab-button--active {
+  background-color: white;
+  color: #333;
+  font-weight: 600;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+/* 검색바 스타일 */
+.business-coupon-page__search-section {
+  margin-bottom: 20px;
+  position: relative;
+}
+
+.business-coupon-page__search-container {
+  background-color: #fff;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+}
+
+.business-coupon-page__search-input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  flex: 1;
+}
+
+.business-coupon-page__search-icon {
+  position: absolute;
+  left: 12px;
+  color: #b0b1b3;
+  font-size: 20px;
+  z-index: 2;
+}
+
+.business-coupon-page__search-input {
+  width: 100%;
+  border: none;
+  background: transparent;
+  padding: 10px 12px 10px 40px;
+  font-size: 14px;
+  color: #000;
+  font-family:
+    'Pretendard',
+    -apple-system,
+    BlinkMacSystemFont,
+    system-ui,
+    sans-serif;
+}
+
+.business-coupon-page__search-input:focus {
+  outline: none;
+}
+
+.business-coupon-page__search-input::placeholder {
+  color: #b0b1b3;
+  font-family:
+    'Pretendard',
+    -apple-system,
+    BlinkMacSystemFont,
+    system-ui,
+    sans-serif;
+}
+
+.business-coupon-page__filter-btn {
+  background: white;
+  border: none;
+  color: var(--text-color);
+  border-radius: 8px;
+  padding: 8px;
+  margin-left: 8px;
+  position: relative;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+  cursor: pointer;
+}
+
+.business-coupon-page__filter-badge {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  background: #ff4444;
+  color: white;
+  border-radius: 50%;
+  width: 16px;
+  height: 16px;
+  font-size: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* 필터 드롭다운 */
+.business-coupon-page__filter-dropdown {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  padding: 12px;
+  z-index: 10;
+  min-width: 120px;
+}
+
+.business-coupon-page__filter-options {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.business-coupon-page__filter-option {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.business-coupon-page__filter-checkbox {
+  width: 16px;
+  height: 16px;
+  accent-color: var(--main-color);
+}
+
+.business-coupon-page__filter-label {
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  margin: 0;
+  color: #000;
+}
+
+/* 쿠폰 리스트 */
+.business-coupon-page__coupon-list {
+  margin-bottom: 24px;
+  padding-bottom: 100px;
+}
+
+/* 빈 상태 */
+.business-coupon-page__empty-state {
+  text-align: center;
+  padding: 40px 20px;
+}
+
+.business-coupon-page__empty-icon {
+  font-size: 48px;
+  color: #ccc;
+  margin-bottom: 12px;
+}
+
+.business-coupon-page__empty-title {
+  color: #666;
+  font-size: 14px;
+  margin: 0;
+}
+
+/* 페이지네이션 */
+.business-coupon-page__pagination-nav {
+  margin-top: 20px;
+}
+
+.business-coupon-page__pagination-container {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+}
+
+.business-coupon-page__page-btn {
+  width: 32px;
+  height: 32px;
+  border: none;
+  border-radius: 50%;
+  background-color: transparent;
+  color: #666;
+  font-size: 14px;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.business-coupon-page__page-btn--active {
+  background-color: #017f58;
+  color: white;
+}
+
+.business-coupon-page__page-btn--disabled {
+  cursor: default;
+  color: #ccc;
+}
+
+.business-coupon-page__page-btn:hover:not(.business-coupon-page__page-btn--disabled):not(
+    .business-coupon-page__page-btn--active
+  ) {
+  background-color: #f5f5f5;
+}
+
+/* 사업자 쿠폰 카드 스타일 */
+.business-coupon-card {
+  margin-bottom: 12px;
+}
+
+.business-coupon-card__container {
+  border-radius: 12px;
+  padding: 16px;
+  border: 1px solid;
+  transition: all 0.3s ease;
+}
+
+/* 활성 쿠폰 (연한 초록색 배경) */
+.business-coupon-card__container--active {
+  background-color: var(--active-bg);
+  border-color: var(--active-border);
+}
+
+/* 협의중 쿠폰 (주황색 배경) */
+.business-coupon-card__container--exchanging {
+  background-color: var(--exchanging-bg);
+  border-color: var(--exchanging-border);
+}
+
+/* 만료 쿠폰 (회색 배경) */
+.business-coupon-card__container--expired {
+  background-color: var(--expired-bg);
+  border-color: var(--expired-border);
+  opacity: 0.5;
+}
+
+.business-coupon-card__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 12px;
+}
+
+.business-coupon-card__info {
+  flex: 1;
+}
+
+.business-coupon-card__title-wrapper {
+  display: flex;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.business-coupon-card__title {
+  font-size: 16px;
+  font-weight: 600;
+  color: #333;
+  margin: 0;
+}
+
+.business-coupon-card__description {
+  font-size: 12px;
+  color: #666;
+  margin: 0;
+}
+
+.business-coupon-card__time {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  color: #666;
+}
+
+.business-coupon-card__time .material-symbols-outlined {
+  font-size: 14px;
+}
+
+/* 상태 배지 - title 옆에 위치 */
+.business-coupon-card__status-badge {
+  padding: 4px 8px;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 500;
+  white-space: nowrap;
+  margin-left: 10px;
+  border: 1px solid;
+}
+
+.business-coupon-card__status-badge--active {
+  background-color: var(--active-badge-bg);
+  color: var(--active-badge-text);
+  border-color: var(--active-badge-border);
+}
+
+.business-coupon-card__status-badge--exchanging {
+  background-color: var(--exchanging-badge-bg);
+  color: var(--exchanging-badge-text);
+  border-color: var(--exchanging-badge-border);
+}
+
+.business-coupon-card__status-badge--expired {
+  background-color: var(--expired-badge-bg);
+  color: var(--expired-badge-text);
+  border-color: var(--expired-badge-border);
+}
+
+/* 차트 아이콘 - 오른쪽 상단 */
+.business-coupon-card__chart-icon {
+  font-size: 20px !important;
+  color: #999;
+  cursor: pointer;
+}
+
+/* 쿠폰 통계 */
+.business-coupon-card__stats {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 12px;
+  color: #666;
+}
+
+.business-coupon-card__stat-item {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+}
+
+.business-coupon-card__stat-item .material-symbols-outlined {
+  font-size: 14px;
+}
+
+/* 사용률 섹션 */
+.business-coupon-card__usage-section {
+  margin-top: 12px;
+}
+
+.business-coupon-card__usage-label {
+  font-size: 12px;
+  color: #666;
+  margin-bottom: 4px;
+}
+
+.business-coupon-card__usage-bar-container {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.business-coupon-card__usage-bar {
+  flex: 1;
+  height: 6px;
+  background-color: #e0e0e0;
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.business-coupon-card__usage-progress {
+  height: 100%;
+  border-radius: 3px;
+  transition: width 0.3s ease;
+}
+
+/* 활성 카드 프로그래스바 색상 */
+.business-coupon-card__container--active .business-coupon-card__usage-progress {
+  background-color: var(--active-progress);
+}
+
+/* 만료 카드 프로그래스바 색상 */
+.business-coupon-card__container--expired .business-coupon-card__usage-progress {
+  background-color: var(--expired-progress);
+}
+
+.business-coupon-card__usage-percentage {
+  font-size: 12px;
+  font-weight: 600;
+  color: #333;
+  min-width: 40px;
+  text-align: right;
+}
+
+/* 채팅 버튼 */
+.business-coupon-card__chat-button {
+  width: 100%;
+  background-color: #f54900;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 8px;
+  font-weight: 600;
+  font-size: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 12px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.business-coupon-card__chat-button .material-symbols-outlined {
+  font-size: 16px;
+}
+
+.business-coupon-card__chat-button:hover {
+  background-color: #e85a2b;
+}
+
+/* 로딩 스피너 */
+.business-coupon-page__spinner {
+  width: 2rem;
+  height: 2rem;
+}
+
+/* 로딩 텍스트 */
+.business-coupon-page__loading-text {
+  font-family: 'Pretendard', sans-serif;
+  font-size: 14px;
+  color: #666;
+}
+
+/* Material Icons 제외하고 텍스트 요소에만 폰트 적용 */
+.business-coupon-page :not(.material-symbols-outlined) {
+  font-family: 'Pretendard', sans-serif;
+}
+
+/* Material Icons는 올바른 폰트 유지 (기본 font-size 제거) */
+.business-coupon-page .material-symbols-outlined {
+  font-family: 'Material Symbols Outlined';
+  font-weight: normal;
+  font-style: normal;
+  line-height: 1;
+  letter-spacing: normal;
+  text-transform: none;
+  display: inline-block;
+  white-space: nowrap;
+  word-wrap: normal;
+  direction: ltr;
+  -webkit-font-feature-settings: 'liga';
+  -webkit-font-smoothing: antialiased;
+}
+
+/* 반응형 디자인 */
+@media (max-width: 768px) {
+  .business-coupon-page__tab-container {
+    max-width: 300px;
+  }
+
+  .business-coupon-card__container {
+    padding: 14px;
+  }
+
+  .business-coupon-card__title {
+    font-size: 15px;
+  }
+}
+
+@media (max-width: 480px) {
+  .business-coupon-page__tab-container {
+    max-width: 280px;
+  }
+
+  .business-coupon-page__tab-button {
+    font-size: 11px;
+    padding: 8px 12px;
+  }
+
+  .business-coupon-card__container {
+    padding: 16px;
+  }
+}

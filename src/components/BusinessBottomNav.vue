@@ -1,101 +1,95 @@
 <template>
-  <div class="tab-bar-container sticky-bottom bg-white border-top">
-    <div class="container-fluid p-0">
+  <nav class="business-bottom-navigation fixed-bottom bg-white border-top">
+    <div class="container-fluid px-0">
       <div class="row g-0">
-        <div class="col" v-for="tab in tabs" :key="tab.name">
-          <router-link
-            :to="tab.route"
-            class="tab-item d-flex flex-column align-items-center py-3 text-decoration-none"
-            :class="{ active: isActive(tab.route) }"
-          >
-            <span class="material-symbols-outlined mb-1 tab-icon">
-              {{ tab.icon }}
-            </span>
-
-            <small class="tab-label">
-              {{ tab.label }}
-            </small>
-          </router-link>
+        <div
+          v-for="item in navigationItems"
+          :key="item.name"
+          class="business-bottom-navigation__item col d-flex flex-column align-items-center justify-content-center py-2"
+          :class="{ 'business-bottom-navigation__item--active': isActive(item.route) }"
+          @click="navigateTo(item.route)"
+          role="button"
+          tabindex="0"
+        >
+          <div class="business-bottom-navigation__icon mb-1">
+            <i class="material-symbols-outlined">{{ item.icon }}</i>
+          </div>
+          <span class="business-bottom-navigation__label">{{ item.label }}</span>
         </div>
       </div>
     </div>
-  </div>
+  </nav>
 </template>
 
 <script>
+import { computed } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
+
 export default {
   name: 'BusinessBottomNavigation',
-  data() {
-    return {
-      tabs: [
-        {
-          name: 'Home',
-          route: '/business',
-          icon: 'home',
-          label: '홈',
-        },
-        {
-          name: 'StoreList',
-          route: '/business/stores',
-          icon: 'handshake',
-          label: '제휴',
-        },
-        {
-          name: 'CouponList',
-          route: '/business/coupons',
-          icon: 'redeem',
-          label: '쿠폰',
-        },
-        {
-          name: 'GroupBuy',
-          route: '/business/group-buy',
-          icon: 'groups',
-          label: '공동구매',
-        },
-        {
-          name: 'Profile',
-          route: '/business/profile',
-          icon: 'person',
-          label: '내정보',
-        },
-      ],
+  setup() {
+    const route = useRoute()
+    const router = useRouter()
+
+    const navigationItems = [
+      {
+        name: 'Home',
+        route: '/business',
+        icon: 'home',
+        label: '홈',
+      },
+      {
+        name: 'StoreList',
+        route: '/business/store',
+        icon: 'handshake',
+        label: '제휴',
+      },
+      {
+        name: 'BusinessCouponPage',
+        route: '/business/coupon',
+        icon: 'redeem',
+        label: '쿠폰',
+      },
+      {
+        name: 'GroupBuy',
+        route: '/business/groupbuy',
+        icon: 'groups',
+        label: '공동구매',
+      },
+      {
+        name: 'Profile',
+        route: '/business/profile',
+        icon: 'person',
+        label: '내정보',
+      },
+    ]
+
+    const currentRoute = computed(() => route.path)
+
+    const isActive = (routePath) => {
+      // 정확한 경로 일치 또는 하위 경로 포함 체크
+      return (
+        route.path === routePath ||
+        (routePath !== '/business' && route.path.startsWith(routePath + '/'))
+      )
     }
-  },
-  methods: {
-    isActive(route) {
-      return this.$route.path === route
-    },
+
+    const navigateTo = (routePath) => {
+      if (routePath !== route.path) {
+        router.push(routePath)
+      }
+    }
+
+    return {
+      navigationItems,
+      currentRoute,
+      isActive,
+      navigateTo,
+    }
   },
 }
 </script>
 
-<style scoped>
-.tab-item {
-  color: #6f797a;
-  transition: color 0.2s ease;
-  padding: 8px 4px;
-}
-
-.tab-item.active {
-  color: #017f58;
-}
-
-.tab-item.active .tab-icon,
-.tab-item.active .tab-label {
-  color: #017f58;
-}
-
-.tab-icon {
-  font-size: 24px;
-  font-weight: 400;
-}
-
-.tab-label {
-  font-size: 0.75rem;
-  font-weight: 600;
-}
-
-.border-top {
-  border-color: var(--bs-gray-200, #e9ecef) !important;
-}
+<style>
+@import '../styles/business-bottom-navigation.css';
 </style>

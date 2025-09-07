@@ -1,36 +1,47 @@
 <template>
-  <div class="header-container sticky-top bg-white shadow-sm">
-    <div class="container-fluid px-3 py-2">
-      <div class="d-flex align-items-center justify-content-between">
-        <!-- 로고 -->
-        <div class="logo d-flex align-items-center">
-          <img
-            src="@/assets/images/togethershop_logo.png"
-            alt="함께가게 로고"
-            style="height: 40px"
-          />
-        </div>
-
-        <!-- 우측 버튼들 -->
-        <div class="d-flex align-items-center gap-3">
-          <button class="btn btn-link p-1" style="text-decoration: none">
-            <span class="material-symbols-outlined" style="font-size: 24px; color: #6f797a"
-              >chat</span
-            >
-          </button>
-          <button class="btn btn-link p-1" style="text-decoration: none">
-            <span class="material-symbols-outlined" style="font-size: 24px; color: #6f797a"
-              >notifications</span
-            >
-          </button>
-        </div>
+  <header class="business-top-bar bg-white">
+    <div class="business-top-bar__container">
+      <div class="business-top-bar__logo-section">
+        <img
+          src="@/assets/images/togethershop_logo.png"
+          alt="Togethershop Logo"
+          class="business-top-bar__logo"
+        />
+      </div>
+      <div class="business-top-bar__actions">
+        <button class="business-top-bar__action-btn" @click="handleChatClick">
+          <i class="material-symbols-outlined">chat</i>
+        </button>
+        <button class="business-top-bar__action-btn" @click="handleNotificationClick">
+          <i class="material-symbols-outlined">notifications</i>
+        </button>
       </div>
     </div>
-  </div>
+  </header>
 </template>
 
 <script>
 export default {
   name: 'BusinessTopBar',
+  setup() {
+    const handleChatClick = () => {
+      console.log('채팅 버튼 클릭')
+      // 채팅 페이지로 이동 로직
+    }
+
+    const handleNotificationClick = () => {
+      console.log('알림 버튼 클릭')
+      // 알림 페이지로 이동 로직
+    }
+
+    return {
+      handleChatClick,
+      handleNotificationClick,
+    }
+  },
 }
 </script>
+
+<style>
+@import '../styles/business-top-bar.css';
+</style>

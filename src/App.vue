@@ -21,17 +21,41 @@ import { onMounted } from 'vue'
 </script>
 
 <template>
-  <div class="position-relative min-vh-100">
-    <div class="container d-flex flex-column bg-white min-vh-100 shadow mx-auto app-wrapper p-0">
-      <RouterView />
+  <div class="app-container position-relative">
+    <div class="container d-flex flex-column bg-white shadow mx-auto app-wrapper p-0">
+      <div class="content-wrapper flex-grow-1 overflow-auto">
+        <RouterView />
+      </div>
     </div>
-    <!-- 알림 토스트 컴포넌트가 있다면 남김 -->
-    <!-- <BaseToast /> -->
   </div>
 </template>
 
 <style>
+.app-container {
+  width: 100%;
+  height: 100vh;
+}
+
 .app-wrapper {
-  max-width: 430px; /* 원하는 앱 크기로 제한 */
+  max-width: 430px;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+/* 내부 내용만 스크롤, 스크롤바 숨김 */
+.content-wrapper {
+  -ms-overflow-style: none; /* IE, Edge */
+  scrollbar-width: none; /* Firefox */
+}
+
+.content-wrapper::-webkit-scrollbar {
+  display: none; /* Chrome, Safari */
+}
+
+@supports (-webkit-touch-callout: none) {
+  .app-container {
+    height: -webkit-fill-available;
+  }
 }
 </style>

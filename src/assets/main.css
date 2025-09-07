@@ -48,118 +48,31 @@ body {
   }
 }
 
-/* 스크롤바 숨기기 */
-.scrollbar-none::-webkit-scrollbar {
-  display: none;
-}
+/* 전체 스크롤 숨기기 (필요시) */
+/*
 .scrollbar-none {
+  overflow: hidden;
+}
+*/
+
+/* 세로 스크롤 숨기기 */
+.scrollbar-none {
+  overflow-y: hidden; /* 세로 스크롤 제거 */
   -ms-overflow-style: none; /* IE, Edge */
   scrollbar-width: none; /* Firefox */
 }
 
-/* Custom Bootstrap overrides */
-:root {
-  --bs-primary: #2ecc71;
-  --bs-primary-rgb: 46, 204, 113;
-  --bs-secondary: #27ae60;
-  --bs-success: #2ecc71;
-  --bs-danger: #e74c3c;
-  --bs-warning: #f39c12;
-  --bs-info: #3498db;
-  --bs-light: #ecf0f1;
-  --bs-dark: #2c3e50;
-
-  --border-radius: 8px;
-  --border-radius-lg: 12px;
-  --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.1);
-  --shadow-md: 0 4px 8px rgba(0, 0, 0, 0.15);
-  --shadow-lg: 0 8px 16px rgba(0, 0, 0, 0.2);
+.scrollbar-none::-webkit-scrollbar {
+  width: 0; /* Chrome, Safari 등 Webkit 브라우저에서 스크롤바 숨기기 */
 }
 
-.btn-primary {
-  background-color: var(--bs-primary);
-  border-color: var(--bs-primary);
+/* 기존 가로 스크롤 숨기기 */
+.scrollbar-none-x {
+  overflow-x: hidden; /* 가로 스크롤 제거 */
+  -ms-overflow-style: none; /* IE, Edge */
+  scrollbar-width: none; /* Firefox */
 }
 
-.btn-primary:hover {
-  background-color: var(--bs-secondary);
-  border-color: var(--bs-secondary);
-}
-
-.text-primary {
-  color: var(--bs-primary) !important;
-}
-
-.bg-primary {
-  background-color: var(--bs-primary) !important;
-}
-
-/* Custom utility classes */
-.border-radius {
-  border-radius: var(--border-radius) !important;
-}
-
-.border-radius-lg {
-  border-radius: var(--border-radius-lg) !important;
-}
-
-.shadow-custom {
-  box-shadow: var(--shadow-md);
-}
-
-.card-custom {
-  border: none;
-  border-radius: var(--border-radius-lg);
-  box-shadow: var(--shadow-sm);
-  background: white;
-}
-
-.badge-custom {
-  font-size: 0.75rem;
-  padding: 0.25rem 0.5rem;
-  border-radius: 4px;
-}
-
-/* Mobile-first responsive utilities */
-.mobile-container {
-  max-width: 430px;
-  margin: 0 auto;
-  background: white;
-  min-height: 100vh;
-  position: relative;
-}
-
-.sticky-bottom {
-  position: sticky;
-  bottom: 0;
-  z-index: 1000;
-}
-
-/* Animation utilities */
-.fade-in {
-  animation: fadeIn 0.3s ease-in-out;
-}
-
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-.slide-up {
-  animation: slideUp 0.3s ease-out;
-}
-
-@keyframes slideUp {
-  from {
-    transform: translateY(100%);
-  }
-  to {
-    transform: translateY(0);
-  }
+.scrollbar-none-x::-webkit-scrollbar {
+  height: 0; /* 가로 스크롤바 숨기기 */
 }

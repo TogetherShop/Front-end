@@ -217,7 +217,7 @@ export default {
                 // title: `${coupon.discountValue}% 할인쿠폰`, orginal
                 title: `${coupon.description} 쿠폰`, //이게 출력되는곳 여기를 수정해야함
                 expiryDate: formatDate(coupon.endDate),
-                remainingCount: coupon.totalQuantity,
+                remainingCount: coupon.currentQuantity,
                 isClaimed: false,
                 businessId: coupon.businessId,
                 partnerBusinessId: coupon.partnerBusinessId,
@@ -264,7 +264,7 @@ export default {
                   // title: `${coupon.discountValue}% 할인쿠폰`, orginal
                   title: `${coupon.description} 쿠폰`, //이게 출력되는곳 여기를 수정해야함
                   expiryDate: formatDate(coupon.endDate),
-                  remainingCount: coupon.totalQuantity,
+                  remainingCount: coupon.currentQuantity,
                   isClaimed: false,
                   businessId: coupon.businessId,
                   partnerBusinessId: coupon.partnerBusinessId,

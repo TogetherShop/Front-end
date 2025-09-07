@@ -90,7 +90,9 @@
             </div>
             <div class="sort-option" @click="setSortBy('together-score')">
               <span :class="{ active: sortBy === 'together-score' }">함께지수 순</span>
-              <span v-if="sortBy === 'together-score'" class="material-symbols-outlined">check</span>
+              <span v-if="sortBy === 'together-score'" class="material-symbols-outlined"
+                >check</span
+              >
             </div>
           </div>
         </div>
@@ -162,13 +164,10 @@
     />
 
     <!-- 성공 토스트 -->
-    <BusinessSuccessToast
-      :show="showSuccessToast"
-      @hide="hideSuccessToast"
-    />
+    <BusinessSuccessToast :show="showSuccessToast" @hide="hideSuccessToast" />
 
     <!-- 하단 네비게이션 -->
-    <BusinessBottomNavigation />
+    <BusinessBottomNav />
   </div>
 </template>
 
@@ -179,7 +178,7 @@ import BusinessStoreCard from '@/components/BusinessStoreCard.vue'
 import BusinessStoreDetailModal from '@/components/BusinessStoreDetailModal.vue'
 import BusinessPartnershipModal from '@/components/BusinessPartnershipModal.vue'
 import BusinessSuccessToast from '@/components/BusinessSuccessToast.vue'
-import BusinessBottomNavigation from '@/components/BusinessBottomNavigation.vue'
+import BusinessBottomNav from '@/components/BusinessBottomNav.vue'
 
 // 반응형 데이터
 const searchQuery = ref('')
@@ -210,7 +209,7 @@ const dummyStores = [
     togetherScore: 85,
     couponDescription: '월 10% 할인 쿠폰',
     image: null,
-    isPartnershipAvailable: true
+    isPartnershipAvailable: true,
   },
   {
     id: 2,
@@ -221,7 +220,7 @@ const dummyStores = [
     togetherScore: 78,
     couponDescription: '주말 15% 할인 쿠폰',
     image: null,
-    isPartnershipAvailable: true
+    isPartnershipAvailable: true,
   },
   {
     id: 3,
@@ -232,7 +231,7 @@ const dummyStores = [
     togetherScore: 92,
     couponDescription: '신규 회원 20% 할인',
     image: null,
-    isPartnershipAvailable: true
+    isPartnershipAvailable: true,
   },
   {
     id: 4,
@@ -243,7 +242,7 @@ const dummyStores = [
     togetherScore: 65,
     couponDescription: '아메리카노 2+1',
     image: null,
-    isPartnershipAvailable: true
+    isPartnershipAvailable: true,
   },
   {
     id: 5,
@@ -254,7 +253,7 @@ const dummyStores = [
     togetherScore: 45,
     couponDescription: '첫 방문 30% 할인',
     image: null,
-    isPartnershipAvailable: true
+    isPartnershipAvailable: true,
   },
   {
     id: 6,
@@ -265,8 +264,8 @@ const dummyStores = [
     togetherScore: 72,
     couponDescription: '컷+파마 20% 할인',
     image: null,
-    isPartnershipAvailable: true
-  }
+    isPartnershipAvailable: true,
+  },
 ]
 
 // 계산된 속성
@@ -276,9 +275,9 @@ const filteredStores = computed(() => {
   // 탭에 따른 기본 필터링
   if (activeTab.value === 'recommended') {
     // 추천 매장: 사용자 선호 업종 + 함께지수 60 이상
-    result = result.filter(store =>
-      userPreferredCategories.value.includes(store.category) &&
-      store.togetherScore >= 60
+    result = result.filter(
+      (store) =>
+        userPreferredCategories.value.includes(store.category) && store.togetherScore >= 60,
     )
   }
   // 전체 매장은 필터링 없이 모든 매장 표시
@@ -286,28 +285,27 @@ const filteredStores = computed(() => {
   // 검색 필터링
   if (searchQuery.value.trim()) {
     const query = searchQuery.value.toLowerCase()
-    result = result.filter(store =>
-      store.name.toLowerCase().includes(query) ||
-      store.category.toLowerCase().includes(query)
+    result = result.filter(
+      (store) =>
+        store.name.toLowerCase().includes(query) || store.category.toLowerCase().includes(query),
     )
   }
 
   // 카테고리 필터링 (선택된 경우)
   if (selectedCategories.value.length > 0) {
-    result = result.filter(store =>
-      selectedCategories.value.some(category =>
-        store.category.includes(category) ||
-        (category === '온라인' && store.isOnline) ||
-        (category === '오프라인' && !store.isOnline)
-      )
+    result = result.filter((store) =>
+      selectedCategories.value.some(
+        (category) =>
+          store.category.includes(category) ||
+          (category === '온라인' && store.isOnline) ||
+          (category === '오프라인' && !store.isOnline),
+      ),
     )
   }
 
   // 업종 필터링 (선택된 경우)
   if (selectedBusinessTypes.value.length > 0) {
-    result = result.filter(store =>
-      selectedBusinessTypes.value.includes(store.category)
-    )
+    result = result.filter((store) => selectedBusinessTypes.value.includes(store.category))
   }
 
   // 정렬
@@ -447,7 +445,6 @@ const confirmPartnership = async (store) => {
     // 성공 시 모달 닫고 토스트 표시
     closeModal()
     showSuccessToast.value = true
-
   } catch (error) {
     console.error('제휴 요청 실패:', error)
     alert('제휴 요청에 실패했습니다. 다시 시도해주세요.')

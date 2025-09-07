@@ -19,9 +19,10 @@ const routes = [
   { path: '/signup', component: OnboardingView },
   { path: '/signup/customer', component: CustomerSignupView },
   { path: '/signup/business', component: SignupView },
+  { path: '/', name: 'home', component: HomePage },
 
   // 인증 필요 ⭕
-  { path: '/', name: 'home', component: HomePage, meta: { requiresAuth: true } },
+
   {
     path: '/customer',
     component: CustomerHomePage,

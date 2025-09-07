@@ -179,7 +179,7 @@ import BusinessStoreCard from '@/components/BusinessStoreCard.vue'
 import BusinessStoreDetailModal from '@/components/BusinessStoreDetailModal.vue'
 import BusinessPartnershipModal from '@/components/BusinessPartnershipModal.vue'
 import BusinessSuccessToast from '@/components/BusinessSuccessToast.vue'
-import BusinessBottomNavigation from '@/components/BusinessBottomNavigation.vue'
+import BusinessBottomNavigation from '@/components/BusinessBottomNav.vue'
 
 // 반응형 데이터
 const searchQuery = ref('')

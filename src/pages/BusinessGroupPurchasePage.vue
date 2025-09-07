@@ -184,7 +184,7 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import BusinessTopBar from '@/components/BusinessTopBar.vue'
-import BusinessBottomNavigation from '@/components/BusinessBottomNavigation.vue'
+import BusinessBottomNavigation from '@/components/BusinessBottomNav.vue'
 import BusinessSuccessToast from '@/components/BusinessSuccessToast.vue'
 import GroupPurchaseRegisterModal from '@/components/GroupPurchaseRegisterModal.vue'
 import GroupPurchaseActionModal from '@/components/GroupPurchaseActionModal.vue'

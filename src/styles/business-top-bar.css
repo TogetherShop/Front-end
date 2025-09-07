@@ -1,67 +1,94 @@
-.business-top-bar {
-  background: white;
-  position: sticky;
-  top: 0;
-  z-index: 100;
-  height: 50px;
+/* Material Icons 폰트 로딩 */
+@import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200');
+
+/* Pretendard 폰트 로딩 */
+@import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.8/dist/web/static/pretendard.css');
+
+/* Figma 디자인 색상 변수 */
+:root {
+  --main-color: #017f58;
+  --gray-0: #6f797a;
+  --gray-3: #f3f3f7;
+  --text-color: #555555;
+  --text-dark: #222222;
+  --text-light: #3a3a3a;
 }
 
-.top-bar-content {
+/* 사업자 상단바 스타일 */
+.business-top-bar {
+  background-color: white !important;
+  height: 50px;
+  border-bottom: 1px solid var(--gray-3);
+}
+
+.business-top-bar__container {
+  height: 100%;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  height: 100%;
+  padding: 0 16px;
 }
 
-.logo-section {
-  flex: 1;
-}
-
-.logo-image {
+.business-top-bar__logo {
+  width: 50px;
   height: 50px;
-  width: auto;
   object-fit: contain;
 }
 
-.action-buttons {
+.business-top-bar__actions {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 12px;
 }
 
-.action-button {
+.business-top-bar__action-btn {
   background: none;
   border: none;
-  padding: 4px;
-  border-radius: 20px;
+  padding: 8px;
   cursor: pointer;
-  position: relative;
+  border-radius: 50%;
   transition: background-color 0.2s ease;
-}
-
-.action-button:hover {
-  background-color: #f3f4f6;
-}
-
-.action-button .material-symbols-outlined {
-  font-size: 32px;
-  line-height: 1;
-  color: #6f797a;
-}
-
-.notification-badge {
-  position: absolute;
-  top: 2px;
-  right: 2px;
-  background-color: #ef4444;
-  color: white;
-  font-size: 10px;
-  font-weight: 600;
-  min-width: 16px;
-  height: 16px;
-  border-radius: 8px;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 0 4px;
+}
+
+.business-top-bar__action-btn:hover {
+  background-color: var(--gray-3);
+}
+
+.business-top-bar__action-btn .material-symbols-outlined {
+  font-size: 24px;
+  color: var(--gray-0);
+}
+
+/* 반응형 디자인 */
+@media (max-width: 768px) {
+  .business-top-bar {
+    height: 48px;
+  }
+
+  .business-top-bar__logo {
+    width: 45px;
+    height: 45px;
+  }
+
+  .business-top-bar__action-btn .material-symbols-outlined {
+    font-size: 22px;
+  }
+}
+
+@media (max-width: 480px) {
+  .business-top-bar {
+    height: 46px;
+  }
+
+  .business-top-bar__logo {
+    width: 40px;
+    height: 40px;
+  }
+
+  .business-top-bar__action-btn .material-symbols-outlined {
+    font-size: 20px;
+  }
 }

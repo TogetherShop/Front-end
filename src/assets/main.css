@@ -48,11 +48,31 @@ body {
   }
 }
 
-/* 스크롤바 숨기기 */
-.scrollbar-none::-webkit-scrollbar {
-  display: none;
-}
+/* 전체 스크롤 숨기기 (필요시) */
+/*
 .scrollbar-none {
+  overflow: hidden;
+}
+*/
+
+/* 세로 스크롤 숨기기 */
+.scrollbar-none {
+  overflow-y: hidden; /* 세로 스크롤 제거 */
   -ms-overflow-style: none; /* IE, Edge */
   scrollbar-width: none; /* Firefox */
+}
+
+.scrollbar-none::-webkit-scrollbar {
+  width: 0; /* Chrome, Safari 등 Webkit 브라우저에서 스크롤바 숨기기 */
+}
+
+/* 기존 가로 스크롤 숨기기 */
+.scrollbar-none-x {
+  overflow-x: hidden; /* 가로 스크롤 제거 */
+  -ms-overflow-style: none; /* IE, Edge */
+  scrollbar-width: none; /* Firefox */
+}
+
+.scrollbar-none-x::-webkit-scrollbar {
+  height: 0; /* 가로 스크롤바 숨기기 */
 }

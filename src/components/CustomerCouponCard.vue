@@ -1,13 +1,13 @@
 <template>
-  <div class="coupon-card mb-3">
+  <div class="coupon-card mb-3" :class="{ 'coupon-card--disabled': coupon.isDisabled }">
     <div class="coupon-card__container">
       <div class="coupon-card__body">
         <div class="row g-0">
           <!-- 쿠폰 정보 영역 -->
           <div 
             class="coupon-card__info-area col-9 p-2 mb-1"
-            @click="openModal"
-            style="cursor: pointer;"
+            @click="!coupon.isDisabled && openModal()"
+            :style="{ cursor: coupon.isDisabled ? 'not-allowed' : 'pointer' }"
           >
             <div class="coupon-card__header d-flex align-items-center mb-1 ms-2" >
               <h6 class="coupon-card__store-name mb-0 fw-bold">{{ coupon.storeName || coupon.businessName }}</h6>
@@ -29,8 +29,11 @@
           <div class="col-3 p-0">
             <div
               class="coupon-card__action-area h-100 d-flex flex-column justify-content-between align-items-center position-relative"
-              @click="handleDownload"
-              :class="{ 'coupon-card__action-area--clickable': !isReceived && coupon.remainingCount > 0 }"
+              @click="!coupon.isDisabled && !coupon.isClaimed && handleDownload()"
+              :class="{ 
+                'coupon-card__action-area--clickable': !isReceived && !coupon.isClaimed && coupon.remainingCount > 0 && !coupon.isDisabled,
+                'coupon-card__action-area--disabled': coupon.isDisabled || coupon.isClaimed
+              }"
             >
               <!-- 남은 수량 아이콘 (중심) -->
               <div
@@ -59,6 +62,16 @@
                   <small class="coupon-card__claimed-text text-success fw-semibold"
                     >발급 완료</small
                   >
+                </div>
+              </div>
+
+              <!-- 비활성화 표시 -->
+              <div v-else-if="coupon.isDisabled" class="coupon-card__disabled-status">
+                <i class="material-symbols-outlined text-muted mb-1" style="font-size: 24px"
+                  >block</i
+                >
+                <div class="text-center">
+                  <small class="coupon-card__disabled-text text-muted">발급 불가</small>
                 </div>
               </div>
 

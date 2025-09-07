@@ -392,7 +392,16 @@ export default {
         for (const business of businessCoupons.value) {
           const couponIndex = business.coupons.findIndex((c) => c.templateId === couponId || c.id === couponId)
           if (couponIndex !== -1) {
+            // 발급된 쿠폰은 발급 완료 상태로 변경
             business.coupons[couponIndex].remainingCount--
+            business.coupons[couponIndex].isClaimed = true
+            
+            // 같은 매장의 다른 쿠폰들을 비활성화
+            business.coupons.forEach((c, index) => {
+              if (index !== couponIndex && c.businessId === coupon.businessId) {
+                c.isDisabled = true
+              }
+            })
             break
           }
         }
@@ -401,6 +410,14 @@ export default {
         const couponIndex = availableCoupons.value.findIndex((c) => c.templateId === couponId || c.id === couponId)
         if (couponIndex !== -1) {
           availableCoupons.value[couponIndex].remainingCount--
+          availableCoupons.value[couponIndex].isClaimed = true
+          
+          // 같은 매장의 다른 쿠폰들을 비활성화
+          availableCoupons.value.forEach((c, index) => {
+            if (index !== couponIndex && c.businessId === coupon.businessId) {
+              c.isDisabled = true
+            }
+          })
         }
 
         console.log('쿠폰 다운로드 성공:', coupon.title)

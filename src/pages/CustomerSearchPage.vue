@@ -125,35 +125,42 @@
       <!-- 관련 매장 추천 섹션 (검색 중이 아닐 때만 표시) -->
       <div v-if="!hasSearchResults" class="customer-search__related bg-light-green rounded-3 mx-3 mb-5 p-4">
         <h2 class="customer-search__related-title mb-2">
-          <span class="customer-search__related-title-highlight">스타벅스 강남점</span><span class="customer-search__related-title-normal">을<br>방문한 고객들이 자주 가는 곳</span>
+          <span class="customer-search__related-title-highlight">{{ recentBusiness?.businessName || '매장' }}</span><span class="customer-search__related-title-normal">을<br>방문한 고객들이 자주 가는 곳</span>
         </h2>
         <p class="customer-search__related-subtitle text-muted small mb-3">유사한 취향을 가진 고객들의 선택</p>
         
+        <!-- 로딩 상태 -->
+        <div v-if="relatedStoresLoading" class="text-center py-4">
+          <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">관련 매장 로딩 중...</span>
+          </div>
+        </div>
+        
         <!-- 관련 매장 카드들 -->
-        <div class="customer-search__related-cards d-flex gap-3 overflow-auto">
+        <div v-else class="customer-search__related-cards d-flex gap-3 overflow-auto">
           <div 
             v-for="store in relatedStores" 
-            :key="store.id"
+            :key="store.businessId"
             class="customer-search__related-card bg-light rounded-3 p-3 flex-shrink-0" 
           >
             <div class="d-flex justify-content-between align-items-center mb-2">
-              <h3 class="customer-search__related-card-name fw-bold text-dark mb-0">{{ store.name }}</h3>
+              <h3 class="customer-search__related-card-name fw-bold text-dark mb-0">{{ store.businessName }}</h3>
               <span 
                 class="badge customer-search__related-card-category bg-light-green text-primary"
-              >{{ store.category || '매장' }}</span>
+              >{{ store.businessCategory || '매장' }}</span>
             </div>
             <div class="d-flex justify-content-between align-items-center">
               <div class="customer-search__related-card-progress flex-grow-1 me-3">
                 <div class="progress customer-search__related-card-progress-bar">
                   <div 
                     class="progress-bar customer-search__related-card-progress-fill bg-primary"
-                    :style="{ width: `${store.matchPercentage || 0}%` }"
+                    :style="{ width: `${(store.associationRate || 0) * 100}%` }"
                   ></div>
                 </div>
               </div>
               <span 
                 class="fw-semibold customer-search__related-card-percentage text-primary"
-              >{{ store.matchPercentage || 0 }}%</span>
+              >{{ Math.round((store.associationRate || 0) * 100) }}%</span>
             </div>
           </div>
 
@@ -170,7 +177,7 @@
 import { ref, computed, onMounted } from 'vue'
 import CustomerTopBar from '@/components/CustomerTopBar.vue'
 import CustomerBottomNavigation from '@/components/CustomerBottomNavigation.vue'
-import { getRecommendedStores } from '@/api/customer-search.js'
+import { getRecommendedStores, getRelatedStores } from '@/api/customer-search.js'
 
 export default {
   name: 'SearchPage',
@@ -184,6 +191,9 @@ export default {
     const isSearching = ref(false)
     const recommendedStores = ref([])
     const recommendedStoresLoading = ref(false)
+    const relatedStores = ref([])
+    const recentBusiness = ref(null)
+    const relatedStoresLoading = ref(false)
 
     // 더미 데이터 - RecommendedBusinessDTO 형식
     const dummyRecommendedStores = [
@@ -277,53 +287,109 @@ export default {
       }
     }
 
-    const relatedStores = ref([
+    // 더미 데이터 - RelatedBusinessDTO 형식
+    const dummyRecentBusiness = {
+      businessId: 1,
+      businessName: '스타벅스 강남점',
+      businessCategory: '카페',
+      associationRate: 1.0
+    }
+
+    const dummyRelatedStores = [
       {
-        id: 'twosome-place',
-        name: '투썸플레이스',
-        category: '카페',
-        matchPercentage: 85,
-        rating: 4.3,
-        description: '프리미엄 디저트와 커피를 제공하는 카페',
-        address: '서울특별시 강남구 역삼로 123'
+        businessId: 2,
+        businessName: '투썸플레이스',
+        businessCategory: '카페',
+        associationRate: 0.85
       },
       {
-        id: 'bagel-bagel',
-        name: '베이글베이글',
-        category: '카페',
-        matchPercentage: 72,
-        rating: 4.1,
-        description: '수제 베이글과 커피가 유명한 카페',
-        address: '서울특별시 강남구 테헤란로 456'
+        businessId: 3,
+        businessName: '베이글베이글',
+        businessCategory: '카페',
+        associationRate: 0.72
       },
       {
-        id: 'salady',
-        name: '샐러디',
-        category: '샐러드',
-        matchPercentage: 68,
-        rating: 4.0,
-        description: '신선한 샐러드와 건강한 식사',
-        address: '서울특별시 강남구 선릉로 789'
+        businessId: 4,
+        businessName: '샐러디',
+        businessCategory: '샐러드',
+        associationRate: 0.68
       },
       {
-        id: 'subway',
-        name: '서브웨이',
-        category: '샌드위치',
-        matchPercentage: 55,
-        rating: 3.8,
-        description: '신선한 재료로 만든 샌드위치',
-        address: '서울특별시 강남구 도곡로 321'
+        businessId: 5,
+        businessName: '서브웨이',
+        businessCategory: '샌드위치',
+        associationRate: 0.55
       },
       {
-        id: 'mcdonalds',
-        name: '맥도날드',
-        category: '패스트푸드',
-        matchPercentage: 45,
-        rating: 3.5,
-        description: '전 세계적으로 사랑받는 패스트푸드',
-        address: '서울특별시 강남구 압구정로 654'
+        businessId: 6,
+        businessName: '맥도날드',
+        businessCategory: '패스트푸드',
+        associationRate: 0.45
       }
-    ])
+    ]
+
+    // 관련 매장 데이터 로드
+    const loadRelatedStores = async () => {
+      relatedStoresLoading.value = true
+      try {
+        console.log('관련 매장 API 호출 시작...')
+        const response = await getRelatedStores()
+        console.log('관련 매장 API 응답:', response)
+        
+        if (response && response.recentBusiness && response.relatedBusiness) {
+          // CustomerVisitPatternResponseDTO 형식으로 받는 경우
+          recentBusiness.value = {
+            businessId: response.recentBusiness.businessId,
+            businessName: response.recentBusiness.businessName,
+            businessCategory: response.recentBusiness.businessCategory,
+            associationRate: response.recentBusiness.associationRate
+          }
+          
+          relatedStores.value = response.relatedBusiness.map(store => ({
+            businessId: store.businessId,
+            businessName: store.businessName,
+            businessCategory: store.businessCategory,
+            associationRate: store.associationRate
+          }))
+        } else if (response && response.data) {
+          // 응답이 { data: {...} } 형태인 경우
+          recentBusiness.value = {
+            businessId: response.data.recentBusiness.businessId,
+            businessName: response.data.recentBusiness.businessName,
+            businessCategory: response.data.recentBusiness.businessCategory,
+            associationRate: response.data.recentBusiness.associationRate
+          }
+          
+          relatedStores.value = response.data.relatedBusiness.map(store => ({
+            businessId: store.businessId,
+            businessName: store.businessName,
+            businessCategory: store.businessCategory,
+            associationRate: store.associationRate
+          }))
+        } else {
+          console.warn('관련 매장 API 응답 형식이 예상과 다릅니다:', response)
+          recentBusiness.value = null
+          relatedStores.value = []
+        }
+        
+        console.log('관련 매장 데이터 설정 완료:', { recentBusiness: recentBusiness.value, relatedStores: relatedStores.value })
+      } catch (error) {
+        console.error('관련 매장 데이터 로드 실패:', error)
+        
+        // 403 오류인 경우 특별 처리
+        if (error.response?.status === 403) {
+          console.warn('403 Forbidden - 관련 매장 API 권한이 없거나 구현되지 않았을 수 있습니다.')
+          recentBusiness.value = null
+          relatedStores.value = []
+        } else {
+          // 다른 에러의 경우 더미 데이터로 fallback
+          recentBusiness.value = dummyRecentBusiness
+          relatedStores.value = dummyRelatedStores
+        }
+      } finally {
+        relatedStoresLoading.value = false
+      }
+    }
 
     // 전체 매장 데이터 (검색용)
     const allStores = computed(() => [...recommendedStores.value, ...relatedStores.value])
@@ -382,9 +448,10 @@ export default {
       debouncedSearch.value()
     }
 
-    // 컴포넌트 마운트 시 추천 매장 로드
+    // 컴포넌트 마운트 시 추천 매장과 관련 매장 로드
     onMounted(() => {
       loadRecommendedStores()
+      loadRelatedStores()
     })
 
     return {
@@ -393,6 +460,8 @@ export default {
       recommendedStores,
       recommendedStoresLoading,
       relatedStores,
+      recentBusiness,
+      relatedStoresLoading,
       popularSearchTerms,
       searchResults,
       isSearching,

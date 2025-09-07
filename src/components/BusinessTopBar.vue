@@ -1,57 +1,47 @@
 <template>
-  <div class="business-top-bar">
-    <div class="top-bar-content">
-      <!-- 로고 -->
-      <div class="logo-section">
-        <img src="@/assets/images/togethershop_logo.png" alt="Togethershop" class="logo-image" />
+  <header class="business-top-bar bg-white">
+    <div class="business-top-bar__container">
+      <div class="business-top-bar__logo-section">
+        <img
+          src="@/assets/images/togethershop_logo.png"
+          alt="Togethershop Logo"
+          class="business-top-bar__logo"
+        />
       </div>
-
-      <!-- 우측 액션 버튼들 -->
-      <div class="action-buttons">
-        <button class="action-button" @click="onMessageClick">
-          <span class="material-symbols-outlined">mail</span>
+      <div class="business-top-bar__actions">
+        <button class="business-top-bar__action-btn" @click="handleChatClick">
+          <i class="material-symbols-outlined">chat</i>
         </button>
-
-        <button v-if="showNotification" class="action-button notification-button" @click="onNotificationClick">
-          <span class="material-symbols-outlined">notifications</span>
-          <span v-if="notificationCount > 0" class="notification-badge">{{ notificationCount }}</span>
+        <button class="business-top-bar__action-btn" @click="handleNotificationClick">
+          <i class="material-symbols-outlined">notifications</i>
         </button>
       </div>
     </div>
-  </div>
+  </header>
 </template>
 
-<script setup>
-import { useRouter } from 'vue-router'
+<script>
+export default {
+  name: 'BusinessTopBar',
+  setup() {
+    const handleChatClick = () => {
+      console.log('채팅 버튼 클릭')
+      // 채팅 페이지로 이동 로직
+    }
 
-const router = useRouter()
+    const handleNotificationClick = () => {
+      console.log('알림 버튼 클릭')
+      // 알림 페이지로 이동 로직
+    }
 
-const props = defineProps({
-  showNotification: {
-    type: Boolean,
-    default: true
+    return {
+      handleChatClick,
+      handleNotificationClick,
+    }
   },
-  notificationCount: {
-    type: Number,
-    default: 0
-  }
-})
-
-const emit = defineEmits(['message', 'notification'])
-
-const onMessageClick = () => {
-  emit('message')
-  // 메시지 페이지로 이동
-  router.push('/business/messages')
-}
-
-const onNotificationClick = () => {
-  emit('notification')
-  // 알림 페이지로 이동
-  router.push('/business/notifications')
 }
 </script>
 
-<style scoped>
-@import '@/styles/business-top-bar.css';
+<style>
+@import '../styles/business-top-bar.css';
 </style>

@@ -1,26 +1,518 @@
 /* 매장찾기 페이지 스타일 */
 .search-page {
-  background: #ffffff;
   min-height: 100vh;
-  padding-bottom: 72px; /* 하단 네비게이션 높이만큼 여백 */
+  padding-bottom: 72px; /* 하단 네비게이션 공간 */
 }
 
-.search-page__content {
-  min-height: calc(100vh - 122px); /* 전체 높이 - 상단바(50px) - 하단바(72px) */
+/* 메인 제목 섹션 */
+.customer-search__header {
+  text-align: center;
+  padding: 20px 0 0 0;
 }
 
-.search-page__title {
-  color: var(--text-dark);
+.customer-search__title {
+  color: #222;
+  text-align: center;
+  font-family: Pretendard;
   font-size: 28px;
+  font-style: normal;
   font-weight: 700;
+  line-height: 30px; /* 150% */
+}
+
+.customer-search__subtitle {
+  color: #717171;
+  text-align: center;
+  font-family: Pretendard;
+  font-size: 14px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: 20px; /* 142.857% */
+}
+
+/* 검색바 섹션 */
+.customer-search__search-container {
+  position: relative;
+  padding: 0 1rem;
+  margin-bottom: 1rem;
+}
+
+.customer-search__search-bar {
+  height: 41px;
+  border: 1px solid #f8f8f8;
+  box-shadow: 0px 1px 2px 0px rgba(0, 0, 0, 0.1);
+}
+
+.customer-search__search-icon {
+  position: absolute;
+  left: 18px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #b0b1b3;
+  font-size: 16px;
+}
+
+.customer-search__search-input {
+  width: 100%;
+  height: 100%;
+  border: none;
+  outline: none;
+  padding: 0 18px 0 50px;
+  background: transparent;
+  color: var(--, #B0B1B3);
+  font-family: Pretendard;
+  font-size: 15px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: normal;
+}
+
+.customer-search__search-input::placeholder {
+  color: #b0b1b3;
+}
+
+.customer-search__search-loading {
+  position: absolute;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  margin-right: 0.75rem;
+}
+
+/* 핫플레이스 섹션 */
+.customer-search__hotplace {
+  background-color: #f0f9f4;
+}
+
+.customer-search__hotplace-title {
+  color: #222;
+  font-family: Pretendard;
+  font-size: 18px;
+  font-style: normal;
+  font-weight: 700;
+  line-height: 22.5px; /* 125% */
+}
+
+.customer-search__hotplace-subtitle {
+  color: #717171;
+  font-family: Pretendard;
+  font-size: 12px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: 19.5px; /* 162.5% */
+}
+
+/* 핫플레이스 매장 카드들 */
+.customer-search__hotplace-cards {
+  padding-bottom: 10px;
+}
+
+.customer-search__hotplace-card {
+  background-color: #f8f8f8;
+  border: 1px solid rgba(228, 228, 228, 0.5);
+  box-shadow: 0px 4px 6px -1px rgba(0, 0, 0, 0.1), 0px 2px 4px -2px rgba(0, 0, 0, 0.1);
+  width: 300px;
+}
+
+.customer-search__hotplace-card-image {
+  position: relative;
+  margin-bottom: 0.75rem;
+}
+
+.customer-search__hotplace-card-image-bg {
+  height: 128px;
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+}
+
+.customer-search__hotplace-card-category {
+  position: absolute;
+  top: 0;
+  right: 0;
+  margin: 0.5rem;
+  color: #222;
+font-family: Pretendard;
+font-size: 14px;
+font-style: normal;
+font-weight: 500;
+line-height: 16px; /* 133.333% */
+}
+
+.customer-search__hotplace-card-name {
+  font-size: 14px;
+  margin-bottom: 0;
+  color: #222;
+font-family: Pretendard;
+font-size: 14px;
+font-style: normal;
+font-weight: 700;
+line-height: 17.5px; /* 125% */
+}
+
+.customer-search__hotplace-card-description {
+  font-size: 12px;
+  margin-bottom: 0;
+  
+}
+
+.customer-search__hotplace-card-rating-icon {
+  font-size: 12px;
+  transform: scale(0.7);
+  transform-origin: center;
+  color: #ffc107 !important;
+  font-variation-settings: 'FILL' 1;
+}
+.customer-search__hotplace-card-address-icon {
+  font-size: 12px;
+  color: #717171;
+  transform: scale(0.7);
+  transform-origin: center;
+}
+
+
+.customer-search__hotplace-card-visitor-count {
+  color: var(--primary, #017F58);
+  font-family: Pretendard;
+  font-size: 12px;
+  font-style: normal;
+  font-weight: 600;
+  line-height: 16px; /* 133.333% */
+}
+.text-muted{
+  color: #717171;
+font-family: Pretendard;
+font-size: 12px;
+font-style: normal;
+font-weight: 400;
+line-height: 16px; /* 133.333% */
+}
+
+/* 관련 매장 섹션 */
+.customer-search__related {
+  background-color: #f0f9f4;
+}
+
+.customer-search__related-title {
+  font-size: 18px;
+  margin-bottom: 0;
+}
+
+.customer-search__related-title-highlight {
+  color: var(--primary, #017F58);
+  font-family: Pretendard;
+  font-size: 18px;
+  font-style: normal;
+  font-weight: 700;
+  line-height: 22.5px; /* 125% */
+}
+
+.customer-search__related-title-normal {
+  color: #222;
+  font-family: Pretendard;
+  font-size: 18px;
+  font-style: normal;
+  font-weight: 700;
+  line-height: 22.5px;
+}
+
+.customer-search__related-subtitle {
+  color: var(--, #017F58);
+  font-family: Pretendard;
+  font-size: 12px;
+  font-style: normal;
+  font-weight: 500;
+  line-height: 16px; /* 133.333% */
+}
+
+.customer-search__related-cards {
+  padding-bottom: 10px;
+}
+
+.customer-search__related-card {
+  background-color: #f8f8f8;
+  border: 1px solid rgba(228, 228, 228, 0.5);
+  box-shadow: 0px 4px 6px -1px rgba(0, 0, 0, 0.1), 0px 2px 4px -2px rgba(0, 0, 0, 0.1);
+  width: 224px;
+}
+
+.customer-search__related-card-name {
+  color: #222;
+  font-family: Pretendard;
+  font-size: 14px;
+  font-style: normal;
+  font-weight: 700;
+  line-height: 17.5px; /* 125% */
+}
+
+.customer-search__related-card-progress-bar {
+  height: 6px;
+  background-color: #edeef2;
+  border-radius: 3px;
+}
+
+.customer-search__related-card-progress-fill {
+  height: 100%;
+  border-radius: 3px;
+  background-color: #017f58 !important;
+}
+
+.customer-search__related-card-progress-fill.bg-primary {
+  background-color: #017f58 !important;
+}
+
+
+
+
+.customer-search__related-card-category {
+  color: var(--, #017F58);
+  font-family: Pretendard;
+  font-size: 12px;
+  font-style: normal;
+  font-weight: 500;
+  line-height: 16px; /* 133.333% */
+  padding: 4px 8px;
+  border-radius: 12px;
+}
+
+.customer-search__related-card-category.bg-light-green {
+  background-color: #f0f9f4;
+  color: #017F58;
+}
+
+.customer-search__related-card-percentage {
+  color: var(--, #017F58);
+  font-family: Geist;
+  font-size: 12px;
+  font-style: normal;
+  font-weight: 600;
+  line-height: 16px; /* 133.333% */
+}
+
+.customer-search__related-card-percentage.text-primary {
+  color: #017f58;
+}
+
+.bg-light-green {
+  background-color: #f0f9f4 !important;
+}
+
+.bg-dark-green {
+  background-color: rgba(0, 79, 31, 0.1) !important;
+}
+
+.text-primary {
+  color: #017f58 !important;
+}
+
+.text-dark-green {
+  color: #004f1f !important;
+}
+
+.bg-gradient-primary {
+  background: linear-gradient(to right, #004f1f, #00aa72) !important;
+}
+
+/* 검색 결과 섹션 */
+.customer-search__results {
+  margin: 0 12px 16px 12px;
+}
+
+.customer-search__results-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
   margin-bottom: 16px;
 }
 
-.search-page__description {
-  color: var(--gray-0);
+.customer-search__results-title {
+  color: #222;
+  font-family: Pretendard;
+  font-size: 18px;
+  font-style: normal;
+  font-weight: 700;
+  line-height: 22.5px;
+  margin: 0;
+}
+
+.customer-search__results-count {
+  color: #717171;
+  font-family: Pretendard;
+  font-size: 14px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: 20px;
+}
+
+.customer-search__results-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.customer-search__result-item {
+  background: #f0f9f4;
+  border-radius: 12px;
+  padding: 20px;
+  height: 100px;
+}
+
+.customer-search__result-content {
+  display: flex;
+  gap: 12px;
+  height: 100%;
+  align-items: center;
+}
+
+.customer-search__result-image {
+  width: 60px;
+  height: 60px;
+  flex-shrink: 0;
+}
+
+.customer-search__result-image-bg {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
+.customer-search__result-info {
+  flex: 1;
+  min-width: 0;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.customer-search__result-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.customer-search__result-name {
+  color: #222;
+  font-family: Pretendard;
+  font-size: 18px;
+  font-style: normal;
+  font-weight: 700;
+  line-height: 22.5px; /* 125% */
+  margin: 0;
+}
+
+.customer-search__result-status {
+  color: var(--gray0, #6F797A);
+  font-family: Pretendard;
+  font-size: 12px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: 16px; /* 133.333% */
+  margin: 0;
+}
+
+.customer-search__result-rating {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  color: #6f797a;
+  font-family: Pretendard;
+  font-size: 12px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: 16px;
+  margin-left: 0;
+}
+
+.customer-search__result-rating i {
+  fill: var(--, #017F58);
   font-size: 16px;
-  line-height: 1.6;
-  margin-bottom: 0;
+  color: #017f58;
+  font-variation-settings: 'FILL' 1;
+}
+
+.customer-search__result-category {
+  color: var(--gray0, #6F797A);
+  font-family: Pretendard;
+  font-size: 12px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: 19.5px; /* 162.5% */
+}
+
+.customer-search__result-address {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--gray0, #6F797A);
+  font-family: Pretendard;
+  font-size: 12px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: 16px; /* 133.333% */
+}
+
+.customer-search__result-address i {
+  font-size: 16px;
+  color: var(--gray0, #6F797A);
+}
+
+/* 매칭도 섹션 */
+.customer-search__result-match {
+  padding-top: 12px;
+  border-top: 1px solid #f0f0f0;
+}
+
+.customer-search__result-match-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.customer-search__result-match-label {
+  color: #666;
+  font-family: Pretendard;
+  font-size: 12px;
+  font-style: normal;
+  font-weight: 500;
+  line-height: 16px;
+}
+
+.customer-search__result-match-percentage {
+  color: #017F58;
+  font-family: Pretendard;
+  font-size: 12px;
+  font-style: normal;
+  font-weight: 600;
+  line-height: 16px;
+}
+
+.customer-search__result-match-progress {
+  height: 6px;
+  background: #f0f0f0;
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.customer-search__result-match-progress-bar {
+  height: 100%;
+  background: #017F58;
+  border-radius: 3px;
+  transition: width 0.3s ease;
+}
+
+/* 스크롤바 스타일링 */
+.customer-search__hotplace-cards::-webkit-scrollbar,
+.customer-search__related-cards::-webkit-scrollbar {
+  display: none;
+}
+
+.customer-search__hotplace-cards,
+.customer-search__related-cards {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
 }
 
 /* 반응형 디자인 */
@@ -29,16 +521,17 @@
     padding-bottom: 68px;
   }
   
-  .search-page__content {
-    min-height: calc(100vh - 116px);
-  }
-  
-  .search-page__title {
+  .customer-search__title {
     font-size: 24px;
   }
   
-  .search-page__description {
-    font-size: 15px;
+  
+  .customer-search__hotplace-card {
+    width: 280px;
+  }
+  
+  .customer-search__related-card {
+    width: 240px;
   }
 }
 
@@ -47,15 +540,12 @@
     padding-bottom: 64px;
   }
   
-  .search-page__content {
-    min-height: calc(100vh - 110px);
+  .customer-search__title {
+    font-size: 24px;
   }
   
-  .search-page__title {
-    font-size: 22px;
-  }
   
-  .search-page__description {
-    font-size: 14px;
+  .customer-search__related-card {
+    width: 240px;
   }
 }

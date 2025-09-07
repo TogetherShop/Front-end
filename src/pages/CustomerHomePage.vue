@@ -2,7 +2,7 @@
   <div class="home-page">
     <!-- 상단바 -->
     <CustomerTopBar />
-    
+
     <!-- 메인 콘텐츠 -->
     <main class="home-page__content">
       <div class="container-fluid px-4 py-5">
@@ -14,7 +14,7 @@
         </div>
       </div>
     </main>
-    
+
     <!-- 하단 네비게이션 -->
     <CustomerBottomNavigation />
   </div>
@@ -23,7 +23,6 @@
 <script>
 import CustomerTopBar from '@/components/CustomerTopBar.vue'
 import CustomerBottomNavigation from '@/components/CustomerBottomNavigation.vue'
-
 export default {
   name: 'HomePage',
   components: {

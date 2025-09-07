@@ -171,7 +171,7 @@
 </template>
 
 <script>
-import { ref, computed, watch, nextTick } from 'vue'
+import { ref, computed, watch, nextTick, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useCouponsStore } from '@/stores/coupons'
 import BusinessTopBar from '@/components/BusinessTopBar.vue'
@@ -193,7 +193,7 @@ export default {
     const currentPage = ref(1)
     const itemsPerPage = 5
 
-    // 탭 상태 (Pinia store)
+    // 탭 상태
     const activeTab = computed({
       get: () => couponsStore.activeTab,
       set: (val) => couponsStore.setActiveTab(val),
@@ -205,20 +205,19 @@ export default {
       set: (val) => couponsStore.setSearchQuery(val),
     })
 
-    // 원본 필터링 (탭별 쿠폰)
-    const filteredMyCoupons = computed(() => {
-      return couponsStore.searchFilteredCoupons.filter(
-        (c) => activeTab.value === 'my' && couponsStore.myCoupons.includes(c),
-      )
-    })
+    // loading from store
+    const loading = computed(() => couponsStore.loading)
+    const error = computed(() => couponsStore.error)
 
-    const filteredReceivedCoupons = computed(() => {
-      return couponsStore.searchFilteredCoupons.filter(
-        (c) => activeTab.value === 'received' && couponsStore.receivedCoupons.includes(c),
-      )
-    })
+    // 필터링된 리스트는 기존 로직 유지 (store의 getters 사용)
+    const filteredMyCoupons = computed(() =>
+      couponsStore.searchFilteredCoupons.filter((c) => couponsStore.myCoupons.includes(c)),
+    )
 
-    // 페이지네이션 적용된 데이터
+    const filteredReceivedCoupons = computed(() =>
+      couponsStore.searchFilteredCoupons.filter((c) => couponsStore.receivedCoupons.includes(c)),
+    )
+
     const paginatedMyCoupons = computed(() => {
       const start = (currentPage.value - 1) * itemsPerPage
       return filteredMyCoupons.value.slice(start, start + itemsPerPage)
@@ -229,7 +228,6 @@ export default {
       return filteredReceivedCoupons.value.slice(start, start + itemsPerPage)
     })
 
-    // 총 페이지 수
     const totalPages = computed(() => {
       const totalItems =
         activeTab.value === 'my'
@@ -238,16 +236,12 @@ export default {
       return Math.ceil(totalItems / itemsPerPage)
     })
 
-    // visiblePages 로직은 그대로 사용
     const visiblePages = computed(() => {
       const pages = []
       const total = totalPages.value
       const current = currentPage.value
-
       if (total <= 7) {
-        for (let i = 1; i <= total; i++) {
-          pages.push(i)
-        }
+        for (let i = 1; i <= total; i++) pages.push(i)
       } else {
         pages.push(1)
         if (current > 4) pages.push('...')
@@ -262,29 +256,17 @@ export default {
       return pages
     })
 
-    // 페이지 전환 함수 (상단으로 스크롤 포함)
     const changePage = async (page) => {
       if (typeof page !== 'number') return
-      // 페이지 변경
       currentPage.value = page
-
-      // DOM이 업데이트된 뒤에 스크롤 (가능하면 컴포넌트 루트로, 없으면 window 최상단)
       await nextTick()
       const rootEl = document.querySelector('.business-coupon-page')
-      if (rootEl) {
-        rootEl.scrollIntoView({ behavior: 'smooth', block: 'start' })
-      } else {
-        window.scrollTo({ top: 0, behavior: 'smooth' })
-      }
+      if (rootEl) rootEl.scrollIntoView({ behavior: 'smooth', block: 'start' })
+      else window.scrollTo({ top: 0, behavior: 'smooth' })
     }
 
-    // 탭이 바뀔 때 페이지 초기화
     watch(activeTab, () => {
       currentPage.value = 1
-      // 탭 전환 시에도 상단으로 이동하고 싶다면 아래 주석을 해제하세요:
-      // const rootEl = document.querySelector('.business-coupon-page')
-      // if (rootEl) rootEl.scrollIntoView({ behavior: 'smooth', block: 'start' })
-      // else window.scrollTo({ top: 0, behavior: 'smooth' })
     })
 
     const toggleFilter = () => {
@@ -293,12 +275,14 @@ export default {
 
     const handleOpenAnalysis = (coupon) => {
       const templateId = coupon.template_id || coupon.templateId || coupon.id
-      // query로 전달 (URL에 남음, 새로고침 안전)
-      router.push({
-        name: 'BusinessCouponAnalysis', // 라우트 name 설정
-        query: { templateId: String(templateId) },
-      })
+      router.push({ name: 'BusinessCouponAnalysis', query: { templateId: String(templateId) } })
     }
+
+    // 페이지가 마운트되면 스토어에서 쿠폰 로드 (businessId는 실제 앱에서 로그인된 사업자 id로 대체)
+    onMounted(async () => {
+      const businessId = 1 // 필요하면 route params 또는 인증 토큰에서 가져오세요
+      await couponsStore.loadCoupons(businessId)
+    })
 
     return {
       activeTab,
@@ -315,6 +299,8 @@ export default {
       currentPage,
       changePage,
       handleOpenAnalysis,
+      loading,
+      error,
     }
   },
 }

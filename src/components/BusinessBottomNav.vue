@@ -40,7 +40,7 @@ export default {
       },
       {
         name: 'StoreList',
-        route: '/business/partnership',
+        route: '/business/store',
         icon: 'handshake',
         label: '제휴',
       },

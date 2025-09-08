@@ -4,11 +4,6 @@
       <BusinessTopBar />
 
       <div class="container-fluid px-3 py-3">
-        <!-- 페이지 타이틀(원하면 지워도 됨) -->
-        <div class="page-title mb-3">
-          <h5 class="mb-0 fw-bold">홈</h5>
-        </div>
-
         <!-- 함께지수 카드 -->
         <section class="mb-3">
           <div class="score-card">
@@ -179,7 +174,7 @@ export default {
 }
 .rank-value {
   font-size: 24px;
-  font-weight: 800;
+  font-weight: 500;
   line-height: 1.1;
 }
 .score-card__bottom {

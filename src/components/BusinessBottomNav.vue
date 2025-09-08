@@ -34,13 +34,13 @@ export default {
     const navigationItems = [
       {
         name: 'Home',
-        route: '/business',
+        route: '/business/home',
         icon: 'home',
         label: '홈',
       },
       {
         name: 'StoreList',
-        route: '/business/store',
+        route: '/business/partnership',
         icon: 'handshake',
         label: '제휴',
       },

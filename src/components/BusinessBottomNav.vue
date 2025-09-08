@@ -34,7 +34,7 @@ export default {
     const navigationItems = [
       {
         name: 'Home',
-        route: '/business',
+        route: '/business/home',
         icon: 'home',
         label: '홈',
       },

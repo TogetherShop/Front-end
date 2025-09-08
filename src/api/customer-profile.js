@@ -9,13 +9,22 @@ import api from './api'
  */
 export const getCustomerProfile = async () => {
   try {
+    // 요청 전 헤더 확인
+    const token = localStorage.getItem('access_token')
+
     const response = await api.get('/api/customer/profile', {
       userType: 'customer',
     })
-    console.log('고객 프로필 조회:', response.data)
     return response.data
   } catch (error) {
     console.error('고객 프로필 조회 실패:', error)
+    console.error('에러 상세:', {
+      status: error.response?.status,
+      statusText: error.response?.statusText,
+      data: error.response?.data,
+      message: error.message,
+      requestHeaders: error.config?.headers,
+    })
     throw error
   }
 }

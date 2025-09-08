@@ -1,0 +1,173 @@
+/* Group Purchase Action Modal Styles (Join & Cancel) */
+
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1001;
+  padding: 8px;
+}
+
+.action-modal {
+  background: white;
+  border-radius: 16px;
+  width: 100%;
+  max-width: 400px;
+  min-width: 400px;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  position: relative;
+}
+
+.modal-content {
+  padding: 24px;
+  text-align: center;
+}
+
+/* 닫기 버튼 */
+.close-button {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  background: none;
+  border: none;
+  padding: 4px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.close-button:hover {
+  background-color: var(--gray-3);
+}
+
+.close-button .material-symbols-outlined {
+  font-size: 20px;
+  color: var(--gray-0);
+}
+
+/* 확인 섹션 */
+.confirmation-section {
+  margin-bottom: 6px;
+  text-align: left;
+}
+
+.confirmation-title {
+  font-family: 'Pretendard', sans-serif;
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--text-dark);
+  margin: 0 0 10px 0;
+  line-height: 1.5;
+  text-align: left;
+}
+
+.item-info {
+  text-align: left;
+  margin-bottom: 16px;
+}
+
+.item-detail {
+  font-family: 'Pretendard', sans-serif;
+  font-size: 14px;
+  color: var(--text-dark);
+  margin: 0 0 4px 0;
+  font-weight: 400;
+}
+
+.item-description {
+  font-family: 'Pretendard', sans-serif;
+  font-size: 10px;
+  color: var(--text-color);
+  line-height: 1.4;
+  margin: 12px 0 0 0;
+  white-space: pre-line;
+}
+
+/* 공통 액션 버튼 */
+.action-button {
+  width: 25%;
+  border: none;
+  border-radius: 8px;
+  padding: 8px 8px;
+  font-family: 'Pretendard', sans-serif;
+  font-size: 14px;
+  font-weight: 400;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-left: auto;
+  white-space: nowrap;
+}
+
+/* 참여 버튼 */
+.join-button {
+  background-color: var(--main-color);
+  color: white;
+}
+
+.join-button:hover:not(:disabled) {
+  opacity: 0.9;
+}
+
+.join-button:disabled {
+  background-color: var(--gray-0);
+  cursor: not-allowed;
+}
+
+/* 취소 버튼 */
+.cancel-button {
+  background-color: #dc3545;
+  color: white;
+}
+
+.cancel-button:hover:not(:disabled) {
+  opacity: 0.9;
+}
+
+.cancel-button:disabled {
+  background-color: var(--gray-0);
+  cursor: not-allowed;
+}
+
+/* 로딩 스피너 */
+.loading-spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top: 2px solid white;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* 반응형 디자인 */
+@media (max-width: 480px) {
+  .action-modal {
+    min-width: 350px;
+  }
+
+  .modal-content {
+    padding: 16px;
+  }
+
+  .confirmation-title {
+    font-size: 15px;
+  }
+
+  .action-button {
+    padding: 10px 16px;
+  }
+}

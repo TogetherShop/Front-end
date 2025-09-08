@@ -6,7 +6,7 @@ import BusinessCouponPage from '@/pages/business/BusinessCouponPage.vue'
 import BusinessGroupBuyPage from '@/pages/business/BusinessGroupBuyPage.vue'
 import BusinessHomePage from '@/pages/business/BusinessHomePage.vue'
 import BusinessProfilePage from '@/pages/business/BusinessProfilePage.vue'
-import BusinessStorePage from '@/pages/business/BusinessStorePage.vue'
+import BusinessPartnershipPage from '@/pages/BusinessPartnershipPage.vue'
 import BusinessCouponAnalysis from '@/pages/business/BusinessCouponAnalysis.vue'
 import LoginView from '@/pages/LoginView.vue'
 import OnboardingView from '@/pages/OnboardingView.vue'
@@ -47,25 +47,25 @@ const routes = [
     component: CustomerProfilePage,
     meta: { requiresAuth: true, role: 'customer' },
   },
-  {
-    path: '/business',
-    component: BusinessHomePage,
-    meta: { requiresAuth: true, role: 'business' },
-  },
+  // {
+  //   path: '/business',
+  //   component: BusinessHomePage,
+  //   meta: { requiresAuth: true, role: 'business' },
+  // },
   {
     path: '/business/chats',
     component: ChattingHomePage,
     meta: { requiresAuth: true, role: 'business' },
   },
   {
-    path: '/business',
+    path: '/business/home',
     name: 'business-home',
     component: BusinessHomePage,
   },
   {
     path: '/business/store',
     name: 'business-store',
-    component: BusinessStorePage,
+    component: BusinessPartnershipPage,
   },
   {
     path: '/business/coupon',

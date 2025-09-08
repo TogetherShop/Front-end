@@ -3,7 +3,7 @@ import CustomerSearchPage from '@/pages/CustomerSearchPage.vue'
 import CustomerCouponPage from '@/pages/CustomerCouponPage.vue'
 import CustomerProfilePage from '@/pages/CustomerProfilePage.vue'
 import BusinessCouponPage from '@/pages/business/BusinessCouponPage.vue'
-import BusinessGroupBuyPage from '@/pages/business/BusinessGroupBuyPage.vue'
+import BusinessGroupPurchasePage from '@/pages/BusinessGroupPurchasePage.vue'
 import BusinessHomePage from '@/pages/business/BusinessHomePage.vue'
 import BusinessProfilePage from '@/pages/business/BusinessProfilePage.vue'
 import BusinessPartnershipPage from '@/pages/BusinessPartnershipPage.vue'
@@ -75,7 +75,7 @@ const routes = [
   {
     path: '/business/groupbuy',
     name: 'business-groupbuy',
-    component: BusinessGroupBuyPage,
+    component: BusinessGroupPurchasePage,
   },
   {
     path: '/business/profile',

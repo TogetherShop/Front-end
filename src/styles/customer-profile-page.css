@@ -76,11 +76,11 @@ box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
 
 .CustomerProfile__profile-info {
   position: absolute;
-  left: 40%;
+  left: 50%;
   top: 50%;
   transform: translate(-50%, -50%);
   text-align: center;
-  width: 100px;
+  width: 150px;
 }
 
 .CustomerProfile__profile-name {

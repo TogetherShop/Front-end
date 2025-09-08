@@ -5,7 +5,9 @@
       <div class="coupon-modal__header">
         <div class="coupon-modal__store-info">
           <div class="coupon-modal__store-avatar">
-            <img :src="coupon.storeAvatar" />
+            <img :src="coupon.storeAvatar || togethershopLogo" :alt="coupon.storeName" />
+            <!-- 디버깅용 -->
+            <div v-if="!coupon.storeAvatar && !togethershopLogo" style="color: red; font-size: 12px;">No Avatar</div>
           </div>
           <div class="coupon-modal__store-details">
             <h3 class="coupon-modal__store-name">{{ coupon.storeName }}</h3>
@@ -43,6 +45,8 @@
 </template>
 
 <script>
+import togethershopLogo from '@/assets/images/togethershop_logo.png'
+
 export default {
   name: 'CouponModal',
   props: {
@@ -58,11 +62,16 @@ export default {
         category: '',
         title: '',
         expiryDate: '',
-        storeAvatar: ''
+        storeAvatar: togethershopLogo
       })
     }
   },
   emits: ['close', 'download'],
+  data() {
+    return {
+      togethershopLogo
+    }
+  },
   methods: {
     closeModal() {
       this.$emit('close')

@@ -24,11 +24,7 @@ export async function signup({
 }
 
 export async function login(username, password) {
-  const { data } = await api.post(
-    '/api/auth/login',
-    { username, password },
-    { userType: 'business' },
-  )
+  const { data } = await api.post('/api/auth/login', { username, password })
   localStorage.setItem('access_token', data.accessToken)
   localStorage.setItem('refresh_token', data.refreshToken)
   localStorage.setItem('username', username)

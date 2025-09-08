@@ -59,11 +59,6 @@ const routes = [
     meta: { requiresAuth: true, role: 'business' },
   },
   {
-    path: '/business/chats',
-    component: ChatList,
-    meta: { requiresAuth: true, role: 'business' },
-  },
-  {
     path: '/business/chats/new',
     component: ChatUserListView,
     meta: { requiresAuth: true, role: 'business' },

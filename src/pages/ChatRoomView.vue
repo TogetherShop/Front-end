@@ -1,90 +1,108 @@
 <template>
-  <div class="card">
-    <h3>채팅방 #{{ roomId }}</h3>
+  <div class="chat-room">
+    <!-- 상단 헤더 -->
+    <header class="chat-header">
+      <div class="header-left">
+        <button class="back-btn">←</button>
+        <div class="shop-info">
+          <h3 class="shop-name">달콤 베이커리</h3>
+          <span class="shop-status">오프라인</span>
+        </div>
+      </div>
+      <div class="header-right">
+        <button class="icon-btn">📞</button>
+        <button class="icon-btn">⋮</button>
+      </div>
+    </header>
 
-    <!-- WebSocket 연결 상태 표시 -->
-    <div v-if="!wsConnected" class="status-banner disconnected">
-      연결 중... ({{ reconnectAttempts }}/{{ maxReconnectAttempts }})
+    <!-- 상단 지표 -->
+    <div class="shop-stats">
+      <div class="stat">
+        <div class="stat-value green">4.8</div>
+        <div class="stat-label">함께지수</div>
+      </div>
+      <div class="stat">
+        <div class="stat-value">0.8km</div>
+        <div class="stat-label">거리</div>
+      </div>
+      <div class="stat">
+        <div class="stat-value">베이커리</div>
+        <div class="stat-label">강남구 역삼동</div>
+      </div>
     </div>
 
-    <!-- 상태 배너 -->
-    <div v-if="roomStatus === 'waiting'" class="status-banner waiting">대기 중...</div>
-    <div v-else-if="roomStatus === 'active'" class="status-banner active">협업 진행 중</div>
-    <div v-else-if="roomStatus === 'rejected'" class="status-banner rejected">거절됨</div>
-
-    <!-- 채팅 리스트 -->
-    <div ref="chatContainer" class="chat-container">
+    <!-- 메시지 영역 -->
+    <main ref="chatContainer" class="chat-container">
       <div
         v-for="m in messages"
         :key="m.id"
-        class="chat-message-wrapper"
-        :class="{
-          'my-message': m.senderId === currentUserId,
-          'temp-message': m.isTemp,
-        }"
+        class="message-wrapper"
+        :class="{ mine: m.senderId === currentUserId }"
       >
+        <!-- 제휴 제안 카드 -->
+        <!-- <div v-if="m.type === 'COUPON_PROPOSAL'" class="proposal-card">
+          <div class="proposal-header">✔ 제휴 제안</div>
+          <div class="proposal-body">
+            <div class="proposal-row">
+              <span>아메리카노</span>
+              <span class="highlight">10% 할인</span>
+              <span>⇔</span>
+              <span class="highlight">15% 할인</span>
+              <span>크로와상</span>
+            </div>
+            <div class="proposal-meta">
+              <span>발급 수량: 100개</span>
+              <span>유효기간: 30일</span>
+            </div>
+          </div>
+          <div class="proposal-actions">
+            <button class="accept-btn">수락</button>
+            <button class="reject-btn">거절</button>
+          </div>
+        </div> -->
         <ProposalMessage
           v-if="m.type === 'COUPON_PROPOSAL'"
           :message="m"
           :currentUserId="currentUserId"
         />
-        <div
-          v-else
-          class="chat-message"
-          :class="{
-            'my-message': m.senderId === currentUserId,
-            'temp-message': m.isTemp,
-          }"
-        >
-          <div class="message-sender">{{ m.senderName || '알 수 없음' }}</div>
-          <div class="message-content">{{ m.content }}</div>
-          <div class="message-time">{{ formatTime(m.timestamp) }}</div>
-          <div v-if="m.isTemp" class="sending-indicator">전송 중...</div>
+        <!-- 일반 메시지 -->
+        <div v-else class="chat-bubble">
+          <div class="chat-text">{{ m.content }}</div>
+          <div class="chat-time">{{ formatTime(m.timestamp) }}</div>
         </div>
       </div>
-
-      <div v-if="messages.length === 0" class="empty-messages">메시지가 없습니다.</div>
-
-      <!-- 마지막 메시지가 상대방이 보낸 대기중 협업 요청이면 버튼 표시 -->
-      <div v-if="lastIncomingRequest" class="request-buttons-container">
-        <button @click="acceptRequest(lastIncomingRequest.id)">수락</button>
-        <button @click="rejectRequest(lastIncomingRequest.id)">거절</button>
-      </div>
-    </div>
+    </main>
 
     <!-- 입력창 -->
-    <div class="chat-input" v-if="roomStatus !== 'rejected'">
-      <div v-if="roomStatus === 'active'" class="partnership-button-container">
-        <button @click="openPartnershipModal">제휴 제안</button>
+    <footer class="chat-input">
+      <button class="proposal-btn" v-if="roomStatus === 'active'" @click="openPartnershipModal">
+        제휴 제안
+      </button>
+      <div class="input-box">
+        <input
+          v-model="text"
+          type="text"
+          placeholder="메시지를 입력하세요..."
+          @keyup.enter="sendMessage"
+        />
+        <button class="send-btn" @click="sendMessage">➤</button>
+        <PartnershipModal
+          :roomId="roomId"
+          :visible="partnershipModalVisible"
+          @update:visible="partnershipModalVisible = $event"
+          @proposal-sent="handleProposalSent"
+        />
       </div>
-      <input
-        v-model="text"
-        placeholder="메시지 입력..."
-        @keyup.enter="sendMessage"
-        :disabled="!wsConnected"
-      />
-      <button @click="sendMessage" :disabled="!wsConnected || !text.trim()">보내기</button>
-
-      <!-- 모달 연결 -->
-      <PartnershipModal
-        :roomId="roomId"
-        :visible="partnershipModalVisible"
-        @update:visible="partnershipModalVisible = $event"
-        @proposal-sent="handleProposalSent"
-      />
-    </div>
+    </footer>
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted, nextTick, onUnmounted, computed } from 'vue'
+import { ref, nextTick } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { connectWS, disconnectWS, subscribeRoom, sendText, proposeBilateralCoupon } from '@/api/ws'
-import api from '@/api/api'
-import PartnershipModal from '../components/PartnershipModal.vue'
-import ProposalMessage from '../components/ProposalMessage.vue'
+import PartnershipModal from '@/components/PartnershipModal.vue'
+import ProposalMessage from '@/components/ProposalMessage.vue'
 const partnershipModalVisible = ref(false)
-const proposalMessages = ref([]) // 모달에서 보낸 메시지 추가용
 const openPartnershipModal = () => {
   partnershipModalVisible.value = true
 }
@@ -118,16 +136,59 @@ const roomId = route.params.roomId
 const wsConnected = ref(false)
 const reconnectAttempts = ref(0)
 const maxReconnectAttempts = 5
-const messages = ref([])
-const text = ref('')
-const chatContainer = ref(null)
 const currentUser = ref(localStorage.getItem('username') || '')
-const roomStatus = ref('waiting')
-const currentUserId = ref(Number(localStorage.getItem('userId') || 0))
 
 let unsubscribe = null
 let connectionCheckInterval = null
 let connectWebSocket = null // 함수를 변수로 선언
+
+const messages = ref([
+  {
+    id: 1,
+    senderId: 2,
+    content: '안녕하세요! 제휴 제안 감사합니다. 조건을 검토해보겠습니다.',
+    timestamp: Date.now() - 60000,
+    type: 'CHAT',
+  },
+  {
+    id: 2,
+    senderId: 1,
+    content: '네, 감사합니다. 1:1 쿠폰 교환으로 진행하면 좋을 것 같습니다.',
+    timestamp: Date.now() - 30000,
+    type: 'CHAT',
+  },
+  {
+    id: 3,
+    senderId: 1,
+    type: 'COUPON_PROPOSAL',
+    timestamp: Date.now() - 20000,
+    payload: {
+      proposerCoupon: {
+        itemName: '아메리카노',
+        discountPercent: 10,
+        totalQuantity: 100,
+        startDate: new Date().toISOString().slice(0, 10),
+        endDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10),
+      },
+      recipientCoupon: {
+        itemName: '크로와상',
+        discountPercent: 15,
+        totalQuantity: 100,
+        startDate: new Date().toISOString().slice(0, 10),
+        endDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10),
+      },
+      status: 'WAITING',
+    },
+  },
+
+  {
+    id: 4,
+    senderId: 2,
+    content: '제안 검토했습니다. 15% 할인으로 조정 가능할까요?',
+    timestamp: Date.now() - 10000,
+    type: 'CHAT',
+  },
+])
 
 const fetchHistory = async () => {
   try {
@@ -156,359 +217,226 @@ const fetchHistory = async () => {
   }
 }
 
-const updateRoomStatus = () => {
-  const latest = messages.value.filter((m) => m.type === 'PARTNERSHIP_REQUEST').pop()
-  const status = latest?.payload?.status?.toUpperCase() || 'WAITING'
-  if (status === 'ACCEPTED' || status === 'IN_NEGOTIATION') roomStatus.value = 'active'
-  else if (status === 'REJECTED') roomStatus.value = 'rejected'
-  else roomStatus.value = 'waiting'
-}
-
-const scrollToBottom = () => {
-  nextTick(() => {
-    if (chatContainer.value) chatContainer.value.scrollTop = chatContainer.value.scrollHeight
-  })
-}
-
-// 메시지 중복 제거 및 정렬 함수 - 새 메시지가 올 때마다 호출
-const removeDuplicateMessages = () => {
-  const uniqueMessages = messages.value.reduce((acc, current) => {
-    const existing = acc.find((msg) => msg.id === current.id)
-    if (!existing) {
-      acc.push(current)
-    }
-    return acc
-  }, [])
-
-  // 시간순 정렬
-  uniqueMessages.sort((a, b) => a.timestamp - b.timestamp)
-  messages.value = uniqueMessages
-}
+const currentUserId = 1
+const text = ref('')
+const roomStatus = ref('active')
+const chatContainer = ref(null)
 
 const sendMessage = () => {
-  if (!text.value.trim() || !wsConnected.value) return
-
-  const messageContent = text.value.trim()
-  const tempId = `temp_${Date.now()}`
-
-  // 임시 메시지를 로컬에 먼저 표시 (낙관적 업데이트)
-  const tempMsg = {
-    id: tempId,
-    senderId: currentUserId.value,
-    sender: currentUser.value,
-    content: messageContent,
+  if (!text.value.trim()) return
+  messages.value.push({
+    id: Date.now(),
+    senderId: currentUserId,
+    content: text.value,
     timestamp: Date.now(),
-    type: 'TEXT',
-    payload: null,
-    isTemp: true, // 임시 메시지 표시
-  }
-
-  messages.value = [...messages.value, tempMsg]
-  text.value = ''
-  scrollToBottom()
-
-  // 서버에 메시지 전송 - Promise 체크 추가
-  try {
-    const result = sendText(roomId, messageContent)
-
-    // sendText가 Promise를 반환하는 경우
-    if (result && typeof result.then === 'function') {
-      result
-        .then(() => {
-          console.log('메시지 전송 완료')
-          // 임시 메시지는 서버에서 오는 실제 메시지로 대체됨
-        })
-        .catch((error) => {
-          console.error('메시지 전송 실패:', error)
-          // 실패시 임시 메시지 제거
-          messages.value = messages.value.filter((m) => m.id !== tempId)
-        })
-    } else {
-      // sendText가 Promise를 반환하지 않는 경우
-      console.log('메시지 전송 시도')
-
-      // 일정 시간 후 임시 메시지 정리 (서버 메시지로 대체되지 않은 경우)
-      setTimeout(() => {
-        const stillExists = messages.value.some((m) => m.id === tempId && m.isTemp)
-        if (stillExists) {
-          // 실제 서버 메시지가 아직 오지 않았다면 임시 메시지를 실제 메시지로 변환
-          messages.value = messages.value.map((m) =>
-            m.id === tempId ? { ...m, isTemp: false } : m,
-          )
-        }
-      }, 5000) // 5초 후
-    }
-  } catch (error) {
-    console.error('메시지 전송 중 오류:', error)
-    // 오류 발생시 임시 메시지 제거
-    messages.value = messages.value.filter((m) => m.id !== tempId)
-  }
-}
-
-// WebSocket 연결 함수
-connectWebSocket = () => {
-  connectWS(
-    () => {
-      console.log('WebSocket 연결됨')
-      wsConnected.value = true
-      reconnectAttempts.value = 0
-
-      unsubscribe = subscribeRoom(roomId, (parsedMsg) => {
-        // parsedMsg: 이미 JSON.parse 완료된 객체
-        // msg.body로 다시 파싱하면 안 됨
-        messages.value = messages.value.filter(
-          (m) =>
-            !(m.isTemp && m.content === parsedMsg.content && m.senderId === parsedMsg.senderId),
-        )
-
-        const existing = messages.value.find((m) => m.id === parsedMsg.id)
-        if (!existing) {
-          messages.value = [...messages.value, parsedMsg]
-          removeDuplicateMessages()
-          nextTick(() => {
-            updateRoomStatus()
-            scrollToBottom()
-          })
-        }
-      })
-    },
-    (error) => {
-      // WebSocket 연결 실패 시 재연결 시도
-      console.error('WebSocket 연결 오류:', error)
-      wsConnected.value = false
-
-      if (reconnectAttempts.value < maxReconnectAttempts) {
-        reconnectAttempts.value++
-        console.log(`재연결 시도 ${reconnectAttempts.value}/${maxReconnectAttempts}`)
-        setTimeout(() => {
-          connectWebSocket()
-        }, 3000 * reconnectAttempts.value) // 지수 백오프
-      }
-    },
-  )
-}
-
-const checkConnection = () => {
-  if (!wsConnected.value) {
-    console.log('연결이 끊어진 것을 감지, 재연결 시도...')
-    connectWebSocket()
-  }
-}
-
-onMounted(async () => {
-  if (!currentUser.value) return router.push('/login')
-
-  await fetchHistory()
-  connectWebSocket()
-
-  // 주기적으로 연결 상태 체크
-  connectionCheckInterval = setInterval(checkConnection, 30000) // 30초마다 체크
-
-  // 페이지 가시성 API를 이용한 포커스 시 재연결
-  document.addEventListener('visibilitychange', () => {
-    if (document.visibilityState === 'visible' && !wsConnected.value) {
-      console.log('페이지 포커스 시 재연결 시도')
-      connectWebSocket()
-    }
+    type: 'CHAT',
   })
-})
-
-onUnmounted(() => {
-  if (connectionCheckInterval) {
-    clearInterval(connectionCheckInterval)
-  }
-  if (unsubscribe) unsubscribe()
-  disconnectWS()
-
-  // 이벤트 리스너 정리
-  document.removeEventListener('visibilitychange', () => {})
-})
+  text.value = ''
+  nextTick(() => {
+    chatContainer.value.scrollTop = chatContainer.value.scrollHeight
+  })
+}
 
 const formatTime = (timestamp) =>
   new Date(timestamp).toLocaleTimeString('ko-KR', {
     hour: '2-digit',
     minute: '2-digit',
   })
-
-// 마지막으로 온 상대방 협업 요청 메시지 (대기중)
-const lastIncomingRequest = computed(() => {
-  // 내 메시지 제외 + PARTNERSHIP_REQUEST + WAITING 상태
-  return [...messages.value]
-    .reverse()
-    .find(
-      (m) =>
-        m.senderId !== currentUserId.value &&
-        m.type === 'PARTNERSHIP_REQUEST' &&
-        m.payload?.status === 'WAITING',
-    )
-})
-
-const acceptRequest = (messageId) => {
-  const msg = messages.value.find((m) => m.id === messageId)
-  if (!msg) return
-
-  // 서버로 수락 요청 보내기
-  // 예: sendAccept(msg.id)
-  msg.payload.status = 'ACCEPTED'
-  updateRoomStatus()
-}
-
-const rejectRequest = (messageId) => {
-  const msg = messages.value.find((m) => m.id === messageId)
-  if (!msg) return
-
-  // 서버로 거절 요청 보내기
-  // 예: sendReject(msg.id)
-  msg.payload.status = 'REJECTED'
-  updateRoomStatus()
-}
 </script>
 
 <style scoped>
-.card {
-  max-width: 600px;
-  margin: 40px auto;
-  padding: 24px;
-  background: white;
-  border-radius: 16px;
-}
-.chat-container {
-  height: 400px;
-  overflow-y: auto;
-  border: 1px solid #e5e7eb;
-  padding: 16px;
-  border-radius: 12px;
-  margin-bottom: 16px;
-  background: #f8fafc;
-}
-.chat-message {
-  padding: 12px;
-  border-radius: 12px;
-  margin-bottom: 12px;
-  max-width: 70%;
-  background: #e5e7eb;
-  position: relative;
-}
-.chat-message.my-message {
-  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
-  color: white;
-  margin-left: auto;
-}
-.chat-message.temp-message {
-  opacity: 0.7;
-}
-.message-sender {
-  font-weight: bold;
-  font-size: 12px;
-  margin-bottom: 4px;
-  opacity: 0.8;
-}
-.message-content {
-  font-size: 14px;
-  line-height: 1.4;
-  margin-bottom: 4px;
-}
-.message-time {
-  font-size: 10px;
-  opacity: 0.7;
-  text-align: right;
-}
-.sending-indicator {
-  font-size: 10px;
-  opacity: 0.6;
-  font-style: italic;
-  text-align: right;
-  margin-top: 2px;
-}
-.chat-input {
+.chat-room {
   display: flex;
-  gap: 8px;
-}
-.chat-input input {
-  flex: 1;
-  padding: 12px;
-  border-radius: 8px;
-  border: 2px solid #e5e7eb;
-}
-.chat-input input:disabled {
-  background-color: #f3f4f6;
-  cursor: not-allowed;
-}
-.chat-input button {
-  padding: 12px 20px;
-  border-radius: 8px;
-  background: #3b82f6;
-  color: white;
-  border: none;
-  cursor: pointer;
-}
-.chat-input button:disabled {
-  background: #9ca3af;
-  cursor: not-allowed;
-}
-.status-banner {
-  padding: 12px;
-  border-radius: 8px;
-  margin-bottom: 16px;
-  text-align: center;
-  font-weight: bold;
-}
-.status-banner.waiting {
-  background: #fef3c7;
-  color: #d97706;
-}
-.status-banner.active {
-  background: #d1fae5;
-  color: #059669;
-}
-.status-banner.rejected {
-  background: #fee2e2;
-  color: #dc2626;
-}
-.status-banner.disconnected {
-  background: #fef2f2;
-  color: #991b1b;
-}
-.empty-messages {
-  text-align: center;
-  color: #6b7280;
-  font-style: italic;
-  margin-top: 150px;
+  flex-direction: column;
+  height: 100vh;
+  background: #fff;
 }
 
-.request-buttons-container {
+/* 헤더 */
+.chat-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px;
+  border-bottom: 1px solid #eee;
+}
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.shop-info {
+  display: flex;
+  flex-direction: column;
+}
+.shop-name {
+  font-size: 16px;
+  margin: 0;
+}
+.shop-status {
+  font-size: 12px;
+  color: #888;
+}
+.icon-btn,
+.back-btn {
+  background: none;
+  border: none;
+  font-size: 18px;
+  cursor: pointer;
+}
+
+/* 상단 지표 */
+.shop-stats {
+  display: flex;
+  justify-content: space-around;
+  background: #f0fdf4;
+  padding: 8px 0;
+  border-bottom: 1px solid #eee;
+}
+.stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.stat-value {
+  font-weight: bold;
+}
+.green {
+  color: #017f58;
+}
+.stat-label {
+  font-size: 12px;
+  color: #666;
+}
+
+/* 메시지 영역 */
+.chat-container {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px;
+  background: #f9fafb;
+}
+.message-wrapper {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 12px;
+  align-items: flex-start;
+}
+.message-wrapper.mine {
+  align-items: flex-end;
+}
+
+/* 일반 메시지 */
+.chat-bubble {
+  max-width: 70%;
+  padding: 10px 14px;
+  border-radius: 12px;
+  background: #e5e7eb;
+  font-size: 14px;
+}
+.message-wrapper.mine .chat-bubble {
+  background: #017f58;
+  color: #fff;
+}
+.chat-time {
+  font-size: 10px;
+  color: #888;
+  margin-top: 4px;
+}
+
+/* 제휴 제안 카드 */
+.proposal-card {
+  width: 80%;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  background: #fff;
+  padding: 12px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+.proposal-header {
+  font-weight: bold;
+  margin-bottom: 8px;
+  color: #017f58;
+}
+.proposal-body {
+  font-size: 14px;
+  margin-bottom: 8px;
+}
+.proposal-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 6px;
+  font-weight: bold;
+}
+.highlight {
+  color: #059669;
+}
+.proposal-meta {
+  font-size: 12px;
+  color: #666;
+  display: flex;
+  justify-content: space-between;
+}
+.proposal-actions {
   display: flex;
   gap: 8px;
-  justify-content: flex-start; /* 왼쪽 정렬, 상대방 메시지 기준 */
   margin-top: 8px;
-  margin-bottom: 16px;
 }
-.request-buttons-container button {
-  padding: 6px 14px;
-  border-radius: 8px;
-  border: none;
-  cursor: pointer;
-  font-weight: bold;
-}
-.request-buttons-container button:first-child {
-  background-color: #3b82f6;
-  color: white;
-}
-.request-buttons-container button:last-child {
-  background-color: #e5e7eb;
-  color: #374151;
-}
-.partnership-button-container {
-  margin-bottom: 16px;
-  text-align: left; /* 왼쪽 정렬 */
-}
-.partnership-button-container button {
-  padding: 6px 14px;
-  border-radius: 8px;
-  background-color: #3b82f6;
+.accept-btn {
+  flex: 1;
+  background: #017f58;
   color: white;
   border: none;
+  padding: 6px 0;
+  border-radius: 8px;
+}
+.reject-btn {
+  flex: 1;
+  background: #e5e7eb;
+  border: none;
+  padding: 6px 0;
+  border-radius: 8px;
+}
+
+/* 입력창 */
+.chat-input {
+  display: flex;
+  align-items: center; /* 세로 중앙 정렬 */
+  gap: 8px; /* 버튼과 input 사이 간격 */
+  border-top: 1px solid #eee;
+  padding: 8px;
+}
+.proposal-btn {
+  background: #017f58;
+  color: white;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 8px;
   cursor: pointer;
-  font-weight: bold;
+  font-size: 13px;
+}
+.input-box {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 4px;
+  background: #fff;
+}
+.input-box input {
+  flex: 1;
+  border: none;
+  outline: none;
+  padding: 8px;
+}
+.send-btn {
+  background: #017f58;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  width: 36px;
+  height: 36px;
+  cursor: pointer;
 }
 </style>

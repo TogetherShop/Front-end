@@ -3,24 +3,24 @@
     <div class="container">
       <!-- Header -->
       <div class="header">
-        <div class="arrow-back-ios">←</div>
-        <div class="title">제휴 채팅</div>
+        <div class="arrow-back-ios" @click="$router.back()">←</div>
+        <div class="title">회원 검색</div>
       </div>
 
       <!-- Search Box -->
       <div class="search-container">
         <div class="search-box">
           <div class="search-icon">
-            <div class="search-icon-inner">
-              <div class="search-circle"></div>
-              <div class="search-handle"></div>
-            </div>
+            <i class="fa-solid fa-magnifying-glass"></i>
           </div>
-          <div class="search-text">매장명 검색</div>
+          <input
+            v-model="query"
+            @input="search"
+            placeholder="회원 이름 검색..."
+            style="border: none; outline: none; flex: 1"
+          />
         </div>
       </div>
-
-      <!-- Filter Buttons -->
       <div class="filter-buttons">
         <div
           v-for="filter in ['전체', '대기', '협의중', '협의완료', '거절']"
@@ -32,149 +32,119 @@
           <div class="filter-text">{{ filter }}</div>
         </div>
       </div>
+      <!-- 로딩 / 결과 없음 표시 -->
+      <div v-if="loading" class="loading-text">로딩 중...</div>
+      <div v-else-if="query && users.length === 0" class="no-result">검색 결과가 없습니다.</div>
 
-      <!-- Chat List -->
-      <div class="chat-list">
-        <!-- 달콤 베이커리 -->
-        <div class="chat-item">
+      <!-- 검색 결과 리스트 -->
+      <div class="chat-list" v-else>
+        <div
+          class="chat-item"
+          v-for="user in users"
+          :key="user.id"
+          @click="startChat(user.id)"
+          :disabled="loading"
+        >
           <div class="chat-header">
             <div class="store-name-container">
-              <div class="store-name">달콤 베이커리</div>
+              <div class="store-name">{{ user.businessName }}</div>
               <div class="store-info">
-                <div class="online-status">오프라인</div>
+                <div class="online-status">{{ user.businessType }}</div>
                 <div class="rating">
                   <div class="star">★</div>
-                  <div class="rating-score">4.8</div>
-                </div>
-              </div>
-            </div>
-
-            <div class="status-badge negotiating">
-              <div class="status-text">협의중</div>
-            </div>
-          </div>
-          <div class="store-category">베이커리</div>
-          <div class="message-container">
-            <div class="message">
-              <div class="message-text">15% 할인으로 조정 가능할까요?</div>
-            </div>
-            <div class="time-badge">
-              <div class="time-background"></div>
-              <div class="time-text">2분 전</div>
-            </div>
-          </div>
-        </div>
-
-        <!-- 행복한 꽃집 -->
-        <div class="chat-item">
-          <div class="chat-header">
-            <div class="store-name-container">
-              <div class="store-name">행복한 꽃집</div>
-              <div class="store-info">
-                <div class="online-status">오프라인</div>
-                <div class="rating">
-                  <div class="star">★</div>
-                  <div class="rating-score">4.9</div>
-                </div>
-              </div>
-            </div>
-            <div class="status-badge completed">
-              <div class="status-text">협의완료</div>
-            </div>
-          </div>
-          <div class="store-category">꽃집</div>
-          <div class="message-container">
-            <div class="message">
-              <div class="message-text">제휴 조건에 동의합니다~</div>
-            </div>
-            <div class="time-badge">
-              <div class="time-text">1시간 전</div>
-            </div>
-          </div>
-        </div>
-
-        <!-- 맛있는 피자 -->
-        <div class="chat-item">
-          <div class="chat-header">
-            <div class="store-name-container">
-              <div class="store-name">맛있는 피자</div>
-              <div class="store-info">
-                <div class="online-status">오프라인</div>
-                <div class="rating">
-                  <div class="star">★</div>
-                  <div class="rating-score">3.9</div>
+                  <div class="rating-score">{{ user.togetherIndex || 0 }}</div>
                 </div>
               </div>
             </div>
             <div class="status-badge rejected">
-              <div class="status-text">거절</div>
+              <div class="status-text">{{ user.status }}</div>
             </div>
           </div>
-          <div class="store-category">음식점</div>
+          <div class="store-category" v-if="user.businessCategory">{{ user.businessCategory }}</div>
           <div class="message-container">
-            <div class="message">
-              <div class="message-text">죄송하지만 이번엔 어려울 것 `~~`.~~~~~~~~~~₩</div>
-            </div>
+            <div class="message-text">{{ user.lastMessage }}안녕하세요</div>
             <div class="time-badge">
-              <div class="time-text">3시간 전</div>
+              <div class="time-text">{{ user.lastMessageTime }}3시간 전</div>
             </div>
-          </div>
-          <div class="store-info">
-            <div class="rating">
-              <div class="rating-score">3.9</div>
-              <div class="star">★</div>
-            </div>
-            <div class="online-status">오프라인</div>
           </div>
         </div>
+      </div>
 
-        <!-- 스타일 헤어샵 -->
-        <div class="chat-item">
-          <div class="chat-header">
-            <div class="store-name-container">
-              <div class="store-name">스타일 헤어샵</div>
-              <div class="store-info">
-                <div class="online-status">오프라인</div>
-                <div class="rating">
-                  <div class="star">★</div>
-                  <div class="rating-score">4.6</div>
-                </div>
-              </div>
-            </div>
-            <div class="status-badge waiting">
-              <div class="status-text">대기</div>
-            </div>
-          </div>
-          <div class="store-category">음식점</div>
-          <div class="message-container">
-            <div class="message">
-              <div class="message-text">요청이 들어왔습니다.</div>
-            </div>
-            <div class="time-badge">
-              <div class="time-background"></div>
-              <div class="time-text">30분 전</div>
-            </div>
-          </div>
-          <div class="store-info">
-            <div class="rating">
-              <div class="rating-score">4.6</div>
-              <div class="star">★</div>
-            </div>
-            <div class="online-status">오프라인</div>
-          </div>
-        </div>
+      <!-- 오류 메시지 -->
+      <div v-if="errorMessage" class="error-message">
+        {{ errorMessage }}
       </div>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
+import api from '@/api/api'
+import { useRouter } from 'vue-router'
 
-// 선택된 필터 상태
+const query = ref('')
+const users = ref([])
+const loading = ref(false)
+const errorMessage = ref('')
+const router = useRouter()
+
+const hasToken = computed(() => !!localStorage.getItem('access_token'))
+const currentUser = computed(() => localStorage.getItem('username') || '')
 const selectedFilter = ref('전체')
 
-// 필터 버튼 클릭 핸들러
+let searchTimer = null
+
+const search = async () => {
+  if (!query.value.trim()) {
+    users.value = []
+    return
+  }
+
+  clearTimeout(searchTimer)
+  searchTimer = setTimeout(async () => {
+    loading.value = true
+    errorMessage.value = ''
+    try {
+      const { data } = await api.get('/api/users', { params: { q: query.value.trim() } })
+      // 예: lastMessage, lastMessageTime, rating 같은 추가 필드 매핑
+      users.value = data.map((user) => ({
+        ...user,
+        lastMessage: user.lastMessage || '',
+        lastMessageTime: user.lastMessageTime || '',
+        rating: user.rating || 0,
+      }))
+    } catch (e) {
+      console.error(e)
+      users.value = []
+      errorMessage.value = `검색 오류: ${e.response?.status || ''} ${e.response?.data?.message || e.message}`
+    } finally {
+      loading.value = false
+    }
+  }, 300)
+}
+
+const startChat = async (userId) => {
+  loading.value = true
+  errorMessage.value = ''
+  try {
+    const { data } = await api.post(`/api/partnership/request/${userId}`)
+    router.push(`/business/chats/${data.roomId}`)
+  } catch (e) {
+    console.error(e)
+    if (e.response?.status === 403) {
+      errorMessage.value = '권한이 없습니다. 로그인을 확인해주세요.'
+    } else if (e.response?.status === 401) {
+      errorMessage.value = '인증이 필요합니다. 다시 로그인해주세요.'
+    } else if (e.response?.status === 404) {
+      errorMessage.value = 'API를 찾을 수 없습니다.'
+    } else {
+      errorMessage.value = `오류: ${e.response?.status || ''} ${e.response?.data?.message || e.message}`
+    }
+  } finally {
+    loading.value = false
+  }
+}
 const selectFilter = (filter) => {
   selectedFilter.value = filter
 }
@@ -249,12 +219,6 @@ const selectFilter = (filter) => {
   display: flex;
   align-items: center;
   justify-content: center;
-}
-
-.search-icon-inner {
-  position: relative;
-  width: 13px;
-  height: 13px;
 }
 
 .search-circle {
@@ -469,5 +433,19 @@ const selectFilter = (filter) => {
   font-size: 12px;
   font-weight: 400;
   color: #666666;
+}
+
+.loading-text,
+.no-result,
+.error-message {
+  text-align: center;
+  margin: 12px 0;
+  font-size: 14px;
+}
+.error-message {
+  background: #fee2e2;
+  color: #dc2626;
+  padding: 10px;
+  border-radius: 8px;
 }
 </style>

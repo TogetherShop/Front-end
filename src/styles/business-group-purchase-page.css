@@ -32,8 +32,17 @@
 }
 
 .trophy-icon {
-  font-size: 30px;
-  color: #fbbf24;
+  font-size: 28px;
+  line-height: 1;
+  display: inline-block;
+  vertical-align: middle;
+  /* 이모지 렌더링 최적화 */
+  font-family: 'Apple Color Emoji', 'Segoe UI Emoji', 'Noto Color Emoji', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  /* 텍스트 선택 방지 */
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  user-select: none;
 }
 
 .ranking-title {
@@ -42,6 +51,33 @@
   font-weight: 700;
   color: var(--text-dark);
   margin: 0;
+}
+
+/* 랭킹 로딩 상태 */
+.ranking-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  min-height: 120px;
+}
+
+.ranking-loading-spinner {
+  width: 32px;
+  height: 32px;
+  border: 3px solid #f3f4f6;
+  border-top: 3px solid #fbbf24;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 1rem;
+}
+
+.ranking-empty {
+  text-align: center;
+  padding: 2rem;
+  color: #6b7280;
+  font-size: 0.875rem;
 }
 
 .ranking-list {
@@ -291,8 +327,23 @@
 }
 
 .person-icon {
-  font-size: 14px;
+  font-size: 18px;
   color: var(--gray-0);
+  font-family: 'Material Symbols Outlined', sans-serif;
+  font-weight: normal;
+  font-style: normal;
+  line-height: 1;
+  letter-spacing: normal;
+  text-transform: none;
+  display: inline-block;
+  white-space: nowrap;
+  word-wrap: normal;
+  direction: ltr;
+  -webkit-font-feature-settings: 'liga';
+  -webkit-font-smoothing: antialiased;
+  font-feature-settings: 'liga';
+  /* 폰트 로딩 대비책 */
+  font-display: swap;
 }
 
 .deadline {
@@ -305,8 +356,23 @@
 }
 
 .calendar-icon {
-  font-size: 14px;
+  font-size: 18px;
   color: var(--gray-0);
+  font-family: 'Material Symbols Outlined', sans-serif;
+  font-weight: normal;
+  font-style: normal;
+  line-height: 1;
+  letter-spacing: normal;
+  text-transform: none;
+  display: inline-block;
+  white-space: nowrap;
+  word-wrap: normal;
+  direction: ltr;
+  -webkit-font-feature-settings: 'liga';
+  -webkit-font-smoothing: antialiased;
+  font-feature-settings: 'liga';
+  /* 폰트 로딩 대비책 */
+  font-display: swap;
 }
 
 .progress-bar {

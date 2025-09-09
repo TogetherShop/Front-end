@@ -1,37 +1,147 @@
+<!-- /src/pages/CustomerHomePage.vue -->
 <template>
-  <div class="home-page">
-    <!-- 상단바 -->
-    <CustomerTopBar />
+  <div class="store-search-page">
+    <!-- 상단바 고정 -->
+    <CustomerTopBar class="topbar" />
 
-    <!-- 메인 콘텐츠 -->
-    <main class="home-page__content">
-      <div class="container-fluid px-4 py-5">
-        <div class="row">
-          <div class="col-12">
-            <h1 class="home-page__title">홈</h1>
-            <p class="home-page__description">환영합니다! Togethershop에 오신 것을 환영합니다.</p>
-          </div>
-        </div>
+    <!-- 지도가 상단바 높이만큼 아래로 시작 -->
+    <div class="map-section">
+      <StoreMap
+        v-if="!locationError"
+        :stores="filteredStores"
+        :selected-store="selectedStore"
+        :center="mapCenter"
+        v-model:searchQuery="searchQuery"
+        v-model:panelExpanded="bottomExpanded"
+        @select-store="handleSelectStore"
+        @map-ready="handleMapReady"
+      />
+      <div v-else class="error-section">
+        <p>위치 정보를 가져올 수 없습니다</p>
+        <p class="error-detail">{{ locationError }}</p>
+        <button @click="retryLoad" class="retry-button">다시 시도</button>
       </div>
-    </main>
+    </div>
 
-    <!-- 하단 네비게이션 -->
     <CustomerBottomNavigation />
+    <ReviewModal />
   </div>
 </template>
 
-<script>
+<script setup>
+import { ref, computed, onMounted, watch } from 'vue'
+import { storeToRefs } from 'pinia'
 import CustomerTopBar from '@/components/CustomerTopBar.vue'
 import CustomerBottomNavigation from '@/components/CustomerBottomNavigation.vue'
-export default {
-  name: 'HomePage',
-  components: {
-    CustomerTopBar,
-    CustomerBottomNavigation
+import StoreMap from '@/components/StoreMap.vue'
+import ReviewModal from '@/components/ReviewModal.vue'
+import { useLocationStore } from '@/stores/location'
+import { useStoresStore } from '@/stores/stores'
+
+const locationStore = useLocationStore()
+const storesStore = useStoresStore()
+const { currentLocation, locationError } = storeToRefs(locationStore)
+const { filteredStores } = storeToRefs(storesStore)
+
+const searchQuery = ref('')
+const selectedStore = ref(null)
+const mapReady = ref(false)
+const bottomExpanded = ref(false)
+
+const mapCenter = computed(() => {
+  if (currentLocation.value?.latitude) {
+    return { lat: currentLocation.value.latitude, lng: currentLocation.value.longitude }
+  }
+  return { lat: 37.5173, lng: 127.0473 }
+})
+
+watch(searchQuery, (v) => {
+  // 실시간 검색 반영
+  storesStore.setSearchQuery(v)
+})
+
+const handleSelectStore = (store) => {
+  selectedStore.value = store
+  bottomExpanded.value = true
+}
+const handleMapReady = () => {
+  mapReady.value = true
+}
+
+const loadNearbyStores = async () => {
+  if (currentLocation.value?.latitude) {
+    await storesStore.fetchNearbyStores(
+      currentLocation.value.latitude,
+      currentLocation.value.longitude,
+    )
   }
 }
+
+const retryLoad = async () => {
+  await locationStore.getCurrentLocation()
+  await loadNearbyStores()
+}
+
+onMounted(async () => {
+  await locationStore.getCurrentLocation()
+  await loadNearbyStores()
+})
+
+watch(
+  () => currentLocation.value,
+  async (n, o) => {
+    if (n?.latitude && (!o?.latitude || n.latitude !== o.latitude || n.longitude !== o.longitude)) {
+      await loadNearbyStores()
+    }
+  },
+  { deep: true },
+)
 </script>
 
-<style>
-@import '../styles/customer-home-page.css';
+<style scoped>
+.store-search-page {
+  --topbar-h: 56px;
+  display: flex;
+  flex-direction: column;
+  height: 100vh; /* ← 고정 높이 */
+  overflow: hidden; /* ← 스크롤 차단 */
+  background: #fff;
+  padding-bottom: 0; /* ← 여백 제거(이게 페이지 스크롤 원인) */
+}
+
+/* 고정 상단바 */
+.topbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 60;
+  background: #fff;
+}
+
+/* 지도는 상단바 아래부터 시작 */
+.map-section {
+  height: calc(100vh - var(--topbar-h));
+  margin-top: var(--topbar-h);
+  position: relative;
+  background: #f5f5f5;
+}
+
+.error-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 16px;
+  gap: 16px;
+  color: #ef4444;
+}
+.retry-button {
+  padding: 8px 16px;
+  background: #017f58;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
 </style>

@@ -39,10 +39,8 @@ const confirmPartnership = async () => {
   loading.value = true
 
   try {
-    // 잠시 대기 (실제 API 호출 시뮬레이션)
-    await new Promise(resolve => setTimeout(resolve, 1000))
-
-    emit('confirm', props.store)
+    // 제휴 요청 API 호출
+    await emit('confirm', props.store)
   } catch (error) {
     console.error('제휴 요청 실패:', error)
   } finally {

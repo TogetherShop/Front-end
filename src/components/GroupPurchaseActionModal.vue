@@ -12,16 +12,19 @@
           <h3 class="confirmation-title">{{ modalConfig.title }}</h3>
 
           <div class="item-info">
-            <p class="item-detail">가격: {{ formatPrice(item?.price || 500000) }}</p>
-            <p class="item-detail">수량: 100개</p>
+            <h4 class="item-title">{{ item?.title || '공동구매 프로젝트' }}</h4>
+            <p class="item-detail">목표 금액: ₩ {{ formatPrice(item?.targetMoney || item?.price || 0) }}</p>
+            <p class="item-detail">목표 수량: {{ item?.targetQuantity || 0 }}명</p>
+            <p class="item-detail">현재 참여: {{ item?.currentQuantity || 0 }}명</p>
+            <p v-if="item?.endDate" class="item-detail">마감일: {{ formatDate(item?.endDate) }}</p>
             <p class="item-description">{{ modalConfig.description }}</p>
           </div>
         </div>
 
         <!-- 액션 버튼 -->
-        <button 
-          :class="['action-button', modalConfig.buttonClass]" 
-          @click="confirmAction" 
+        <button
+          :class="['action-button', modalConfig.buttonClass]"
+          @click="confirmAction"
           :disabled="loading"
         >
           <span v-if="loading" class="loading-spinner"></span>
@@ -79,20 +82,61 @@ const confirmAction = async () => {
   loading.value = true
 
   try {
-    await new Promise(resolve => setTimeout(resolve, 1000))
+    // 부모 컴포넌트에서 실제 API 호출을 처리
     emit('confirm', props.item)
+    // loading 상태는 부모 컴포넌트에서 관리하므로 여기서는 즉시 false로 설정
+    loading.value = false
   } catch (error) {
     console.error('액션 실패:', error)
-  } finally {
     loading.value = false
   }
 }
 
 const formatPrice = (price) => {
-  return `${price.toLocaleString()}원`
+  if (!price) return '0'
+  return price.toLocaleString()
+}
+
+const formatDate = (dateString) => {
+  if (!dateString) return ''
+
+  try {
+    const date = new Date(dateString)
+    const year = date.getFullYear()
+    const month = String(date.getMonth() + 1).padStart(2, '0')
+    const day = String(date.getDate()).padStart(2, '0')
+    const hours = String(date.getHours()).padStart(2, '0')
+    const minutes = String(date.getMinutes()).padStart(2, '0')
+
+    return `${year}.${month}.${day} ${hours}:${minutes}`
+  } catch (error) {
+    return dateString
+  }
 }
 </script>
 
 <style scoped>
 @import '@/styles/group-purchase-action-modal.css';
+
+.item-title {
+  font-size: 1.125rem;
+  font-weight: 600;
+  margin-bottom: 0.75rem;
+  color: #1f2937;
+}
+
+.loading-spinner {
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  border: 2px solid currentColor;
+  border-radius: 50%;
+  border-top-color: transparent;
+  animation: spin 1s ease-in-out infinite;
+  margin-right: 8px;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
 </style>

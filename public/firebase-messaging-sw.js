@@ -17,10 +17,14 @@ const messaging = firebase.messaging()
 
 messaging.onBackgroundMessage(function (payload) {
   console.log('[firebase-messaging-sw.js] Received background message ', payload)
+
   const notificationTitle = payload.notification.title
   const notificationOptions = {
     body: payload.notification.body,
     icon: '/firebase-logo.png',
+    badge: '/firebase-logo.png',
+    tag: 'togethershop-notification',
+    requireInteraction: true, // 사용자가 클릭할 때까지 알림 유지
   }
 
   self.registration.showNotification(notificationTitle, notificationOptions)

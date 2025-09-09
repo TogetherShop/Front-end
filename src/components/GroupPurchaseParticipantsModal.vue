@@ -37,7 +37,7 @@
               <div class="participant-name">{{ participant.businessName }}</div>
               <div class="participant-details">
                 <span class="material-symbols-outlined store-icon">storefront</span>
-                <span class="participant-service">{{ participant.businessCategory || '미등록' }}</span>
+                <span class="participant-service">{{ participant.businessCategory || '' }}</span>
                 <span class="participant-amount">₩ {{ formatPrice(item?.targetMoney || 0) }}</span>
               </div>
             </div>
@@ -124,15 +124,15 @@ const loadParticipants = async () => {
 
     if (response.success && response.data) {
       participants.value = response.data.map(participant => ({
-        ...participant,
-        businessCategory: participant.businessCategory || '미등록'
+        ...participant
+        // 기본값 제거 - API에서 받은 데이터 그대로 사용
       }))
       totalPages.value = response.totalPages || 1
     } else if (Array.isArray(response)) {
       // 응답이 배열인 경우
       participants.value = response.map(participant => ({
-        ...participant,
-        businessCategory: participant.businessCategory || '미등록'
+        ...participant
+        // 기본값 제거 - API에서 받은 데이터 그대로 사용
       }))
       totalPages.value = 1
     }

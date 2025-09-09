@@ -12,10 +12,10 @@
           <h3 class="confirmation-title">{{ modalConfig.title }}</h3>
 
           <div class="item-info">
-            <h4 class="item-title">{{ item?.title || '공동구매 프로젝트' }}</h4>
-            <p class="item-detail">목표 금액: ₩ {{ formatPrice(item?.targetMoney || item?.price || 0) }}</p>
-            <p class="item-detail">목표 수량: {{ item?.targetQuantity || 0 }}명</p>
-            <p class="item-detail">현재 참여: {{ item?.currentQuantity || 0 }}명</p>
+            <h4 class="item-title">{{ item?.title || '' }}</h4>
+            <p v-if="item?.targetMoney || item?.price" class="item-detail">목표 금액: ₩ {{ formatPrice(item?.targetMoney || item?.price) }}</p>
+            <p v-if="item?.targetQuantity" class="item-detail">목표 수량: {{ item?.targetQuantity }}명</p>
+            <p v-if="item?.currentQuantity !== undefined" class="item-detail">현재 참여: {{ item?.currentQuantity }}명</p>
             <p v-if="item?.endDate" class="item-detail">마감일: {{ formatDate(item?.endDate) }}</p>
             <p class="item-description">{{ modalConfig.description }}</p>
           </div>

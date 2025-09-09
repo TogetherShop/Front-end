@@ -33,9 +33,9 @@
               </div>
             </div>
 
-            <div class="store-location-row">
+            <div class="store-address">
               <span class="material-symbols-outlined">location_on</span>
-              <span>{{ formatDistance(store.distance) }} | 경기도 어딘가 진짜구</span>
+              <span>{{ formatDistance(store.address)}}</span>
             </div>
           </div>
         </div>

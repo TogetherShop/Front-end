@@ -17,7 +17,7 @@
         </div>
 
         <!-- 입금 정보 -->
-        <div v-else class="deposit-info">
+        <div v-else-if="depositInfo" class="deposit-info">
           <div class="info-item">
             <span class="info-label">입금 금액: {{ formatPrice(depositInfo.targetMoney) }}원</span>
           </div>
@@ -30,6 +30,11 @@
           <div v-if="depositInfo.endDate" class="info-item">
             <span class="info-label">마감일: {{ formatDate(depositInfo.endDate) }}</span>
           </div>
+        </div>
+
+        <!-- 데이터 로딩 실패 시 -->
+        <div v-else class="error-state">
+          <p>입금 정보를 불러올 수 없습니다.</p>
         </div>
 
         <!-- 안내 문구 -->
@@ -58,19 +63,14 @@ const emit = defineEmits(['close'])
 const loading = ref(false)
 const projectDetail = ref(null)
 
-// 입금 정보 계산
+// 입금 정보 계산 - 기본값 제거
 const depositInfo = computed(() => {
-  if (projectDetail.value?.data) {
-    return projectDetail.value.data
+  // 로딩 중이거나 데이터가 없으면 null 반환
+  if (loading.value || !projectDetail.value?.data) {
+    return null
   }
 
-  // 프로젝트 상세 정보가 없으면 전달받은 item에서 정보 추출
-  return {
-    targetMoney: props.item?.targetMoney || props.item?.price || 0,
-    accountHost: props.item?.accountHost || '정보 없음',
-    accountNumber: props.item?.accountNumber || '정보 없음',
-    endDate: props.item?.endDate || null
-  }
+  return projectDetail.value.data
 })
 
 // 프로젝트 상세 정보 로드
@@ -170,5 +170,12 @@ onMounted(() => {
   margin: 0.25rem 0;
   font-size: 0.875rem;
   color: #6b7280;
+}
+
+.error-state {
+  text-align: center;
+  padding: 2rem;
+  color: #6b7280;
+  font-size: 0.875rem;
 }
 </style>

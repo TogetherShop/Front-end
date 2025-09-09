@@ -125,12 +125,21 @@
       <!-- 매장 리스트 -->
       <div class="store-list">
         <BusinessStoreCard
-          v-for="store in filteredStores"
+          v-for="store in users"
           :key="store.id"
           :store="store"
           @request-partnership="onRequestPartnership"
           @view-detail="onViewDetail"
-        />
+        >
+          <template #actions>
+            <!-- partnershipExists true면 요청 완료 상태로 -->
+            <button v-if="store.partnershipExists" disabled class="requested-button">요청됨</button>
+
+            <button v-else @click="$emit('request-partnership', store)" class="request-button">
+              협의 요청
+            </button>
+          </template>
+        </BusinessStoreCard>
       </div>
 
       <!-- 페이지네이션 -->
@@ -173,16 +182,16 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
+import api from '@/api/api'
 import BusinessTopBar from '@/components/BusinessTopBar.vue'
 import BusinessStoreCard from '@/components/BusinessStoreCard.vue'
 import BusinessStoreDetailModal from '@/components/BusinessStoreDetailModal.vue'
 import BusinessPartnershipModal from '@/components/BusinessPartnershipModal.vue'
 import BusinessSuccessToast from '@/components/BusinessSuccessToast.vue'
-
 import BusinessBottomNav from '@/components/BusinessBottomNav.vue'
 
-
-// 반응형 데이터
+// 기존 반응형 데이터
 const searchQuery = ref('')
 const showFilter = ref(false)
 const showSort = ref(false)
@@ -195,281 +204,164 @@ const selectedStore = ref(null)
 const selectedStoreForDetail = ref(null)
 const showSuccessToast = ref(false)
 const loading = ref(false)
-const activeTab = ref('recommended') // 'recommended' 또는 'all'
+const activeTab = ref('recommended')
+const errorMessage = ref('')
 
-// 사용자 선호 업종 (회원가입 시 선택한 것들) - 실제로는 API에서 가져올 예정
+// 사용자 선호 업종
 const userPreferredCategories = ref(['베이커리', '카페'])
-
-// 더미 데이터 (실제로는 API에서 가져올 데이터)
 const dummyStores = [
-  {
-    id: 1,
-    name: '달달 베이커리',
-    category: '베이커리',
-    distance: 500,
-    rating: 4.5,
-    togetherScore: 85,
-    couponDescription: '월 10% 할인 쿠폰',
-    image: null,
-    isPartnershipAvailable: true,
-  },
-  {
-    id: 2,
-    name: '담담 베이커리',
-    category: '베이커리',
-    distance: 800,
-    rating: 4.3,
-    togetherScore: 78,
-    couponDescription: '주말 15% 할인 쿠폰',
-    image: null,
-    isPartnershipAvailable: true,
-  },
-  {
-    id: 3,
-    name: '싱글 베이커리',
-    category: '베이커리',
-    distance: 500,
-    rating: 4.6,
-    togetherScore: 92,
-    couponDescription: '신규 회원 20% 할인',
-    image: null,
-    isPartnershipAvailable: true,
-  },
-  {
-    id: 4,
-    name: '따뜻한 카페',
-    category: '카페',
-    distance: 300,
-    rating: 4.4,
-    togetherScore: 65,
-    couponDescription: '아메리카노 2+1',
-    image: null,
-    isPartnershipAvailable: true,
-  },
-  {
-    id: 5,
-    name: '깔끔한 세탁소',
-    category: '세탁소',
-    distance: 600,
-    rating: 4.2,
-    togetherScore: 45,
-    couponDescription: '첫 방문 30% 할인',
-    image: null,
-    isPartnershipAvailable: true,
-  },
-  {
-    id: 6,
-    name: '모던 헤어샵',
-    category: '미용실',
-    distance: 1200,
-    rating: 4.7,
-    togetherScore: 72,
-    couponDescription: '컷+파마 20% 할인',
-    image: null,
-    isPartnershipAvailable: true,
-  },
+  /* 기존 더미 데이터 */
 ]
 
-// 계산된 속성
+// ------------------------
+// **전체회원 조회 로직**
+// ------------------------
+const users = ref([]) // 검색된 회원 목록
+const query = ref('')
+let searchTimer = null
+
 const filteredStores = computed(() => {
   let result = stores.value
-
-  // 탭에 따른 기본 필터링
-  if (activeTab.value === 'recommended') {
-    // 추천 매장: 사용자 선호 업종 + 함께지수 60 이상
-    result = result.filter(
-      (store) =>
-        userPreferredCategories.value.includes(store.category) && store.togetherScore >= 60,
-    )
-  }
-  // 전체 매장은 필터링 없이 모든 매장 표시
-
-  // 검색 필터링
   if (searchQuery.value.trim()) {
-    const query = searchQuery.value.toLowerCase()
+    const q = searchQuery.value.toLowerCase()
     result = result.filter(
-      (store) =>
-        store.name.toLowerCase().includes(query) || store.category.toLowerCase().includes(query),
+      (store) => store.name.toLowerCase().includes(q) || store.category.toLowerCase().includes(q),
     )
   }
-
-  // 카테고리 필터링 (선택된 경우)
-  if (selectedCategories.value.length > 0) {
-    result = result.filter((store) =>
-      selectedCategories.value.some(
-        (category) =>
-          store.category.includes(category) ||
-          (category === '온라인' && store.isOnline) ||
-          (category === '오프라인' && !store.isOnline),
-      ),
-    )
-  }
-
-  // 업종 필터링 (선택된 경우)
-  if (selectedBusinessTypes.value.length > 0) {
-    result = result.filter((store) => selectedBusinessTypes.value.includes(store.category))
-  }
-
-  // 정렬
-  result.sort((a, b) => {
-    switch (sortBy.value) {
-      case 'distance':
-        return a.distance - b.distance
-      case 'rating':
-        return b.rating - a.rating
-      case 'together-score':
-        return b.togetherScore - a.togetherScore
-      default:
-        return 0
-    }
-  })
-
-  // 페이지네이션용 전체 결과 저장
-  filteredStoresCount.value = result.length
-
-  // 페이지네이션
   const startIndex = (currentPage.value - 1) * itemsPerPage
-  const endIndex = startIndex + itemsPerPage
-  return result.slice(startIndex, endIndex)
+  return result.slice(startIndex, startIndex + itemsPerPage)
 })
+const searchUsers = async () => {
+  if (!searchQuery.value.trim()) {
+    users.value = []
+    return
+  }
+
+  clearTimeout(searchTimer)
+  searchTimer = setTimeout(async () => {
+    loading.value = true
+    errorMessage.value = ''
+    try {
+      const { data } = await api.get('/api/users', {
+        params: { q: searchQuery.value.trim() },
+      })
+      users.value = data.map((user) => ({
+        ...user,
+        lastMessage: user.lastMessage || '',
+        lastMessageTime: user.lastMessageTime || '',
+        rating: user.rating || 0,
+      }))
+    } catch (e) {
+      console.error(e)
+      users.value = []
+      errorMessage.value = `검색 오류: ${e.response?.status || ''} ${e.response?.data?.message || e.message}`
+    } finally {
+      loading.value = false
+    }
+  }, 300)
+}
+
+// ------------------------
+// **협의 요청 / 채팅 생성 로직**
+// ------------------------
+const router = useRouter()
+
+// 기존 매장 필터, 정렬, 페이지네이션 로직 유지
 
 const filteredStoresCount = ref(0)
-
 const itemsPerPage = 10
 const totalPages = computed(() => Math.ceil(filteredStoresCount.value / itemsPerPage))
 
-const visiblePages = computed(() => {
-  const pages = []
-  const total = totalPages.value
-  const current = currentPage.value
-
-  if (total <= 7) {
-    for (let i = 1; i <= total; i++) {
-      pages.push(i)
-    }
-  } else {
-    pages.push(1)
-
-    if (current > 4) {
-      pages.push('...')
-    }
-
-    const start = Math.max(2, current - 2)
-    const end = Math.min(total - 1, current + 2)
-
-    for (let i = start; i <= end; i++) {
-      pages.push(i)
-    }
-
-    if (current < total - 3) {
-      pages.push('...')
-    }
-
-    if (total > 1) {
-      pages.push(total)
-    }
-  }
-
-  return pages
-})
-
-// 메서드
+// 페이지네이션 등 기존 메서드 유지
 const onSearchInput = () => {
-  currentPage.value = 1 // 검색 시 첫 페이지로 리셋
+  currentPage.value = 1
+  searchUsers()
 }
-
 const toggleFilter = () => {
   showFilter.value = !showFilter.value
-  if (showFilter.value) {
-    showSort.value = false
-  }
+  if (showFilter.value) showSort.value = false
 }
-
 const toggleSort = () => {
   showSort.value = !showSort.value
-  if (showSort.value) {
-    showFilter.value = false
-  }
+  if (showSort.value) showFilter.value = false
 }
-
 const setSortBy = (value) => {
   sortBy.value = value
   showSort.value = false
-  currentPage.value = 1 // 정렬 변경 시 첫 페이지로 리셋
+  currentPage.value = 1
 }
-
-const getSortText = () => {
-  switch (sortBy.value) {
-    case 'distance':
-      return '거리 순'
-    case 'together-score':
-      return '함께지수 순'
-    default:
-      return '거리 순'
-  }
-}
-
+const getSortText = () => (sortBy.value === 'distance' ? '거리 순' : '함께지수 순')
 const setActiveTab = (tab) => {
   activeTab.value = tab
-  currentPage.value = 1 // 탭 변경 시 첫 페이지로 리셋
+  currentPage.value = 1
 }
-
 const setCurrentPage = (page) => {
   currentPage.value = page
 }
-
-const onRequestPartnership = (store) => {
-  selectedStoreForDetail.value = null // 상세 모달 닫기
+const onRequestPartnership = async (store) => {
+  // 모달 보여주고 싶으면 모달로
   selectedStore.value = store
+  selectedStoreForDetail.value = null
 }
-
 const onViewDetail = (store) => {
   selectedStoreForDetail.value = store
 }
-
 const closeDetailModal = () => {
   selectedStoreForDetail.value = null
 }
-
 const closeModal = () => {
   selectedStore.value = null
 }
-
 const hideSuccessToast = () => {
   showSuccessToast.value = false
 }
-
 const confirmPartnership = async (store) => {
+  closeModal()
+  showSuccessToast.value = true
+
+  loading.value = true
+  errorMessage.value = ''
   try {
-    // API 호출로 제휴 요청 전송
-    console.log('제휴 요청:', store)
-
-    // 성공 시 모달 닫고 토스트 표시
-    closeModal()
-    showSuccessToast.value = true
-  } catch (error) {
-    console.error('제휴 요청 실패:', error)
-    alert('제휴 요청에 실패했습니다. 다시 시도해주세요.')
-  }
-}
-
-const fetchStores = async () => {
-  try {
-    loading.value = true
-    // 실제로는 API 호출
-    // const response = await partnershipApi.getStores()
-    // stores.value = response.data
-
-    // 현재는 더미 데이터 사용
-    stores.value = dummyStores
-  } catch (error) {
-    console.error('매장 목록 조회 실패:', error)
+    console.log('채팅방 생성 시도 - userId:', store.id)
+    const { data } = await api.post(`/api/partnership/request/${store.id}`)
+    console.log('채팅방 생성 성공:', data)
+    router.push(`/business/chats/${data.roomId}`)
+  } catch (e) {
+    console.error('채팅방 생성 오류:', e)
+    if (e.response?.status === 403) errorMessage.value = '권한이 없습니다. 로그인 확인'
+    else if (e.response?.status === 401) errorMessage.value = '인증 필요'
+    else if (e.response?.status === 404) errorMessage.value = 'API를 찾을 수 없음'
+    else
+      errorMessage.value = `오류: ${e.response?.status} ${e.response?.data?.message || e.message}`
   } finally {
     loading.value = false
   }
 }
 
-// 라이프사이클
+const fetchStores = async () => {
+  loading.value = true
+  try {
+    const { data } = await api.get('/api/users')
+
+    // 배열을 splice로 업데이트하여 반응성 보장
+    users.value.splice(
+      0,
+      users.value.length,
+      ...data.map((user) => ({
+        id: user.id,
+        name: user.businessName || user.name,
+        category: user.businessCategory || user.category,
+        partnershipExists: !!user.partnershipExists, // boolean 강제
+      })),
+    )
+  } catch (e) {
+    console.error('매장 불러오기 오류', e)
+    users.value.splice(0) // 배열 초기화
+  } finally {
+    loading.value = false
+  }
+}
+
 onMounted(() => {
   fetchStores()
 })

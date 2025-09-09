@@ -21,17 +21,21 @@
 </template>
 
 <script>
+import { useRouter } from 'vue-router'
+
 export default {
   name: 'BusinessTopBar',
   setup() {
+    const router = useRouter()
+
     const handleChatClick = () => {
       console.log('채팅 버튼 클릭')
-      // 채팅 페이지로 이동 로직
+      router.push('/business/chats') // 채팅 페이지로 이동
     }
 
     const handleNotificationClick = () => {
       console.log('알림 버튼 클릭')
-      // 알림 페이지로 이동 로직
+      router.push('/business/notifications') // 필요 시 알림 페이지로 이동
     }
 
     return {

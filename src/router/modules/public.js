@@ -17,7 +17,6 @@ import ChatUserListView from '@/pages/ChatUserListView.vue'
 import ChatRoomView from '@/pages/ChatRoomView.vue'
 import CustomerHomePage from '@/pages/CustomerHomePage.vue'
 import ChattingHomePage from '@/pages/ChattingHomePage.vue'
-import BusinessPartnershipPage from '@/pages/BusinessPartnershipPage.vue'
 
 const routes = [
   // 인증 필요 ❌
@@ -83,6 +82,7 @@ const routes = [
     path: '/business/store',
     name: 'business-store',
     component: BusinessPartnershipPage,
+    meta: { requiresAuth: true, role: 'business' },
   },
   {
     path: '/business/coupon',

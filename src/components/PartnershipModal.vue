@@ -93,44 +93,49 @@ const submitProposal = () => {
   const currentUserId = Number(localStorage.getItem('userId') || 0)
   const currentUserName = localStorage.getItem('username') || '익명'
 
+  // 1️⃣ 백엔드 전송용 DTO 구조
   const backendProposalData = {
     roomId: props.roomId,
-    payload: {
-      proposerCoupon: {
-        itemName: myItem.value.trim(),
-        discountPercent: myDiscount.value,
-        totalQuantity: quantity.value,
-        startDate: formatDate(today),
-        endDate: formatDate(endDateObj),
-      },
-      recipientCoupon: {
-        itemName: partnerItem.value.trim(),
-        discountPercent: partnerDiscount.value,
-        totalQuantity: quantity.value,
-        startDate: formatDate(today),
-        endDate: formatDate(endDateObj),
-      },
+    proposerId: currentUserId,
+    proposerCoupon: {
+      itemName: myItem.value.trim(),
+      discountPercent: myDiscount.value,
+      totalQuantity: quantity.value,
+      startDate: formatDate(today),
+      endDate: formatDate(endDateObj),
     },
+    recipientCoupon: {
+      itemName: partnerItem.value.trim(),
+      discountPercent: partnerDiscount.value,
+      totalQuantity: quantity.value,
+      startDate: formatDate(today),
+      endDate: formatDate(endDateObj),
+    },
+    status: 'WAITING',
   }
 
+  // 2️⃣ UI용 임시 메시지
   const uiMessage = {
     id: `temp_${Date.now()}`,
     senderId: currentUserId,
     senderName: currentUserName,
-    content: '',
+    content: '', // 필요 시 요약 텍스트
     timestamp: today.getTime(),
     type: 'COUPON_PROPOSAL',
-    payload: {
-      roomId: props.roomId,
-      proposerId: currentUserId,
-      proposerCoupon: backendProposalData.payload.proposerCoupon,
-      recipientCoupon: backendProposalData.payload.recipientCoupon,
-      status: 'WAITING',
-    },
+    payload: backendProposalData,
     isTemp: true,
   }
 
-  proposeBilateralCoupon(backendProposalData)
+  // 3️⃣ STOMP 전송
+  try {
+    proposeBilateralCoupon(backendProposalData)
+  } catch (err) {
+    console.error('제안 전송 실패', err)
+    alert('제안 전송에 실패했습니다.')
+    return
+  }
+
+  // 4️⃣ UI 반영
   emit('proposal-sent', uiMessage)
   close()
 }

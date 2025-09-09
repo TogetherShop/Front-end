@@ -3,12 +3,7 @@
     <div class="store-card-content">
       <!-- 매장 이미지 -->
       <div class="store-image">
-        <img
-          v-if="store.image"
-          :src="store.image"
-          :alt="store.name"
-          class="store-img"
-        />
+        <img v-if="store.image" :src="store.image" :alt="store.name" class="store-img" />
         <div v-else class="store-img-placeholder">
           <span class="material-symbols-outlined">store</span>
         </div>
@@ -46,13 +41,9 @@
 
       <!-- 요청 버튼 -->
       <div class="action-section">
-        <button
-          class="request-button"
-          :disabled="!store.isPartnershipAvailable"
-          @click.stop="onRequestPartnership"
-        >
+        <button class="request-button" :disabled="store.partnershipExists" @click="handleRequest">
           <span class="material-symbols-outlined request-icon">handshake</span>
-          {{ store.isPartnershipAvailable ? '요청' : '요청됨' }}
+          {{ store.partnershipExists ? '요청됨' : '요청' }}
         </button>
       </div>
     </div>
@@ -60,11 +51,13 @@
 </template>
 
 <script setup>
+import { ref } from 'vue'
+const loading = ref(false)
 const props = defineProps({
   store: {
     type: Object,
-    required: true
-  }
+    required: true,
+  },
 })
 
 const emit = defineEmits(['request-partnership', 'view-detail'])
@@ -79,6 +72,17 @@ const formatDistance = (distance) => {
 const onRequestPartnership = () => {
   if (props.store.isPartnershipAvailable) {
     emit('request-partnership', props.store)
+  }
+}
+
+const handleRequest = async () => {
+  if (props.store.partnershipExists) return
+  loading.value = true
+  try {
+    // 부모에게 이벤트 emit → 모달 사용 여부 결정 가능
+    emit('request-partnership', props.store)
+  } finally {
+    loading.value = false
   }
 }
 

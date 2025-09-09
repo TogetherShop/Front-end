@@ -1,5 +1,5 @@
 <template>
-  <div class="proposal-card">
+  <div class="proposal-card" v-if="payload">
     <!-- 헤더 -->
     <div class="header">
       <span class="check-icon">✔</span>
@@ -9,17 +9,19 @@
     <!-- 쿠폰 비교 -->
     <div class="coupon-comparison">
       <div class="coupon-item">
-        <div class="item-name">{{ payload.proposerCoupon.itemName || '아메리카노' }}</div>
-        <div class="discount my-discount">{{ payload.proposerCoupon.discountPercent }}% 할인</div>
+        <div class="item-name">{{ payload.proposerCoupon?.itemName || '아메리카노' }}</div>
+        <div class="discount my-discount">
+          {{ payload.proposerCoupon?.discountPercent || 0 }}% 할인
+        </div>
         <div class="shop-label">내 매장</div>
       </div>
 
       <div class="exchange-arrow">⇔</div>
 
       <div class="coupon-item">
-        <div class="item-name">{{ payload.recipientCoupon.itemName || '크로와상' }}</div>
+        <div class="item-name">{{ payload.recipientCoupon?.itemName || '크로와상' }}</div>
         <div class="discount partner-discount">
-          {{ payload.recipientCoupon.discountPercent }}% 할인
+          {{ payload.recipientCoupon?.discountPercent || 0 }}% 할인
         </div>
         <div class="shop-label">상대 매장</div>
       </div>
@@ -29,13 +31,11 @@
     <div class="details">
       <div class="detail-row">
         <span class="label">발급 수량:</span>
-        <span class="value">{{ payload.proposerCoupon.totalQuantity }}개</span>
+        <span class="value">{{ payload.proposerCoupon?.totalQuantity || 0 }}개</span>
       </div>
       <div class="detail-row">
         <span class="label">유효기간:</span>
-        <span class="value">
-          {{ payload.proposerCoupon.duration || '30일' }}
-        </span>
+        <span class="value">{{ payload.proposerCoupon?.duration || '30일' }}</span>
       </div>
     </div>
 
@@ -65,43 +65,39 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, watch } from 'vue'
 import { acceptBilateralCoupon, rejectBilateralCoupon } from '@/api/ws'
 
 const props = defineProps({
-  message: { type: Object, required: true },
+  message: { type: Object, required: true }, // 상위에서 reactive 메시지 전달
   currentUserId: { type: Number, required: true },
 })
 
+// 모달 상태
 const showRejectModal = ref(false)
 const rejectReason = ref('')
 
-const payload = computed(() => props.message.payload || {})
+// payload는 이미 상위에서 parse된 객체를 받음
+const payload = computed(() => props.message?.payload || null)
 
-const isMyProposal = computed(() => payload.value.proposerId === props.currentUserId)
+// 내가 보낸 제안인지 확인
+const isMyProposal = computed(() => payload.value?.proposerId === props.currentUserId)
 
-const formatTime = (timestamp) => {
-  return new Date(timestamp).toLocaleTimeString('ko-KR', {
-    hour: '2-digit',
-    minute: '2-digit',
-  })
-}
-const formatDateRange = (startDate, endDate) => {
-  const start = new Date(startDate).toLocaleDateString('ko-KR')
-  const end = new Date(endDate).toLocaleDateString('ko-KR')
-  return `${start} ~ ${end}`
-}
+// 수락
 const acceptProposal = () => {
+  if (!props.message?.id) return
   try {
-    acceptBilateralCoupon(payload.value.roomId)
+    acceptBilateralCoupon(props.message.id)
   } catch (error) {
     alert('제안 수락에 실패했습니다.')
   }
 }
 
+// 거절
 const rejectProposal = () => {
+  if (!props.message?.id) return
   try {
-    rejectBilateralCoupon(payload.value.roomId, rejectReason.value || '사유 없음')
+    rejectBilateralCoupon(props.message.id, rejectReason.value || '사유 없음')
     showRejectModal.value = false
     rejectReason.value = ''
   } catch (error) {

@@ -5,8 +5,8 @@
       <div class="header-left">
         <button class="back-btn">←</button>
         <div class="shop-info">
-          <h3 class="shop-name">달콤 베이커리</h3>
-          <span class="shop-status">오프라인</span>
+          <h3 class="shop-name">{{ businessName }}</h3>
+          <span class="shop-status">{{ partnershipStatus }}</span>
         </div>
       </div>
       <div class="header-right">
@@ -18,238 +18,358 @@
     <!-- 상단 지표 -->
     <div class="shop-stats">
       <div class="stat">
-        <div class="stat-value green">4.8</div>
+        <div class="stat-value green">{{ togetherScore }}</div>
         <div class="stat-label">함께지수</div>
       </div>
       <div class="stat">
-        <div class="stat-value">0.8km</div>
+        <div class="stat-value">{{ distance }}km</div>
         <div class="stat-label">거리</div>
       </div>
       <div class="stat">
-        <div class="stat-value">베이커리</div>
-        <div class="stat-label">강남구 역삼동</div>
+        <div class="stat-value">{{ category }}</div>
+        <div class="stat-label">{{ address }}</div>
       </div>
     </div>
 
+    <!-- 메시지 영역 -->
     <!-- 메시지 영역 -->
     <main ref="chatContainer" class="chat-container">
       <div
         v-for="m in messages"
         :key="m.id"
-        class="message-wrapper"
-        :class="{ mine: m.senderId === currentUserId }"
+        :class="['message-wrapper', { mine: m.senderId === currentUserId }]"
       >
-        <!-- 제휴 제안 카드 -->
-        <!-- <div v-if="m.type === 'COUPON_PROPOSAL'" class="proposal-card">
-          <div class="proposal-header">✔ 제휴 제안</div>
-          <div class="proposal-body">
-            <div class="proposal-row">
-              <span>아메리카노</span>
-              <span class="highlight">10% 할인</span>
-              <span>⇔</span>
-              <span class="highlight">15% 할인</span>
-              <span>크로와상</span>
-            </div>
-            <div class="proposal-meta">
-              <span>발급 수량: 100개</span>
-              <span>유효기간: 30일</span>
-            </div>
-          </div>
-          <div class="proposal-actions">
-            <button class="accept-btn">수락</button>
-            <button class="reject-btn">거절</button>
-          </div>
-        </div> -->
+        <!-- 제휴 제안 메시지 -->
         <ProposalMessage
           v-if="m.type === 'COUPON_PROPOSAL'"
           :message="m"
           :currentUserId="currentUserId"
         />
-        <!-- 일반 메시지 -->
-        <div v-else class="chat-bubble">
-          <div class="chat-text">{{ m.content }}</div>
-          <div class="chat-time">{{ formatTime(m.timestamp) }}</div>
+
+        <!-- 파트너십 요청 메시지 -->
+        <div v-else-if="m.type === 'PARTNERSHIP_REQUEST'" class="chat-bubble system-message">
+          {{ m.content }}
+          <div class="chat-time">{{ formatTime(m.createdAt) }}</div>
+        </div>
+
+        <!-- 일반 텍스트 메시지 -->
+        <div v-else-if="m.type === 'TEXT'" class="chat-bubble">
+          {{ m.content }}
+          <div class="chat-time">{{ formatTime(m.createdAt) }}</div>
         </div>
       </div>
     </main>
 
-    <!-- 입력창 -->
-    <footer class="chat-input">
-      <button class="proposal-btn" v-if="roomStatus === 'active'" @click="openPartnershipModal">
-        제휴 제안
-      </button>
-      <div class="input-box">
-        <input
-          v-model="text"
-          type="text"
-          placeholder="메시지를 입력하세요..."
-          @keyup.enter="sendMessage"
-        />
-        <button class="send-btn" @click="sendMessage">➤</button>
-        <PartnershipModal
-          :roomId="roomId"
-          :visible="partnershipModalVisible"
-          @update:visible="partnershipModalVisible = $event"
-          @proposal-sent="handleProposalSent"
-        />
-      </div>
+    <!-- 입력창 / 버튼 -->
+    <footer class="chat-footer">
+      <!-- 요청 받은 상태 -->
+      <template v-if="partnershipStatus === 'REQUESTED'">
+        <!-- 오직 내가 받은 사람(recipient)일 때만 수락 버튼 표시 -->
+        <div v-if="role === 'RECIPIENT'">
+          <div class="request-box">
+            <p class="request-text">요청을 수락하시겠습니까?</p>
+            <div class="request-actions">
+              <button class="accept-btn" @click="accept">예</button>
+              <button class="reject-btn" @click="reject">아니오</button>
+            </div>
+          </div>
+          <div class="input-row">
+            <button class="proposal-btn" disabled>제휴 제안</button>
+            <div class="input-box disabled">
+              <input type="text" placeholder="메시지를 입력하세요..." disabled />
+              <button class="send-btn" disabled>➤</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- 보낸 사람은 입력창 비활성화 -->
+        <div v-else class="input-row">
+          <button class="proposal-btn" disabled>제휴 제안</button>
+          <div class="input-box disabled">
+            <input type="text" placeholder="메시지를 입력하세요..." disabled />
+            <button class="send-btn" disabled>➤</button>
+          </div>
+        </div>
+      </template>
+
+      <!-- 제휴 가능 상태 -->
+      <template v-else-if="partnershipStatus === 'ACCEPTED'">
+        <div class="input-row">
+          <button class="proposal-btn" @click="openPartnershipModal">제휴 제안</button>
+          <div class="input-box">
+            <input
+              v-model="text"
+              type="text"
+              placeholder="메시지를 입력하세요..."
+              @keyup.enter="sendMessage"
+            />
+            <button class="send-btn" @click="sendMessage">➤</button>
+            <PartnershipModal
+              :roomId="roomId"
+              :visible="partnershipModalVisible"
+              @update:visible="partnershipModalVisible = $event"
+              @proposal-sent="handleProposalSent"
+            />
+          </div>
+        </div>
+      </template>
+
+      <!-- 완료 / 거절 -->
+      <template v-else-if="partnershipStatus === 'REJECTED'">
+        <div class="input-box">
+          <input type="text" placeholder="채팅이 종료되었습니다" disabled />
+        </div>
+      </template>
     </footer>
   </div>
 </template>
 
 <script setup>
-import { ref, nextTick } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
+import { ref, onMounted, onBeforeUnmount, nextTick } from 'vue'
+import { useRoute } from 'vue-router'
+import {
+  connectWS,
+  disconnectWS,
+  subscribeRoom,
+  sendText,
+  fetchChatHistory,
+  acceptRequest, // <-- match ws.js
+  rejectRequest, // <--
+  getRoomInfo,
+} from '@/api/ws'
 import PartnershipModal from '@/components/PartnershipModal.vue'
 import ProposalMessage from '@/components/ProposalMessage.vue'
+import { jwtDecode } from 'jwt-decode'
+
+const route = useRoute()
+const roomId = route.params.roomId
+
+const me = ref({ id: null, username: '', shopName: '' })
+const otherUser = ref({ id: null, username: '', shopName: '' })
+const requesterId = ref(null)
+const recipientId = ref(null)
+const partnershipStatus = ref(null)
+const currentUserId = ref(me.value.id) // me.value.id와 동일
+
+const chatContainer = ref(null)
+const text = ref('')
+const messages = ref([])
 const partnershipModalVisible = ref(false)
+const role = ref(null)
+let unsubscribe = null
+// JWT에서 현재 사용자 ID 가져오기
+
+try {
+  const token = localStorage.getItem('access_token')
+  const decoded = token ? jwtDecode(token) : null
+  currentUserId.value = decoded?.sub ? Number(decoded.sub) : null
+} catch (e) {
+  console.error('JWT 디코딩 실패', e)
+}
+
+// 샵 정보 (임시)
+const businessName = ref('')
+const category = ref('')
+const togetherScore = 4.8
+const distance = 0.8
+const address = '강남구 역삼동'
+// 스크롤 하단 이동
+const scrollToBottom = () => {
+  nextTick(() => {
+    if (chatContainer.value) {
+      chatContainer.value.scrollTop = chatContainer.value.scrollHeight
+    }
+  })
+}
+
+// WebSocket 수신
+const handleIncomingMessage = (msg) => {
+  console.log('수신 메시지:', msg)
+  console.log('payload 타입:', typeof msg.payload, msg.payload)
+  messages.value.push(msg)
+  scrollToBottom()
+
+  if (msg.type === 'PARTNERSHIP_REQUEST') {
+    partnershipStatus.value = msg.payload?.status || partnershipStatus.value
+  }
+  if (msg.type === 'PROPOSAL_ACCEPTED') partnershipStatus.value = 'COMPLETED'
+  if (msg.type === 'PROPOSAL_REJECTED') partnershipStatus.value = 'REJECTED'
+}
+
+// 메시지 전송
+const sendMessage = async () => {
+  if (!text.value.trim()) return
+  const content = text.value
+  text.value = ''
+  try {
+    await sendText(roomId, content)
+  } catch (err) {
+    console.error('메시지 전송 실패', err)
+    alert('메시지 전송에 실패했습니다.')
+  }
+}
+
+// 제휴 모달
 const openPartnershipModal = () => {
   partnershipModalVisible.value = true
 }
 
-const handleProposalSent = (proposalMsg) => {
-  // 1) 채팅 화면에 임시 메시지로 추가
-  messages.value = [...messages.value, proposalMsg]
-  scrollToBottom()
-
-  // 2) 서버로 제휴 제안 전송 (올바른 함수 사용)
+// 요청 수락
+const accept = async () => {
   try {
-    proposeBilateralCoupon(proposalMsg) // ✅ 전용 함수 사용
-    console.log('✅ 제휴 제안 전송 완료')
-
-    // 임시 메시지를 실제 메시지로 변환 (서버 응답이 오지 않는 경우를 대비)
-    setTimeout(() => {
-      messages.value = messages.value.map((m) =>
-        m.id === proposalMsg.id && m.isTemp ? { ...m, isTemp: false } : m,
-      )
-    }, 2000) // 2초 후
-  } catch (error) {
-    console.error('❌ 제휴 제안 전송 실패:', error)
-    // 실패시 임시 메시지 제거
-    messages.value = messages.value.filter((m) => m.id !== proposalMsg.id)
-    alert('제안 전송에 실패했습니다. 다시 시도해주세요.')
+    await acceptRequest(roomId) // currentUserId 제거
+    partnershipStatus.value = 'ACCEPTED'
+  } catch (err) {
+    console.error('요청 수락 실패', err)
   }
 }
-const route = useRoute()
-const router = useRouter()
-const roomId = route.params.roomId
-const wsConnected = ref(false)
-const reconnectAttempts = ref(0)
-const maxReconnectAttempts = 5
-const currentUser = ref(localStorage.getItem('username') || '')
 
-let unsubscribe = null
-let connectionCheckInterval = null
-let connectWebSocket = null // 함수를 변수로 선언
+// 요청 거절
+const reject = async () => {
+  try {
+    await rejectRequest(roomId, '사용자가 거절함') // currentUserId 제거
+    partnershipStatus.value = 'REJECTED'
+  } catch (err) {
+    console.error('요청 거절 실패', err)
+  }
+}
+// 제휴 제안 메시지 처리
+const handleProposalSent = (proposalMsg) => {
+  messages.value.push(proposalMsg)
+  scrollToBottom()
+}
 
-const messages = ref([
-  {
-    id: 1,
-    senderId: 2,
-    content: '안녕하세요! 제휴 제안 감사합니다. 조건을 검토해보겠습니다.',
-    timestamp: Date.now() - 60000,
-    type: 'CHAT',
-  },
-  {
-    id: 2,
-    senderId: 1,
-    content: '네, 감사합니다. 1:1 쿠폰 교환으로 진행하면 좋을 것 같습니다.',
-    timestamp: Date.now() - 30000,
-    type: 'CHAT',
-  },
-  {
-    id: 3,
-    senderId: 1,
-    type: 'COUPON_PROPOSAL',
-    timestamp: Date.now() - 20000,
-    payload: {
-      proposerCoupon: {
-        itemName: '아메리카노',
-        discountPercent: 10,
-        totalQuantity: 100,
-        startDate: new Date().toISOString().slice(0, 10),
-        endDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10),
-      },
-      recipientCoupon: {
-        itemName: '크로와상',
-        discountPercent: 15,
-        totalQuantity: 100,
-        startDate: new Date().toISOString().slice(0, 10),
-        endDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10),
-      },
-      status: 'WAITING',
-    },
-  },
+// 시간 포맷
+const formatTime = (ts) => {
+  if (!ts) return ''
 
-  {
-    id: 4,
-    senderId: 2,
-    content: '제안 검토했습니다. 15% 할인으로 조정 가능할까요?',
-    timestamp: Date.now() - 10000,
-    type: 'CHAT',
-  },
-])
+  try {
+    // createdAt은 ISO 문자열 형태이므로 바로 Date 생성자에 전달
+    const date = new Date(ts)
+    const hours = date.getHours().toString().padStart(2, '0')
+    const minutes = date.getMinutes().toString().padStart(2, '0')
+    return `${hours}:${minutes}`
+  } catch (e) {
+    console.error('시간 포맷 실패:', e)
+    return ''
+  }
+}
 
+onBeforeUnmount(() => {
+  unsubscribe?.()
+  disconnectWS()
+})
+
+const fetchRoomInfo = async () => {
+  try {
+    const res = await getRoomInfo(roomId)
+    if (!res) return
+
+    // API 응답에서 roomInfo 사용
+    const roomInfo = res.roomInfo || res
+    console.log('방 정보 로드됨:', roomInfo)
+    partnershipStatus.value = roomInfo?.status ?? null
+    me.value = roomInfo.me || {}
+    otherUser.value = roomInfo.otherUser || {}
+    requesterId.value = roomInfo.requesterId
+    recipientId.value = roomInfo.recipientId
+    partnershipStatus.value = roomInfo.status || null
+
+    // role 계산
+    role.value = currentUserId.value === requesterId.value ? 'REQUESTER' : 'RECIPIENT'
+
+    businessName.value = otherUser.value.shopName || ''
+    category.value = otherUser.value.username || ''
+
+    console.log('방 정보 로드됨:', roomInfo)
+  } catch (err) {
+    console.error('방 정보 불러오기 실패', err)
+  }
+}
 const fetchHistory = async () => {
   try {
-    const { data } = await api.get(`/api/partnership/rooms/${roomId}/history`)
-    const fetchedMessages = (data.messages || []).map((m) => ({
-      id: m.id,
-      senderId: m.senderId,
-      senderName: m.senderName || '알 수 없음',
-      content: m.content || '',
-      timestamp: new Date(m.createdAt).getTime(),
-      type: m.type || 'CHAT',
-      payload: m.payload || null,
-    }))
+    const res = await fetchChatHistory(roomId)
+    console.log('채팅 기록 전체:', res)
 
-    messages.value = fetchedMessages
-    removeDuplicateMessages() // 중복 제거
-
-    // 서버에서 받아온 roomInfo 기반으로 currentUserId 설정
-    if (!currentUserId.value && data.roomInfo?.currentUserId) {
-      currentUserId.value = data.roomInfo.currentUserId
+    // res 자체가 배열인 경우
+    if (Array.isArray(res)) {
+      messages.value = [...res]
     }
-    updateRoomStatus()
-    scrollToBottom()
-  } catch {
-    messages.value = []
+    // 혹시 res.messages 안에 담기는 경우도 대비
+    else if (res.messages && Array.isArray(res.messages)) {
+      messages.value = [...res.messages]
+    }
+
+    console.log('messages.value 설정됨:', messages.value.length)
+
+    nextTick(() => {
+      scrollToBottom()
+    })
+  } catch (err) {
+    console.error('채팅 기록 불러오기 실패', err)
   }
 }
 
-const currentUserId = 1
-const text = ref('')
-const roomStatus = ref('active')
-const chatContainer = ref(null)
+onMounted(async () => {
+  // 1. JWT에서 사용자 ID 가져오기
+  try {
+    const token = localStorage.getItem('access_token')
+    const decoded = token ? jwtDecode(token) : null
+    currentUserId.value = decoded?.sub ? Number(decoded.sub) : null
+    console.log('현재 사용자 ID:', currentUserId.value)
+    console.log('현재 partnershipStatus:', partnershipStatus.value)
+  } catch (e) {
+    console.error('JWT 디코딩 실패', e)
+  }
 
-const sendMessage = () => {
-  if (!text.value.trim()) return
-  messages.value.push({
-    id: Date.now(),
-    senderId: currentUserId,
-    content: text.value,
-    timestamp: Date.now(),
-    type: 'CHAT',
-  })
-  text.value = ''
-  nextTick(() => {
-    chatContainer.value.scrollTop = chatContainer.value.scrollHeight
-  })
-}
+  // 2. 채팅 기록 먼저 가져오기 (방 정보와 함께 오므로)
+  await fetchHistory()
+  await fetchRoomInfo()
 
-const formatTime = (timestamp) =>
-  new Date(timestamp).toLocaleTimeString('ko-KR', {
-    hour: '2-digit',
-    minute: '2-digit',
-  })
+  // 3. 방 정보는 fetchHistory에서 받은 roomInfo 사용하거나 별도 호출
+  // getRoomInfo가 roomInfo만 반환하는지 확인 필요
+
+  // 4. WebSocket 연결
+  connectWS(
+    () => {
+      unsubscribe = subscribeRoom(roomId, (msg) => {
+        console.log('subscribeRoom 콜백 호출됨:', msg) // 메시지 들어오는지 확인
+        handleIncomingMessage(msg)
+      })
+
+      console.log('WebSocket 연결됨')
+    },
+    (err) => console.error('WebSocket 연결 실패:', err),
+  )
+})
 </script>
-
 <style scoped>
 .chat-room {
   display: flex;
   flex-direction: column;
   height: 100vh;
   background: #fff;
+}
+.chat-footer {
+  border-top: 1px solid #eee;
+  padding: 8px;
+}
+
+.input-row {
+  display: flex;
+  align-items: center;
+  gap: 8px; /* 버튼과 input 사이 간격 */
+}
+
+.proposal-btn {
+  background: #017f58;
+  color: white;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 13px;
+  flex-shrink: 0; /* 버튼 크기 고정 */
 }
 
 /* 헤더 */
@@ -342,6 +462,14 @@ const formatTime = (timestamp) =>
   font-size: 10px;
   color: #888;
   margin-top: 4px;
+}
+/* 시스템 메시지 (파트너십 요청) 스타일 */
+.chat-bubble.system-message {
+  background: #f3f4f6;
+  color: #374151;
+  font-style: italic;
+  text-align: center;
+  border: 1px solid #d1d5db;
 }
 
 /* 제휴 제안 카드 */
@@ -438,5 +566,58 @@ const formatTime = (timestamp) =>
   width: 36px;
   height: 36px;
   cursor: pointer;
+}
+/* 요청 수락/거절 카드 */
+.request-box {
+  width: 100%;
+  padding: 16px;
+  text-align: center;
+}
+
+.request-text {
+  font-size: 16px;
+  font-weight: 500;
+  margin-bottom: 12px;
+}
+
+.request-actions {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+}
+
+.request-actions .accept-btn {
+  flex: 1;
+  max-width: 120px;
+  background: #017f58;
+  color: #fff;
+  border: none;
+  padding: 10px 0;
+  border-radius: 8px;
+  font-size: 15px;
+  cursor: pointer;
+}
+
+.request-actions .reject-btn {
+  flex: 1;
+  max-width: 120px;
+  background: #fff;
+  color: #017f58;
+  border: 1px solid #e5e7eb;
+  padding: 10px 0;
+  border-radius: 8px;
+  font-size: 15px;
+  cursor: pointer;
+}
+
+/* 입력창 비활성화 스타일 */
+.input-box.disabled {
+  opacity: 0.6;
+  pointer-events: none;
+}
+.proposal-btn[disabled],
+.send-btn[disabled] {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 </style>

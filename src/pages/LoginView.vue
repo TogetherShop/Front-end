@@ -93,6 +93,11 @@ import { useRouter } from 'vue-router'
 import { login } from '@/api/auth'
 import { customerLogin } from '@/api/customer-auth'
 import logo from '@/assets/images/togethershop_logo.png'
+import api from '@/api/api'
+
+import { initializeApp } from "firebase/app";
+import { getMessaging, getToken } from "firebase/messaging";
+
 
 const username = ref('')
 const password = ref('')
@@ -100,15 +105,94 @@ const userType = ref('customer') // 기본값: 고객
 const router = useRouter()
 const canLogin = computed(() => username.value && password.value)
 
+const firebaseConfig = {
+  apiKey: "AIzaSyD-I_9-Zj0ZVUtQNq79c21V12M3b5G3yFk",
+  authDomain: "togethershop-94509.firebaseapp.com",
+  projectId: "togethershop-94509",
+  storageBucket: "togethershop-94509.firebasestorage.app",
+  messagingSenderId: "436249821371",
+  appId: "1:436249821371:web:8af7c191a6948884bd699e",
+  measurementId: "G-TKBK7W2X3C"
+};
+
+const app = initializeApp(firebaseConfig);
+const messaging = getMessaging(app);
+
+// Service Worker 등록
+let serviceWorkerReady = false;
+
+const initializeServiceWorker = async () => {
+  try {
+    await navigator.serviceWorker.register('/firebase-messaging-sw.js');
+    serviceWorkerReady = true;
+    console.log('Service Worker 등록 완료');
+  } catch (err) {
+    console.error('Service Worker registration failed:', err);
+    serviceWorkerReady = false;
+  }
+};
+
+// 앱 시작 시 Service Worker 초기화
+initializeServiceWorker();
+
+const getFcmToken = async () => {
+  if (!serviceWorkerReady) {
+    console.warn('Service Worker가 아직 등록되지 않았습니다.');
+    return null;
+  }
+  
+  try {
+    const currentToken = await getToken(messaging, { 
+      vapidKey: 'BAOFN15lHfGyHNIFFIklufg42Vg3YMjpV6jztQECm8yLbR8i-aYGZ6f2Na_n1DpW-5wzS7Kp14OEEIGF60YE39E' 
+    });
+    console.log('FCM 토큰 발급 성공:', currentToken);
+    return currentToken;
+  } catch (error) {
+    console.error('FCM 토큰 발급 실패:', error);
+    return null;
+  }
+}
+
+const sendFcmTokenToServer = async (userType, token) => {
+  if (!token) return;
+
+  const url = userType === 'customer'
+    ? '/api/fcm/customer/fcm-token'     // 고객 토큰 등록 API 엔드포인트
+    : '/api/fcm/business/fcm-token';   // 매장 토큰 등록 API 엔드포인트
+
+  try {
+    await api.post(url, { fcmToken: token }, { userType });
+    console.log('FCM 토큰 서버 전송 성공');
+  } catch (e) {
+    console.error('FCM 토큰 서버 전송 실패:', e);
+  }
+};
+
+
 const doLogin = async () => {
   if (!canLogin.value) return
+  
   try {
     // 사용자 유형에 따라 다른 API 호출
     if (userType.value === 'customer') {
       await customerLogin(username.value, password.value)
+      
+      // FCM 토큰 발급 및 전송 (로그인 성공 후)
+      const fcmToken = await getFcmToken();
+      if (fcmToken) {
+        await sendFcmTokenToServer('customer', fcmToken);
+      }
+      
       router.push('/customer')
     } else {
       await login(username.value, password.value)
+      
+      // FCM 토큰 발급 및 전송 (로그인 성공 후)
+      const fcmToken = await getFcmToken();
+      if (fcmToken) {
+        await sendFcmTokenToServer('business', fcmToken);
+      }
+      
       router.push('/business')
     }
   } catch (e) {

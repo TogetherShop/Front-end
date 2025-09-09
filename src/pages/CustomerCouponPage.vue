@@ -9,7 +9,7 @@
         <button
           class="coupon-page__tab-button"
           :class="{ 'coupon-page__tab-button--active': activeTab === 'available' }"
-          @click="activeTab = 'available'"
+          @click="updateTab('available')"
           type="button"
         >
           발급 가능한 쿠폰
@@ -17,7 +17,7 @@
         <button
           class="coupon-page__tab-button"
           :class="{ 'coupon-page__tab-button--active': activeTab === 'received' }"
-          @click="activeTab = 'received'"
+          @click="updateTab('received')"
           type="button"
         >
           받은 쿠폰
@@ -119,6 +119,7 @@
 
 <script>
 import { ref, onMounted, computed, watch } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
 import CustomerTopBar from '@/components/CustomerTopBar.vue'
 import CustomerCouponCard from '@/components/CustomerCouponCard.vue'
 import CustomerReceivedCouponCard from '@/components/CustomerReceivedCouponCard.vue'
@@ -144,6 +145,8 @@ export default {
     CustomerBottomNavigation,
   },
   setup() {
+    const route = useRoute()
+    const router = useRouter()
     const activeTab = ref('available')
     const loading = ref(false)
     const searchQuery = ref('')
@@ -554,8 +557,37 @@ export default {
       }
     })
 
+    // 라우트 변경 감지
+    watch(() => route.query.tab, (newTab) => {
+      if (newTab === 'received') {
+        activeTab.value = 'received'
+      } else {
+        activeTab.value = 'available'
+      }
+    })
+
+    // URL 쿼리 파라미터 처리
+    const initializeActiveTab = () => {
+      const tabParam = route.query.tab
+      if (tabParam === 'received') {
+        activeTab.value = 'received'
+      } else {
+        activeTab.value = 'available'
+      }
+    }
+
+    // 탭 변경 시 URL 업데이트
+    const updateTab = (tab) => {
+      activeTab.value = tab
+      router.push({
+        path: '/customer/coupon',
+        query: { tab: tab }
+      })
+    }
+
     // 컴포넌트 마운트 시 데이터 로드
     onMounted(() => {
+      initializeActiveTab()
       loadCoupons()
     })
 
@@ -581,6 +613,7 @@ export default {
       loadReceivedCoupons,
       loadCoupons,
       formatDate,
+      updateTab,
     }
   },
 }

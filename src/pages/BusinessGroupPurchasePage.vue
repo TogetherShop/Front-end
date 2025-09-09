@@ -6,56 +6,68 @@
     <!-- 함께지수 랭킹 섹션 -->
     <div class="ranking-container">
       <div class="ranking-header">
-        <span class="material-symbols-outlined trophy-icon">trophy</span>
+        <span class="trophy-icon">🏆</span>
         <h2 class="ranking-title">함께지수 랭킹</h2>
       </div>
 
-      <div class="ranking-list">
+      <!-- 랭킹 로딩 상태 -->
+      <div v-if="rankingLoading" class="ranking-loading">
+        <div class="ranking-loading-spinner"></div>
+        <p>랭킹 데이터를 불러오는 중...</p>
+      </div>
+
+      <!-- 랭킹 데이터가 로드된 후에만 표시 -->
+      <div v-else-if="rankingData.length > 0" class="ranking-list">
         <div class="ranking-item ranking-item--first">
-          <div class="rank-number">{{ rankingData[0]?.rank || 1 }}</div>
+          <div class="rank-number">{{ rankingData[0].rank }}</div>
           <div class="store-image">
             <div class="store-avatar-placeholder"></div>
           </div>
           <div class="user-info">
             <div class="user-name-container">
-              <span class="user-name">{{ rankingData[0]?.businessName || '카페 온다로드' }}</span>
+              <span class="user-name">{{ rankingData[0].businessName }}</span>
               <img src="@/assets/images/first.png" alt="1위" class="rank-icon" />
             </div>
             <div class="user-stats">
-              <span class="score">함께지수 {{ Math.round(rankingData[0]?.togetherScore || 99) }}</span>
+              <span class="score">함께지수 {{ Math.round(rankingData[0].togetherScore) }}</span>
             </div>
           </div>
         </div>
-        <div class="ranking-item">
-          <div class="rank-number rank-number--second">{{ rankingData[1]?.rank || 2 }}</div>
+        <div v-if="rankingData[1]" class="ranking-item">
+          <div class="rank-number rank-number--second">{{ rankingData[1].rank }}</div>
           <div class="store-image">
             <div class="store-avatar-placeholder"></div>
           </div>
           <div class="user-info">
             <div class="user-name-container">
-              <span class="user-name">{{ rankingData[1]?.businessName || '베이커리 담음' }}</span>
+              <span class="user-name">{{ rankingData[1].businessName }}</span>
               <img src="@/assets/images/second.png" alt="2위" class="rank-icon" />
             </div>
             <div class="user-stats">
-              <span class="score">함께지수 {{ Math.round(rankingData[1]?.togetherScore || 88) }}</span>
+              <span class="score">함께지수 {{ Math.round(rankingData[1].togetherScore) }}</span>
             </div>
           </div>
         </div>
-        <div class="ranking-item">
-          <div class="rank-number rank-number--third">{{ rankingData[2]?.rank || 3 }}</div>
+        <div v-if="rankingData[2]" class="ranking-item">
+          <div class="rank-number rank-number--third">{{ rankingData[2].rank }}</div>
           <div class="store-image">
             <div class="store-avatar-placeholder"></div>
           </div>
           <div class="user-info">
             <div class="user-name-container">
-              <span class="user-name">{{ rankingData[2]?.businessName || '해어싱 스타일' }}</span>
+              <span class="user-name">{{ rankingData[2].businessName }}</span>
               <img src="@/assets/images/third.png" alt="3위" class="rank-icon" />
             </div>
             <div class="user-stats">
-              <span class="score">함께지수 {{ Math.round(rankingData[2]?.togetherScore || 77) }}</span>
+              <span class="score">함께지수 {{ Math.round(rankingData[2].togetherScore) }}</span>
             </div>
           </div>
         </div>
+      </div>
+
+      <!-- 랭킹 데이터 로딩 실패 시 -->
+      <div v-else class="ranking-empty">
+        <p>랭킹 데이터를 불러올 수 없습니다.</p>
       </div>
     </div>
 
@@ -111,7 +123,7 @@
           <div class="item-details">
             <span class="price">{{ formatPrice(item.targetMoney || item.price) }}</span>
             <span class="participants">
-              <span class="material-symbols-outlined person-icon">person</span>
+              <span class="material-symbols-outlined person-icon">groups</span>
               {{ formatParticipants(item) }}
             </span>
             <span v-if="item.endDate" class="deadline">
@@ -243,14 +255,16 @@ const pageSize = ref(20)
 
 // 랭킹 데이터
 const rankingData = ref([])
+const rankingLoading = ref(false) // 랭킹 로딩 상태 추가
 
 // 랭킹 데이터를 불러오는 함수
 const loadRankingData = async () => {
   try {
+    rankingLoading.value = true // 로딩 시작
     const response = await getBusinesses()
 
     // 백엔드가 직접 배열을 반환하므로 response 자체가 데이터 배열
-    if (response && Array.isArray(response)) {
+    if (response && Array.isArray(response) && response.length > 0) {
       // 함께지수(togetherIndex)를 기준으로 정렬
       const sortedBusinesses = response
         .sort((a, b) => (b.togetherIndex || 0) - (a.togetherIndex || 0))
@@ -266,52 +280,16 @@ const loadRankingData = async () => {
 
       console.log('랭킹 데이터 로드 완료:', rankingData.value)
     } else {
-      // API 응답이 예상과 다른 경우 기본값 설정
-      rankingData.value = [
-        {
-          id: 1,
-          rank: 1,
-          businessName: '카페 온다로드',
-          togetherScore: 99
-        },
-        {
-          id: 2,
-          rank: 2,
-          businessName: '베이커리 담음',
-          togetherScore: 88
-        },
-        {
-          id: 3,
-          rank: 3,
-          businessName: '해어싱 스타일',
-          togetherScore: 77
-        }
-      ]
-      console.log('기본 랭킹 데이터 사용 - 응답 구조 불일치')
+      // API 응답이 없거나 빈 배열인 경우 빈 배열 유지
+      rankingData.value = []
+      console.log('랭킹 데이터 없음 - 빈 상태 표시')
     }
   } catch (error) {
     console.error('랭킹 데이터 로드 실패:', error)
-    // 에러 발생 시 기본값 설정
-    rankingData.value = [
-      {
-        id: 1,
-        rank: 1,
-        businessName: '카페 온다로드',
-        togetherScore: 99
-      },
-      {
-        id: 2,
-        rank: 2,
-        businessName: '베이커리 담음',
-        togetherScore: 88
-      },
-      {
-        id: 3,
-        rank: 3,
-        businessName: '해어싱 스타일',
-        togetherScore: 77
-      }
-    ]
+    // 에러 발생 시에도 빈 배열 유지 (기본값 제거)
+    rankingData.value = []
+  } finally {
+    rankingLoading.value = false // 로딩 완료
   }
 }
 
@@ -336,7 +314,7 @@ const loadOngoingPurchases = async () => {
       }))
       totalPages.value = response.totalPages || 0
 
-      console.log('📦 진행 중인 공동구매 데이터:', ongoingPurchases.value)
+      console.log('진행 중인 공동구매 데이터:', ongoingPurchases.value)
     }
   } catch (error) {
     console.error('진행 중인 공동구매 로드 실패:', error)
@@ -384,7 +362,7 @@ const loadParticipatedPurchases = async () => {
       participatedPurchases.value = detailedData.filter(item => item !== null)
       totalPages.value = response.totalPages || 0
 
-      console.log('📦 참여한 공동구매 데이터:', participatedPurchases.value)
+      console.log('참여한 공동구매 데이터:', participatedPurchases.value)
     }
   } catch (error) {
     console.error('참여한 공동구매 로드 실패:', error)
@@ -410,7 +388,7 @@ const loadRegisteredPurchases = async () => {
         status: mapApiStatus(item.status) // 백엔드 상태를 프론트 상태로 변환
       }))
 
-      console.log('📦 등록한 공동구매 데이터:', registeredPurchases.value)
+      console.log('등록한 공동구매 데이터:', registeredPurchases.value)
     }
   } catch (error) {
     console.error('등록한 공동구매 로드 실패:', error)
@@ -813,6 +791,33 @@ onMounted(async () => {
 @keyframes spin {
   0% { transform: rotate(0deg); }
   100% { transform: rotate(360deg); }
+}
+
+/* 랭킹 로딩 상태 */
+.ranking-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  min-height: 120px;
+}
+
+.ranking-loading-spinner {
+  width: 32px;
+  height: 32px;
+  border: 3px solid #f3f4f6;
+  border-top: 3px solid #fbbf24;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 1rem;
+}
+
+.ranking-empty {
+  text-align: center;
+  padding: 2rem;
+  color: #6b7280;
+  font-size: 0.875rem;
 }
 
 .empty-state {

@@ -18,8 +18,8 @@
       <div class="store-info">
         <div class="store-header">
           <div class="store-name-category">
-            <h3 class="store-name">{{ store.name }}</h3>
-            <span class="store-category">{{ store.category }}</span>
+            <h3 class="store-name">{{ store.businessName }}</h3>
+            <span class="store-category">{{ store.businessCategory }}</span>
           </div>
         </div>
 
@@ -27,7 +27,7 @@
           <!-- 거리 정보 -->
           <div class="detail-item">
             <span class="material-symbols-outlined">location_on</span>
-            <span class="detail-text">{{ formatDistance(store.distance) }}</span>
+            <span class="detail-text">{{ formatDistance(store.address).slice(0, 6) + '...'}}</span>
           </div>
 
           <!-- 함께지수 정보 -->

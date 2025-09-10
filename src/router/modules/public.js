@@ -61,7 +61,23 @@ const routes = [
   // },
   {
     path: '/business/chats',
-    component: ChattingHomePage,
+    component: ChatList,
+    meta: { requiresAuth: true, role: 'business' },
+  },
+  {
+    path: '/business/chats/new',
+    component: ChatUserListView,
+    meta: { requiresAuth: true, role: 'business' },
+  },
+  {
+    path: '/business/chats/:roomId',
+    component: ChatRoomView,
+    meta: { requiresAuth: true, role: 'business' },
+    props: true,
+  },
+  {
+    path: '/business/partnership',
+    component: BusinessPartnershipPage,
     meta: { requiresAuth: true, role: 'business' },
   },
   {
@@ -73,6 +89,7 @@ const routes = [
     path: '/business/store',
     name: 'business-store',
     component: BusinessPartnershipPage,
+    meta: { requiresAuth: true, role: 'business' },
   },
   {
     path: '/business/coupon',

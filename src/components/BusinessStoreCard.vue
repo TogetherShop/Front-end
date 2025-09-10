@@ -3,12 +3,7 @@
     <div class="store-card-content">
       <!-- 매장 이미지 -->
       <div class="store-image">
-        <img
-          v-if="store.image"
-          :src="store.image"
-          :alt="store.name"
-          class="store-img"
-        />
+        <img v-if="store.image" :src="store.image" :alt="store.name" class="store-img" />
         <div v-else class="store-img-placeholder">
           <span class="material-symbols-outlined">store</span>
         </div>
@@ -27,7 +22,7 @@
           <!-- 거리 정보 -->
           <div class="detail-item">
             <span class="material-symbols-outlined">location_on</span>
-            <span class="detail-text">{{ formatDistance(store.address).slice(0, 6) + '...'}}</span>
+            <span class="detail-text">{{ formatDistance(store.address).slice(0, 6) + '...' }}</span>
           </div>
 
           <!-- 함께지수 정보 -->
@@ -41,7 +36,9 @@
         <div class="coupon-info">
           <span class="material-symbols-outlined coupon-icon">bolt</span>
           <!-- 쿠폰 있음 (축약 표시) -->
-          <span v-if="latestCoupon" class="coupon-text">{{ truncateCouponText(latestCoupon.description) }}</span>
+          <span v-if="latestCoupon" class="coupon-text">{{
+            truncateCouponText(latestCoupon.description)
+          }}</span>
           <!-- 쿠폰 없음 -->
           <span v-else class="coupon-text no-coupon">쿠폰 정보 없음</span>
         </div>
@@ -49,13 +46,9 @@
 
       <!-- 요청 버튼 -->
       <div class="action-section">
-        <button
-          class="request-button"
-          :disabled="!store.isPartnershipAvailable"
-          @click.stop="onRequestPartnership"
-        >
+        <button class="request-button" :disabled="store.partnershipExists" @click="handleRequest">
           <span class="material-symbols-outlined request-icon">handshake</span>
-          {{ store.isPartnershipAvailable ? '요청' : '요청됨' }}
+          {{ store.partnershipExists ? '요청됨' : '요청' }}
         </button>
       </div>
     </div>
@@ -69,8 +62,8 @@ import { getLatestBusinessCoupon } from '@/api/business-coupon'
 const props = defineProps({
   store: {
     type: Object,
-    required: true
-  }
+    required: true,
+  },
 })
 
 const emit = defineEmits(['request-partnership', 'view-detail'])
@@ -124,6 +117,17 @@ const truncateCouponText = (text) => {
 const onRequestPartnership = () => {
   if (props.store.isPartnershipAvailable) {
     emit('request-partnership', props.store)
+  }
+}
+
+const handleRequest = async () => {
+  if (props.store.partnershipExists) return
+  loading.value = true
+  try {
+    // 부모에게 이벤트 emit → 모달 사용 여부 결정 가능
+    emit('request-partnership', props.store)
+  } finally {
+    loading.value = false
   }
 }
 

@@ -11,11 +11,7 @@ export const signup = async (payload) => {
 
 export const customerLogin = async (username, password) => {
   try {
-    const response = await api.post(
-      '/api/customer/auth/login',
-      { username, password },
-      { userType: 'customer' },
-    )
+    const response = await api.post('/api/customer/auth/login', { username, password })
     localStorage.setItem('access_token', response.data.accessToken)
     localStorage.setItem('refresh_token', response.data.refreshToken)
     localStorage.setItem('user_type', 'customer')

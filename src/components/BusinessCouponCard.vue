@@ -142,6 +142,7 @@
 
 <script>
 import { computed } from 'vue'
+import { useRouter } from 'vue-router'
 
 export default {
   name: 'BusinessCouponCard',
@@ -157,6 +158,7 @@ export default {
   },
   emits: ['chatContinue', 'openAnalysis'],
   setup(props, { emit }) {
+    const router = useRouter()
     // 사용량 계산: totalQuantity - currentQuantity
     const usedQuantity = computed(() => {
       if (props.coupon.totalQuantity && props.coupon.currentQuantity !== undefined) {
@@ -171,16 +173,12 @@ export default {
     }
 
     const openAnalysis = () => {
-      // templateId가 있는 경우만 분석 가능
-      if (!props.coupon.templateId) {
-        return
-      }
+      if (!props.coupon.templateId) return
 
-      const analysisData = {
-        ...props.coupon,
-        analysisId: props.coupon.templateId,
-      }
-      emit('openAnalysis', analysisData)
+      router.push({
+        name: 'BusinessCouponAnalysis',
+        params: { templateId: props.coupon.templateId },
+      })
     }
 
     return {

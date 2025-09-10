@@ -40,29 +40,20 @@ export const getMyCoupons = async () => {
 
 /**
  * 특정 쿠폰 분석 조회
+ * GET /api/business/coupons/templates/:templateId/analysis
  */
 export const getCouponAnalysis = async (templateId) => {
   try {
-    console.log(`API 호출 시작: 쿠폰 분석 (templateId: ${templateId})`)
     const response = await api.get(`/api/business/coupons/templates/${templateId}/analysis`, {
       headers: {
         userType: 'business',
         'Content-Type': 'application/json',
       },
-      timeout: 10000,
+      timeout: 5000,
     })
-
-    console.log('쿠폰 분석 응답:', response.data)
     return response.data
   } catch (error) {
     console.error(`쿠폰 분석 조회 실패 (templateId: ${templateId}):`, error)
-
-    if (error.response) {
-      throw new Error(`분석 데이터를 불러올 수 없습니다: ${error.response.status}`)
-    } else if (error.request) {
-      throw new Error('서버에 연결할 수 없습니다.')
-    } else {
-      throw new Error(`분석 요청 오류: ${error.message}`)
-    }
+    throw error
   }
 }

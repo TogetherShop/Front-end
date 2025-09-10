@@ -114,16 +114,11 @@ const submitProposal = () => {
     status: 'WAITING',
   }
 
-  // 2️⃣ UI용 임시 메시지
   const uiMessage = {
-    id: `temp_${Date.now()}`,
-    senderId: currentUserId,
-    senderName: currentUserName,
-    content: '', // 필요 시 요약 텍스트
-    timestamp: today.getTime(),
+    roomId: props.roomId,
     type: 'COUPON_PROPOSAL',
-    payload: backendProposalData,
-    isTemp: true,
+    payload: backendProposalData, // 객체 그대로
+    content: '제휴 제안', // UI용 요약 텍스트
   }
 
   // 3️⃣ STOMP 전송

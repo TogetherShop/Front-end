@@ -3,10 +3,12 @@
     <!-- 상단 헤더 -->
     <header class="chat-header">
       <div class="header-left">
-        <button class="back-btn">←</button>
+        <div class="back-icon" @click="handleBack">
+          <i class="fa-regular fa-less-than"></i>
+        </div>
         <div class="shop-info">
           <h3 class="shop-name">{{ businessName }}</h3>
-          <span class="shop-status">{{ partnershipStatus }}</span>
+          <span class="shop-status">{{ partnershipStatusLabel }}</span>
         </div>
       </div>
       <div class="header-right">
@@ -93,7 +95,7 @@
       </template>
 
       <!-- 제휴 가능 상태 -->
-      <template v-else-if="partnershipStatus === 'ACCEPTED'">
+      <template v-else-if="partnershipStatus === 'ACCEPTED' || partnershipStatus === 'COMPLETED'">
         <div class="input-row">
           <button class="proposal-btn" @click="openPartnershipModal">제휴 제안</button>
           <div class="input-box">
@@ -125,8 +127,8 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onBeforeUnmount, nextTick } from 'vue'
-import { useRoute } from 'vue-router'
+import { ref, onMounted, onBeforeUnmount, nextTick, computed } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
 import {
   connectWS,
   disconnectWS,
@@ -141,6 +143,7 @@ import PartnershipModal from '@/components/PartnershipModal.vue'
 import ProposalMessage from '@/components/ProposalMessage.vue'
 import { jwtDecode } from 'jwt-decode'
 
+const router = useRouter()
 const route = useRoute()
 const roomId = route.params.roomId
 
@@ -182,19 +185,35 @@ const scrollToBottom = () => {
   })
 }
 
+const handleBack = () => {
+  router.back()
+}
 // WebSocket 수신
 const handleIncomingMessage = (msg) => {
-  console.log('수신 메시지:', msg)
-  console.log('payload 타입:', typeof msg.payload, msg.payload)
-  messages.value.push(msg)
-  scrollToBottom()
-
-  if (msg.type === 'PARTNERSHIP_REQUEST') {
-    partnershipStatus.value = msg.payload?.status || partnershipStatus.value
+  const idx = messages.value.findIndex((m) => m.id === msg.id)
+  if (idx !== -1) {
+    // 임시 메시지 교체
+    messages.value[idx] = msg
+  } else {
+    messages.value.push(msg)
   }
-  if (msg.type === 'PROPOSAL_ACCEPTED') partnershipStatus.value = 'COMPLETED'
-  if (msg.type === 'PROPOSAL_REJECTED') partnershipStatus.value = 'REJECTED'
+  scrollToBottom()
 }
+
+const partnershipStatusLabel = computed(() => {
+  switch (partnershipStatus.value) {
+    case 'COMPLETED':
+      return '협의 완료'
+    case 'ACCEPTED':
+      return '수락됨'
+    case 'REJECTED':
+      return '거절됨'
+    case 'REQUESTED':
+      return '요청됨'
+    default:
+      return '알 수 없음'
+  }
+})
 
 // 메시지 전송
 const sendMessage = async () => {
@@ -234,9 +253,9 @@ const reject = async () => {
   }
 }
 // 제휴 제안 메시지 처리
-const handleProposalSent = (proposalMsg) => {
-  messages.value.push(proposalMsg)
-  scrollToBottom()
+const handleProposalUpdated = ({ id, status }) => {
+  const msg = messages.value.find((m) => m.id === id)
+  if (msg) msg.payload.status = status
 }
 
 // 시간 포맷
@@ -619,5 +638,10 @@ onMounted(async () => {
 .send-btn[disabled] {
   opacity: 0.6;
   cursor: not-allowed;
+}
+.back-icon {
+  font-size: 20px;
+  transform: scaleX(0.5);
+  margin-right: 10px;
 }
 </style>

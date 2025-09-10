@@ -68,6 +68,15 @@ export function disconnectWS() {
   }
 }
 
+function safeParseJSON(str) {
+  if (typeof str !== 'string') return str // 이미 객체면 그대로 반환
+  try {
+    return JSON.parse(str) // JSON이면 파싱
+  } catch {
+    return str // 순수 문자열이면 그대로 반환
+  }
+}
+
 // 메시지 구독
 export const subscribeRoom = (roomId, callback) => {
   if (!stompClient?.connected) {
@@ -79,27 +88,26 @@ export const subscribeRoom = (roomId, callback) => {
   const subscription = stompClient.subscribe(destination, (message) => {
     try {
       if (!message.body) return
+
       const raw = message.body.replace(/\0/g, '')
-      const body = JSON.parse(raw)
+      const body = safeParseJSON(raw) // 안전하게 파싱
 
       let payload = null
 
-      // COUPON_PROPOSAL 타입인 경우 content를 JSON으로 파싱
-      if (body.type === 'COUPON_PROPOSAL' && body.content) {
-        try {
-          payload = JSON.parse(body.content)
-        } catch (e) {
-          console.error('실시간 Payload 파싱 실패:', e)
+      // COUPON_PROPOSAL 타입이면 payload 처리
+      if (body.type === 'COUPON_PROPOSAL') {
+        if (body.payload) {
+          payload = typeof body.payload === 'string' ? safeParseJSON(body.payload) : body.payload
         }
       } else if (body.payload) {
-        payload = typeof body.payload === 'string' ? JSON.parse(body.payload) : body.payload
+        payload = typeof body.payload === 'string' ? safeParseJSON(body.payload) : body.payload
       }
 
       callback({
         id: body.id || Date.now(),
         senderId: body.senderId,
         senderName: body.senderName || body.sender || `유저${body.senderId}`,
-        content: body.type === 'COUPON_PROPOSAL' ? '제휴 제안' : body.content || '',
+        content: body.content || '',
         timestamp: new Date(body.createdAt || Date.now()).getTime(),
         type: body.type || 'CHAT',
         payload: payload,
@@ -110,9 +118,7 @@ export const subscribeRoom = (roomId, callback) => {
     }
   })
 
-  return () => {
-    subscription.unsubscribe()
-  }
+  return () => subscription.unsubscribe()
 }
 
 // 메시지 전송 (REST 대신 WebSocket 전송)

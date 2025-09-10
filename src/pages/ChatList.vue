@@ -63,10 +63,10 @@
 
           <div class="message-container">
             <div class="message">
-              <div class="message-text">{{ room.createdAt | formatTime }}</div>
+              <div class="message-text">{{ room.lastMessage }}</div>
             </div>
-            <div class="time-badge">
-              <div class="time-text">{{ room.createdAt | timeAgo }}</div>
+            <div class="time-badge" :class="{ unread: room.isUnread }">
+              <div class="time-text">{{ formatTimeAgo(room.lastMessageAt) }}</div>
             </div>
           </div>
         </div>
@@ -84,13 +84,13 @@ import api from '@/api/api'
 
 // 상태 매핑
 const statusMap = {
-  WAITING: '대기',
+  REQUESTED: '대기',
   NEGOTIATING: '협의중',
   COMPLETED: '협의완료',
   REJECTED: '거절',
 }
 const statusClassMap = {
-  WAITING: 'waiting',
+  REQUESTED: 'requested',
   NEGOTIATING: 'negotiating',
   COMPLETED: 'completed',
   REJECTED: 'rejected',
@@ -135,8 +135,14 @@ watch(query, () => {
   searchTimer = setTimeout(fetchRooms, 300)
 })
 
-const openRoom = (room) => {
+const openRoom = async (room) => {
   if (room.roomId) router.push(`/business/chats/${room.roomId}`)
+  try {
+    await api.post(`/api/partnership/rooms/${room.roomId}/read`)
+    room.isUnread = false
+  } catch (err) {
+    console.error('읽음 처리 실패:', err)
+  }
 }
 
 const selectFilter = (filter) => {
@@ -145,31 +151,13 @@ const selectFilter = (filter) => {
 
 const statusClass = (status) => statusClassMap[status] || ''
 const statusText = (status) => statusMap[status] || status
-
-// 시간 포맷 필터
-const formatTime = (dateStr) => new Date(dateStr).toLocaleString()
-const timeAgo = (dateStr) => {
+const formatTimeAgo = (dateStr) => {
+  if (!dateStr) return ''
   const diff = (Date.now() - new Date(dateStr)) / 1000
   if (diff < 60) return `${Math.floor(diff)}초 전`
   if (diff < 3600) return `${Math.floor(diff / 60)}분 전`
   if (diff < 86400) return `${Math.floor(diff / 3600)}시간 전`
   return `${Math.floor(diff / 86400)}일 전`
-}
-</script>
-
-<script>
-export default {
-  filters: {
-    formatTime: (val) => (val ? new Date(val).toLocaleString() : ''),
-    timeAgo: (val) => {
-      if (!val) return ''
-      const diff = (Date.now() - new Date(val)) / 1000
-      if (diff < 60) return `${Math.floor(diff)}초 전`
-      if (diff < 3600) return `${Math.floor(diff / 60)}분 전`
-      if (diff < 86400) return `${Math.floor(diff / 3600)}시간 전`
-      return `${Math.floor(diff / 86400)}일 전`
-    },
-  },
 }
 </script>
 
@@ -310,7 +298,7 @@ export default {
   font-size: 12px;
   font-weight: 500;
 }
-.status-badge.waiting {
+.status-badge.requested {
   background-color: #f1f3f5;
   color: #495057;
 }
@@ -397,5 +385,19 @@ export default {
   color: #dc2626;
   padding: 10px;
   border-radius: 8px;
+}
+.time-badge {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  color: #999;
+}
+
+/* 읽지 않은 메시지만 빨간 점 표시 */
+.time-badge.unread::before {
+  content: '●';
+  color: #e63946; /* 빨간 점 */
+  font-size: 10px;
 }
 </style>

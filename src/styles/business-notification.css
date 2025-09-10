@@ -1,0 +1,347 @@
+/* BusinessNotification 페이지 스타일 - 피그마 디자인 기반 */
+
+.BusinessNotification {
+  min-height: 100vh;
+  background-color: #f3f3f7;
+  padding-bottom: 80px; /* 하단 네비게이션 공간 확보 */
+  font-family: 'Pretendard', sans-serif;
+}
+
+/* 상단 헤더 */
+.BusinessNotification__header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 70px;
+  background-color: white;
+  display: flex;
+  align-items: center;
+  padding: 0 16px;
+  z-index: 1000;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.BusinessNotification__backButton {
+  background: none;
+  border: none;
+  padding: 8px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 8px;
+}
+
+.BusinessNotification__backButton i {
+  font-size: 20px;
+  color: #333;
+}
+
+.BusinessNotification__title {
+  font-size: 20px;
+  font-weight: 500;
+  color: #000;
+  margin: 0;
+  text-align: center;
+  flex: 1;
+  margin-right: 28px; /* 뒤로가기 버튼과 균형 맞추기 */
+}
+
+.BusinessNotification__markAllReadButton {
+  background: none;
+  border: none;
+  padding: 8px 12px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  color: #007AFF;
+  border-radius: 6px;
+  transition: background-color 0.2s ease;
+}
+
+.BusinessNotification__markAllReadButton:hover {
+  background-color: rgba(0, 122, 255, 0.1);
+}
+
+/* 메인 콘텐츠 */
+.BusinessNotification__content {
+  margin-top: 70px; /* 헤더 높이만큼 여백 */
+  padding: 0 16px;
+}
+
+.BusinessNotification__container {
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 20px 0;
+}
+
+/* 로딩 상태 */
+.BusinessNotification__loading {
+  text-align: center;
+  padding: 60px 20px;
+}
+
+.BusinessNotification__loadingSpinner {
+  margin-bottom: 20px;
+  animation: spin 1s linear infinite;
+}
+
+.BusinessNotification__loadingSpinner i {
+  font-size: 32px;
+  color: #007AFF;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.BusinessNotification__loadingText {
+  font-size: 16px;
+  color: #666;
+  margin: 0;
+}
+
+/* 에러 상태 */
+.BusinessNotification__error {
+  text-align: center;
+  padding: 60px 20px;
+}
+
+.BusinessNotification__errorIcon {
+  margin-bottom: 20px;
+}
+
+.BusinessNotification__errorIcon i {
+  font-size: 48px;
+  color: #ff4444;
+}
+
+.BusinessNotification__errorTitle {
+  font-size: 18px;
+  font-weight: 600;
+  color: #333;
+  margin: 0 0 8px 0;
+}
+
+.BusinessNotification__errorMessage {
+  font-size: 14px;
+  color: #666;
+  margin: 0 0 20px 0;
+}
+
+.BusinessNotification__retryButton {
+  background-color: #007AFF;
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.BusinessNotification__retryButton:hover {
+  background-color: #0056b3;
+}
+
+/* 알림 목록 */
+.BusinessNotification__list {
+  margin-top: 20px;
+}
+
+.BusinessNotification__dateGroup {
+  margin-bottom: 32px;
+}
+
+.BusinessNotification__dateHeader {
+  font-family: Pretendard;
+  font-size: 14px;
+  font-weight: 600;
+  color: #666;
+  margin-bottom: 12px;
+  padding: 0 4px;
+}
+
+.BusinessNotification__items {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.BusinessNotification__item {
+  background-color: white;
+  border-radius: 12px;
+  padding: 16px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  position: relative;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.BusinessNotification__item:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.BusinessNotification__itemContent {
+  margin-bottom: 8px;
+}
+
+.BusinessNotification__itemTitle {
+  font-family: Pretendard;
+
+  font-size: 16px;
+  font-weight: 600;
+  color: #000;
+  margin: 0 0 4px 0;
+  line-height: 24px;
+}
+
+.BusinessNotification__itemMessage {
+  font-family: Pretendard;
+
+  font-size: 14px;
+  font-weight: 400;
+  color: #555555;
+  margin: 0;
+  line-height: 20px;
+}
+
+.BusinessNotification__itemTime {
+  font-family: Pretendard;
+
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  font-size: 12px;
+  font-weight: 500;
+  color: #b0b1b3;
+  text-align: right;
+}
+
+/* 읽지 않은 알림 스타일 */
+.BusinessNotification__item--unread {
+  background-color: #fff;
+  font-weight: 600;
+}
+
+.BusinessNotification__item--unread .BusinessNotification__itemTitle {
+  font-weight: 700;
+  color: #000;
+}
+
+.BusinessNotification__item--unread .BusinessNotification__itemMessage {
+  color: #333;
+  font-weight: 500;
+}
+
+/* 읽은 알림 스타일 */
+.BusinessNotification__item--read {
+  background-color: #b9b9b9;
+  opacity: 0.7;
+}
+
+.BusinessNotification__item--read .BusinessNotification__itemTitle {
+  font-weight: 500;
+  color: #666;
+}
+
+.BusinessNotification__item--read .BusinessNotification__itemMessage {
+  color: #888;
+  font-weight: 400;
+}
+
+/* 빈 상태 */
+.BusinessNotification__empty {
+  text-align: center;
+  padding: 60px 20px;
+}
+
+.BusinessNotification__emptyIcon {
+  margin-bottom: 20px;
+}
+
+.BusinessNotification__emptyIcon i {
+  font-size: 48px;
+  color: #ccc;
+}
+
+.BusinessNotification__emptyTitle {
+  font-size: 18px;
+  font-weight: 600;
+  color: #666;
+  margin: 0 0 8px 0;
+}
+
+.BusinessNotification__emptyMessage {
+  font-size: 14px;
+  color: #999;
+  margin: 0;
+}
+
+/* 반응형 디자인 */
+@media (max-width: 768px) {
+  .BusinessNotification__container {
+    max-width: 100%;
+  }
+  
+  .BusinessNotification__header {
+    padding: 0 12px;
+  }
+  
+  .BusinessNotification__content {
+    padding: 0 12px;
+  }
+  
+  .BusinessNotification__item {
+    padding: 14px;
+  }
+  
+  .BusinessNotification__itemTitle {
+    font-size: 15px;
+  }
+  
+  .BusinessNotification__itemMessage {
+    font-size: 13px;
+  }
+  
+  .BusinessNotification__itemTime {
+    font-size: 11px;
+  }
+}
+
+@media (max-width: 480px) {
+  .BusinessNotification__header {
+    height: 60px;
+    padding: 0 8px;
+  }
+  
+  .BusinessNotification__title {
+    font-size: 18px;
+    margin-right: 20px;
+  }
+  
+  .BusinessNotification__content {
+    margin-top: 60px;
+    padding: 0 8px;
+  }
+  
+  .BusinessNotification__item {
+    padding: 12px;
+  }
+  
+  .BusinessNotification__itemTitle {
+    font-size: 14px;
+  }
+  
+  .BusinessNotification__itemMessage {
+    font-size: 12px;
+  }
+  
+  .BusinessNotification__itemTime {
+    font-size: 10px;
+  }
+}

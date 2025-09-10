@@ -33,7 +33,7 @@ router.beforeEach((to, from, next) => {
 
     // 권한(role) 체크
     if (to.meta.role && to.meta.role !== userType) {
-      return next(userType === 'customer' ? '/customer' : '/business')
+      return next(userType === 'customer' ? '/customer' : '/business/home')
     }
   }
 

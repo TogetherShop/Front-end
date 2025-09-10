@@ -2,6 +2,7 @@ import { createRouter, createWebHistory } from 'vue-router'
 import { jwtDecode } from 'jwt-decode'
 
 import publicRoutes from './modules/public'
+import { useNotificationStore } from '@/stores/notifications'
 
 const routes = publicRoutes
 
@@ -28,6 +29,11 @@ router.beforeEach((to, from, next) => {
       localStorage.removeItem('access_token')
       localStorage.removeItem('refresh_token')
       localStorage.removeItem('user_type')
+      
+      // 알림 상태 초기화
+      const notificationStore = useNotificationStore()
+      notificationStore.clearNotifications()
+      
       return next('/login')
     }
 

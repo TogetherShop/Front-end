@@ -94,12 +94,14 @@ import { login } from '@/api/auth'
 import { customerLogin } from '@/api/customer-auth'
 import logo from '@/assets/images/togethershop_logo.png'
 import { getFcmToken, sendFcmTokenToServer } from '@/utils/fcm'
+import { useNotificationStore } from '@/stores/notifications'
 
 const username = ref('')
 const password = ref('')
 const userType = ref('customer') // 기본값: 고객
 const router = useRouter()
 const canLogin = computed(() => username.value && password.value)
+const notificationStore = useNotificationStore()
 
 const doLogin = async () => {
   if (!canLogin.value) return
@@ -114,6 +116,10 @@ const doLogin = async () => {
       if (fcmToken) {
         await sendFcmTokenToServer('customer', fcmToken)
       }
+      
+      // 알림 상태 확인
+      await notificationStore.checkNotificationStatus('customer')
+      
 
       router.push('/customer')
     } else {
@@ -124,6 +130,11 @@ const doLogin = async () => {
       if (fcmToken) {
         await sendFcmTokenToServer('business', fcmToken)
       }
+      
+      // 알림 상태 확인
+      await notificationStore.checkNotificationStatus('business')
+      
+
 
       router.push('/business/home')
     }

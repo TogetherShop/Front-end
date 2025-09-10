@@ -16,6 +16,8 @@ import ChatList from '@/pages/ChatList.vue'
 import ChatUserListView from '@/pages/ChatUserListView.vue'
 import ChatRoomView from '@/pages/ChatRoomView.vue'
 import CustomerHomePage from '@/pages/CustomerHomePage.vue'
+import CustomerNotificationPage from '@/pages/CustomerNotificationPage.vue'
+import BusinessNotificationPage from '@/pages/business/BusinessNotificationPage.vue'
 import ChattingHomePage from '@/pages/ChattingHomePage.vue'
 
 const routes = [
@@ -45,6 +47,11 @@ const routes = [
   {
     path: '/customer/profile',
     component: CustomerProfilePage,
+    meta: { requiresAuth: true, role: 'customer' },
+  },
+  {
+    path: '/customer/notifications',
+    component: CustomerNotificationPage,
     meta: { requiresAuth: true, role: 'customer' },
   },
   // {
@@ -91,6 +98,11 @@ const routes = [
     path: '/business/coupon/analysis/:templateId',
     name: 'BusinessCouponAnalysis',
     component: BusinessCouponAnalysis,
+  },
+  {
+    path: '/business/notifications',
+    component: BusinessNotificationPage,
+    meta: { requiresAuth: true, role: 'business' },
   },
 ]
 

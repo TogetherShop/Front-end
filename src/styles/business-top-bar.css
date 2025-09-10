@@ -18,7 +18,7 @@
 .business-top-bar {
   background-color: white !important;
   height: 50px;
-  border-bottom: 1px solid var(--gray-3);
+  border: none;
 }
 
 .business-top-bar__container {

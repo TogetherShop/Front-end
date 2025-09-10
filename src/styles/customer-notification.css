@@ -1,0 +1,284 @@
+/* CustomerNotification 페이지 스타일 - 피그마 디자인 기반 */
+
+.CustomerNotification {
+  min-height: 100vh;
+  background-color: #f3f3f7;
+  padding-bottom: 80px; /* 하단 네비게이션 공간 확보 */
+  font-family: 'Pretendard', sans-serif;
+}
+
+/* 상단 헤더 */
+.CustomerNotification__header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 70px;
+  background-color: white;
+  display: flex;
+  align-items: center;
+  padding: 0 16px;
+  z-index: 1000;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.CustomerNotification__backButton {
+  background: none;
+  border: none;
+  padding: 8px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 8px;
+}
+
+.CustomerNotification__backButton i {
+  font-size: 20px;
+  color: #333;
+}
+
+.CustomerNotification__title {
+  font-size: 20px;
+  font-weight: 500;
+  color: #000;
+  margin: 0;
+  text-align: center;
+  flex: 1;
+  margin-right: 28px; /* 뒤로가기 버튼과 균형 맞추기 */
+}
+
+.CustomerNotification__markAllReadButton {
+  background: none;
+  border: none;
+  padding: 8px 12px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  color: #007AFF;
+  border-radius: 6px;
+  transition: background-color 0.2s ease;
+}
+
+.CustomerNotification__markAllReadButton:hover {
+  background-color: rgba(0, 122, 255, 0.1);
+}
+
+/* 메인 콘텐츠 */
+.CustomerNotification__content {
+  margin-top: 70px; /* 헤더 높이만큼 여백 */
+  padding: 0 16px;
+}
+
+.CustomerNotification__container {
+  max-width: 390px;
+  margin: 0 auto;
+}
+
+/* 알림 목록 */
+.CustomerNotification__list {
+  padding: 16px 0;
+}
+
+.CustomerNotification__dateGroup {
+  margin-bottom: 24px;
+}
+
+/* 날짜 헤더 */
+.CustomerNotification__dateHeader {
+  font-size: 14px;
+  font-weight: 500;
+  color: #000;
+  margin-bottom: 8px;
+  padding-left: 11px;
+}
+
+/* 알림 아이템들 */
+.CustomerNotification__items {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* 알림 아이템 */
+.CustomerNotification__item {
+  background-color: white;
+  border-radius: 12px;
+  padding: 16px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  position: relative;
+  border: 1px solid #e0e0e0;
+}
+
+
+
+.CustomerNotification__itemContent {
+  margin-bottom: 8px;
+}
+
+.CustomerNotification__itemTitle {
+  font-family: Pretendard;
+
+  font-size: 16px;
+  font-weight: 600;
+  color: #000;
+  margin: 0 0 4px 0;
+  line-height: 24px;
+}
+
+.CustomerNotification__itemMessage {
+  font-family: Pretendard;
+
+  font-size: 14px;
+  font-weight: 400;
+  color: #555555;
+  margin: 0;
+  line-height: 20px;
+}
+
+.CustomerNotification__itemTime {
+  font-family: Pretendard;
+
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  font-size: 12px;
+  font-weight: 500;
+  color: #b0b1b3;
+  text-align: right;
+}
+
+
+
+.CustomerNotification__item--unread .CustomerNotification__itemTitle {
+  font-weight: 700;
+  color: #000;
+}
+
+.CustomerNotification__item--unread .CustomerNotification__itemMessage {
+  color: #333;
+  font-weight: 500;
+}
+
+/* 읽은 알림 스타일 */
+.CustomerNotification__item--read {
+  background-color: #D9D9D9;
+}
+
+.CustomerNotification__item--read .CustomerNotification__itemTitle {
+  font-weight: 500;
+  color: #666;
+}
+
+.CustomerNotification__item--read .CustomerNotification__itemMessage {
+  color: #888;
+  font-weight: 400;
+}
+
+/* 빈 상태 */
+.CustomerNotification__empty {
+  text-align: center;
+  padding: 60px 20px;
+}
+
+.CustomerNotification__emptyIcon {
+  margin-bottom: 20px;
+}
+
+.CustomerNotification__emptyIcon i {
+  font-size: 48px;
+  color: #ccc;
+}
+
+.CustomerNotification__emptyTitle {
+  font-size: 18px;
+  font-weight: 600;
+  color: #666;
+  margin: 0 0 8px 0;
+}
+
+.CustomerNotification__emptyMessage {
+  font-size: 14px;
+  color: #999;
+  margin: 0;
+}
+
+/* 반응형 디자인 */
+@media (max-width: 768px) {
+  .CustomerNotification__container {
+    max-width: 100%;
+  }
+  
+  .CustomerNotification__header {
+    padding: 0 12px;
+  }
+  
+  .CustomerNotification__content {
+    padding: 0 12px;
+  }
+  
+  .CustomerNotification__item {
+    padding: 14px;
+  }
+  
+  .CustomerNotification__itemTitle {
+    font-size: 15px;
+  }
+  
+  .CustomerNotification__itemMessage {
+    font-size: 13px;
+  }
+  
+  .CustomerNotification__itemTime {
+    font-size: 11px;
+  }
+}
+
+@media (max-width: 480px) {
+  .CustomerNotification__header {
+    height: 60px;
+    padding: 0 8px;
+  }
+  
+  .CustomerNotification__title {
+    font-size: 18px;
+  }
+  
+  .CustomerNotification__content {
+    margin-top: 60px;
+    padding: 0 8px;
+  }
+  
+  .CustomerNotification__item {
+    padding: 12px;
+  }
+  
+  .CustomerNotification__itemTitle {
+    font-size: 14px;
+  }
+  
+  .CustomerNotification__itemMessage {
+    font-size: 12px;
+  }
+  
+  .CustomerNotification__dateHeader {
+    font-size: 13px;
+  }
+}
+
+/* 애니메이션 */
+.CustomerNotification__item {
+  animation: fadeInUp 0.3s ease-out;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

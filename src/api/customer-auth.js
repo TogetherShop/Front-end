@@ -42,6 +42,7 @@ export const logout = async (refresh) => {
     await api.post('/api/customer/auth/logout', { refreshToken: refresh })
     localStorage.removeItem('access_token')
     localStorage.removeItem('refresh_token')
+    localStorage.removeItem('user_type')
   } catch (err) {
     console.error(err)
   }

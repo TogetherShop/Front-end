@@ -104,6 +104,7 @@ import {
   formatNotificationDate,
   formatNotificationTime
 } from '@/api/business-notification'
+import { useNotificationStore } from '@/stores/notifications'
 
 export default {
   name: 'BusinessNotificationPage',
@@ -115,6 +116,7 @@ export default {
     const notifications = ref([])
     const loading = ref(false)
     const error = ref(null)
+    const notificationStore = useNotificationStore()
     
     const goBack = () => {
       router.go(-1)
@@ -206,6 +208,9 @@ export default {
           // 로컬 상태도 읽음으로 변경 (CLICKED 상태로 간주)
           notification.isRead = true
           notification.status = 'CLICKED'
+          
+          // store의 배지 상태 업데이트
+          notificationStore.markAsRead()
         }
         
         // 알림 타입에 따른 상세 처리
@@ -253,6 +258,9 @@ export default {
           notification.isRead = true
           notification.status = 'READ'
         })
+        
+        // store의 배지 상태 업데이트
+        notificationStore.markAllAsRead()
       } catch (err) {
         console.error('모든 알림 읽음 처리 실패:', err)
         // 에러가 발생해도 사용자에게는 알리지 않고 로그만 출력

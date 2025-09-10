@@ -10,7 +10,10 @@
           />
         </div>
         <div class="col-6 d-flex justify-content-end">
-          <i class="material-symbols-outlined fs-2 notification-icon" @click="goToNotifications">notifications</i>
+          <div class="notification-container" @click="goToNotifications">
+            <i class="material-symbols-outlined fs-2 notification-icon">notifications</i>
+            <span v-if="hasUnread" class="notification-badge"></span>
+          </div>
         </div>
       </div>
     </div>
@@ -19,18 +22,21 @@
 
 <script>
 import { useRouter } from 'vue-router'
+import { useNotificationStore } from '@/stores/notifications'
 
 export default {
   name: 'TopBar',
   setup() {
     const router = useRouter()
+    const notificationStore = useNotificationStore()
     
     const goToNotifications = () => {
       router.push('/customer/notifications')
     }
     
     return {
-      goToNotifications
+      goToNotifications,
+      hasUnread: notificationStore.hasUnread
     }
   }
 }

@@ -84,15 +84,20 @@
 
           <!-- 정렬 드롭다운 -->
           <div v-if="showSort" class="sort-dropdown">
-            <div class="sort-option" @click="setSortBy('distance')">
-              <span :class="{ active: sortBy === 'distance' }">거리 순</span>
-              <span v-if="sortBy === 'distance'" class="material-symbols-outlined">check</span>
+            <div
+              class="sort-option"
+              :class="{ active: sortBy === 'distance' }"
+              @click="setSortBy('distance')"
+            >
+              <span>거리 순</span>
             </div>
-            <div class="sort-option" @click="setSortBy('together-score')">
-              <span :class="{ active: sortBy === 'together-score' }">함께지수 순</span>
-              <span v-if="sortBy === 'together-score'" class="material-symbols-outlined"
-                >check</span
-              >
+
+            <div
+              class="sort-option"
+              :class="{ active: sortBy === 'together-score' }"
+              @click="setSortBy('together-score')"
+            >
+              <span>함께지수 순</span>
             </div>
           </div>
         </div>
@@ -180,7 +185,6 @@ import BusinessPartnershipModal from '@/components/BusinessPartnershipModal.vue'
 import BusinessSuccessToast from '@/components/BusinessSuccessToast.vue'
 
 import BusinessBottomNav from '@/components/BusinessBottomNav.vue'
-
 
 // 반응형 데이터
 const searchQuery = ref('')

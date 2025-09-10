@@ -11,7 +11,7 @@
           role="button"
           tabindex="0"
         >
-          <div class="business-bottom-navigation__icon mb-1">
+          <div class="business-bottom-navigation__icon">
             <i class="material-symbols-outlined">{{ item.icon }}</i>
           </div>
           <span class="business-bottom-navigation__label">{{ item.label }}</span>

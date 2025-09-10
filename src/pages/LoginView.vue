@@ -93,6 +93,8 @@ import { useRouter } from 'vue-router'
 import { login } from '@/api/auth'
 import { customerLogin } from '@/api/customer-auth'
 import logo from '@/assets/images/togethershop_logo.png'
+import { getFcmToken, sendFcmTokenToServer } from '@/utils/fcm'
+
 
 const username = ref('')
 const password = ref('')
@@ -100,15 +102,32 @@ const userType = ref('customer') // 기본값: 고객
 const router = useRouter()
 const canLogin = computed(() => username.value && password.value)
 
+
+
 const doLogin = async () => {
   if (!canLogin.value) return
+  
   try {
     // 사용자 유형에 따라 다른 API 호출
     if (userType.value === 'customer') {
       await customerLogin(username.value, password.value)
+      
+      // FCM 토큰 발급 및 전송 (로그인 성공 후)
+      const fcmToken = await getFcmToken();
+      if (fcmToken) {
+        await sendFcmTokenToServer('customer', fcmToken);
+      }
+      
       router.push('/customer')
     } else {
       await login(username.value, password.value)
+      
+      // FCM 토큰 발급 및 전송 (로그인 성공 후)
+      const fcmToken = await getFcmToken();
+      if (fcmToken) {
+        await sendFcmTokenToServer('business', fcmToken);
+      }
+      
       router.push('/business')
     }
   } catch (e) {

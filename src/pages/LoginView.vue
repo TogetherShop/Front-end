@@ -123,7 +123,7 @@ const doLogin = async () => {
       router.push('/customer')
     } else {
       await login(username.value, password.value)
-      router.push('/business')
+      router.push('/business/home')
     }
   } catch (e) {
     alert(typeof e === 'string' ? e : '로그인 실패')

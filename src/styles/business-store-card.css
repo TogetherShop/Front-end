@@ -61,6 +61,7 @@
 }
 
 .store-name {
+  max-width: 120px; /* 적절한 너비 설정 */
   font-size: 16px;
   font-weight: 600;
   color: #111827;

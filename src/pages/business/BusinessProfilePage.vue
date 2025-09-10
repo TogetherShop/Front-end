@@ -38,7 +38,7 @@
               </div>
             </div>
 
-            <hr class="divider divider--tight" />
+            <div class="divider divider--tight"></div>
 
             <div class="kpis">
               <div class="kpi">
@@ -131,7 +131,7 @@
               </div>
             </div>
 
-            <hr class="divider--thin" />
+            <div class="divider--thin"></div>
 
             <div class="listhead list__tail">나에게 온 요청</div>
             <div v-for="(req, idx) in receivedRequests" :key="'r-' + idx" class="request">
@@ -172,7 +172,7 @@
                 <div class="group__title">{{ item.title }}</div>
                 <div class="group__meta">
                   <span class="meta">
-                    <span class="material-symbols-outlined icon-16">groups</span>
+                    <span class="material-symbols-outlined icon-16">person</span>
                     {{ item.joined }}/{{ item.target }}명 ({{ percent(item) }}%)
                   </span>
                   <span class="meta">
@@ -194,7 +194,7 @@
                 <div class="group__title">{{ item.title }}</div>
                 <div class="group__meta">
                   <span class="meta">
-                    <span class="material-symbols-outlined icon-16">groups</span>
+                    <span class="material-symbols-outlined icon-16">person</span>
                     {{ item.joined }}/{{ item.target }}명 ({{ percent(item) }}%)
                   </span>
                   <span class="meta">

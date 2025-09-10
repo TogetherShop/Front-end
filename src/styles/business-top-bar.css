@@ -18,7 +18,7 @@
 .business-top-bar {
   background-color: white !important;
   height: 50px;
-  border-bottom: 1px solid var(--gray-3);
+  border: none;
 }
 
 .business-top-bar__container {
@@ -60,6 +60,22 @@
 .business-top-bar__action-btn .material-symbols-outlined {
   font-size: 24px;
   color: var(--gray-0);
+}
+
+.notification-container {
+  position: relative;
+}
+
+.notification-badge {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  width: 12px;
+  height: 12px;
+  background-color: #ff4444;
+  border-radius: 50%;
+  border: 2px solid white;
+  z-index: 10;
 }
 
 /* 반응형 디자인 */

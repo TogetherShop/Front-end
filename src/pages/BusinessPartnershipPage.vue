@@ -84,23 +84,34 @@
 
           <!-- 정렬 드롭다운 -->
           <div v-if="showSort" class="sort-dropdown">
-            <div class="sort-option" @click="setSortBy('distance')">
-              <span :class="{ active: sortBy === 'distance' }">거리 순</span>
-              <span v-if="sortBy === 'distance'" class="material-symbols-outlined">check</span>
+            <div
+              class="sort-option"
+              :class="{ active: sortBy === 'distance' }"
+              @click="setSortBy('distance')"
+            >
+              <span>거리 순</span>
             </div>
-            <div class="sort-option" @click="setSortBy('together-score')">
-              <span :class="{ active: sortBy === 'together-score' }">함께지수 순</span>
-              <span v-if="sortBy === 'together-score'" class="material-symbols-outlined"
-                >check</span
-              >
+
+            <div
+              class="sort-option"
+              :class="{ active: sortBy === 'together-score' }"
+              @click="setSortBy('together-score')"
+            >
+              <span>함께지수 순</span>
             </div>
           </div>
         </div>
       </div>
     </div>
 
+    <!-- 로딩 상태 -->
+    <div v-if="loading" class="loading-container">
+      <div class="loading-spinner"></div>
+      <p>매장 정보를 불러오는 중...</p>
+    </div>
+
     <!-- 추천 매장 섹션 -->
-    <div class="content-section">
+    <div v-else class="content-section">
       <!-- 탭 헤더 -->
       <div class="section-header">
         <div class="tab-container">
@@ -124,10 +135,15 @@
 
       <!-- 매장 리스트 -->
       <div class="store-list">
+        <div v-if="filteredStores.length === 0" class="empty-state">
+          <p>조건에 맞는 매장이 없습니다.</p>
+        </div>
+
         <BusinessStoreCard
-          v-for="store in users"
-          :key="store.id"
-          :store="store"
+          v-else
+          v-for="store in filteredStores"
+          :key="store.businessId"
+          :store="transformStoreData(store)"
           @request-partnership="onRequestPartnership"
           @view-detail="onViewDetail"
         >
@@ -143,7 +159,7 @@
       </div>
 
       <!-- 페이지네이션 -->
-      <div class="pagination">
+      <div v-if="totalPages > 1" class="pagination">
         <button
           v-for="page in visiblePages"
           :key="page"
@@ -191,13 +207,22 @@ import BusinessPartnershipModal from '@/components/BusinessPartnershipModal.vue'
 import BusinessSuccessToast from '@/components/BusinessSuccessToast.vue'
 import BusinessBottomNav from '@/components/BusinessBottomNav.vue'
 
-// 기존 반응형 데이터
+// API 가져오기
+import {
+  getPartnershipBusinesses,
+  getPartnershipBusinessDetail,
+  requestPartnership,
+  getMyBusinessInfo,
+} from '@/api/partnership'
+
+// 반응형 데이터
 const searchQuery = ref('')
 const showFilter = ref(false)
 const showSort = ref(false)
-const sortBy = ref('distance')
+const sortBy = ref('together-score')
 const selectedCategories = ref([])
 const selectedBusinessTypes = ref([])
+const selectedCollaborationCategories = ref([])
 const currentPage = ref(1)
 const stores = ref([])
 const selectedStore = ref(null)
@@ -207,72 +232,149 @@ const loading = ref(false)
 const activeTab = ref('recommended')
 const errorMessage = ref('')
 
-// 사용자 선호 업종
-const userPreferredCategories = ref(['베이커리', '카페'])
-const dummyStores = [
-  /* 기존 더미 데이터 */
-]
+// 내 비즈니스 정보
+const myBusinessInfo = ref(null)
 
-// ------------------------
-// **전체회원 조회 로직**
-// ------------------------
-const users = ref([]) // 검색된 회원 목록
-const query = ref('')
-let searchTimer = null
+// 페이지네이션
+const itemsPerPage = 5
 
-const filteredStores = computed(() => {
-  let result = stores.value
+// 필터링된 전체 매장 목록 (페이지네이션 적용 전)
+const filteredStoresAll = computed(() => {
+  let result = [...stores.value]
+
+  // 탭에 따른 기본 필터링
+  if (activeTab.value === 'recommended') {
+    console.log('추천 필터링 시작:', {
+      myCollaborationCategory: selectedCollaborationCategories.value,
+      totalStores: result.length,
+      myBusinessInfo: myBusinessInfo.value,
+    })
+
+    // 추천 매장: 내 collaboration_category와 같은 business_category + 함께지수 60 이상
+    result = result.filter((store) => {
+      const categoryMatch = selectedCollaborationCategories.value.includes(store.businessCategory)
+      const scoreMatch = (store.togetherIndex || 0) >= 60
+
+      if (categoryMatch && scoreMatch) {
+        console.log(
+          `✅ ${store.businessName}: category(${store.businessCategory}) + score(${store.togetherIndex})`,
+        )
+      }
+
+      return categoryMatch && scoreMatch
+    })
+
+    console.log(`추천 매장 ${result.length}개 필터링 완료`)
+  }
+  // 전체 매장은 필터링 없이 모든 매장 표시
+
+  // 검색 필터링
   if (searchQuery.value.trim()) {
     const q = searchQuery.value.toLowerCase()
     result = result.filter(
-      (store) => store.name.toLowerCase().includes(q) || store.category.toLowerCase().includes(q),
+      (store) =>
+        store.businessName.toLowerCase().includes(query) ||
+        store.businessCategory.toLowerCase().includes(query),
     )
   }
-  const startIndex = (currentPage.value - 1) * itemsPerPage
-  return result.slice(startIndex, startIndex + itemsPerPage)
-})
-const searchUsers = async () => {
-  if (!searchQuery.value.trim()) {
-    users.value = []
-    return
+
+  // 카테고리 필터링 (선택된 경우)
+  if (selectedCategories.value.length > 0) {
+    result = result.filter((store) =>
+      selectedCategories.value.some(
+        (category) =>
+          store.businessCategory.includes(category) ||
+          (category === '온라인' && store.isOnline) ||
+          (category === '오프라인' && !store.isOnline),
+      ),
+    )
   }
 
-  clearTimeout(searchTimer)
-  searchTimer = setTimeout(async () => {
-    loading.value = true
-    errorMessage.value = ''
-    try {
-      const { data } = await api.get('/api/users', {
-        params: { q: searchQuery.value.trim() },
-      })
-      users.value = data.map((user) => ({
-        ...user,
-        lastMessage: user.lastMessage || '',
-        lastMessageTime: user.lastMessageTime || '',
-        rating: user.rating || 0,
-      }))
-    } catch (e) {
-      console.error(e)
-      users.value = []
-      errorMessage.value = `검색 오류: ${e.response?.status || ''} ${e.response?.data?.message || e.message}`
-    } finally {
-      loading.value = false
+  // 업종 필터링 (선택된 경우)
+  // if (selectedBusinessTypes.value.length > 0) {
+  //   result = result.filter((store) => selectedBusinessTypes.value.includes(store.category))
+  // }
+
+  // 정렬
+  result.sort((a, b) => {
+    switch (sortBy.value) {
+      case 'together-score':
+        return (b.togetherIndex || 0) - (a.togetherIndex || 0)
+      case 'name':
+        return a.businessName.localeCompare(b.businessName)
+      default:
+        return 0
     }
-  }, 300)
+  })
+
+  return result
+})
+
+// 총 아이템 수
+const totalItems = computed(() => filteredStoresAll.value.length)
+
+// 페이지네이션이 적용된 매장 목록
+const filteredStores = computed(() => {
+  const startIndex = (currentPage.value - 1) * itemsPerPage
+  const endIndex = startIndex + itemsPerPage
+  return filteredStoresAll.value.slice(startIndex, endIndex)
+})
+
+const totalPages = computed(() => Math.ceil(totalItems.value / itemsPerPage))
+
+const visiblePages = computed(() => {
+  const pages = []
+  const total = totalPages.value
+  const current = currentPage.value
+
+  if (total <= 7) {
+    for (let i = 1; i <= total; i++) {
+      pages.push(i)
+    }
+  } else {
+    pages.push(1)
+
+    if (current > 4) {
+      pages.push('...')
+    }
+
+    const start = Math.max(2, current - 2)
+    const end = Math.min(total - 1, current + 2)
+
+    for (let i = start; i <= end; i++) {
+      pages.push(i)
+    }
+
+    if (current < total - 3) {
+      pages.push('...')
+    }
+
+    if (total > 1) {
+      pages.push(total)
+    }
+  }
+
+  return pages
+})
+
+// 메서드
+const transformStoreData = (apiStore) => {
+  // API 데이터를 컴포넌트에서 기대하는 형식으로 변환
+  return {
+    businessId: apiStore.businessId,
+    businessName: apiStore.businessName,
+    businessCategory: apiStore.businessCategory,
+    address: apiStore.address,
+    latitude: apiStore.latitude,
+    longitude: apiStore.longitude,
+    togetherScore: apiStore.togetherIndex || 0, // API의 togetherIndex를 togetherScore로 매핑
+    profileImageUrl: apiStore.profileImageUrl,
+    description: apiStore.description,
+    collaborationCategory: apiStore.collaborationCategory,
+    isPartnershipAvailable: true, // API에서 제공하지 않으면 기본값
+  }
 }
 
-// ------------------------
-// **협의 요청 / 채팅 생성 로직**
-// ------------------------
-const router = useRouter()
-
-// 기존 매장 필터, 정렬, 페이지네이션 로직 유지
-
-const filteredStoresCount = ref(0)
-const itemsPerPage = 10
-const totalPages = computed(() => Math.ceil(filteredStoresCount.value / itemsPerPage))
-
-// 페이지네이션 등 기존 메서드 유지
 const onSearchInput = () => {
   currentPage.value = 1
   searchUsers()
@@ -298,13 +400,34 @@ const setActiveTab = (tab) => {
 const setCurrentPage = (page) => {
   currentPage.value = page
 }
+
 const onRequestPartnership = async (store) => {
-  // 모달 보여주고 싶으면 모달로
+  selectedStoreForDetail.value = null // 상세 모달 닫기
   selectedStore.value = store
   selectedStoreForDetail.value = null
 }
-const onViewDetail = (store) => {
-  selectedStoreForDetail.value = store
+
+const onViewDetail = async (store) => {
+  try {
+    loading.value = true
+
+    // API에서 상세 정보 가져오기
+    const response = await getPartnershipBusinessDetail(store.businessId)
+
+    if (response) {
+      // 백엔드가 직접 PartnershipDetailDTO를 반환
+      selectedStoreForDetail.value = transformStoreData(response)
+    } else {
+      // API 실패시 기본 정보로 모달 열기
+      selectedStoreForDetail.value = transformStoreData(store)
+    }
+  } catch (error) {
+    console.error('매장 상세 정보 조회 실패:', error)
+    // 에러시에도 기본 정보로 모달 열기
+    selectedStoreForDetail.value = transformStoreData(store)
+  } finally {
+    loading.value = false
+  }
 }
 const closeDetailModal = () => {
   selectedStoreForDetail.value = null
@@ -315,58 +438,145 @@ const closeModal = () => {
 const hideSuccessToast = () => {
   showSuccessToast.value = false
 }
-const confirmPartnership = async (store) => {
-  closeModal()
-  showSuccessToast.value = true
 
-  loading.value = true
-  errorMessage.value = ''
+const confirmPartnership = async (store, message = '협업을 제안합니다.') => {
   try {
-    console.log('채팅방 생성 시도 - userId:', store.id)
-    const { data } = await api.post(`/api/partnership/request/${store.id}`)
-    console.log('채팅방 생성 성공:', data)
-    router.push(`/business/chats/${data.roomId}`)
-  } catch (e) {
-    console.error('채팅방 생성 오류:', e)
-    if (e.response?.status === 403) errorMessage.value = '권한이 없습니다. 로그인 확인'
-    else if (e.response?.status === 401) errorMessage.value = '인증 필요'
-    else if (e.response?.status === 404) errorMessage.value = 'API를 찾을 수 없음'
-    else
-      errorMessage.value = `오류: ${e.response?.status} ${e.response?.data?.message || e.message}`
-  } finally {
-    loading.value = false
+    loading.value = true
+
+    // API 호출로 제휴 요청 전송
+    const response = await requestPartnership(store.businessId, message)
+
+    if (response && response.roomId) {
+      // 성공 시 모달 닫고 토스트 표시
+      closeModal()
+      showSuccessToast.value = true
+    } else {
+      throw new Error('제휴 요청 응답이 올바르지 않습니다.')
+    }
+  } catch (error) {
+    console.error('제휴 요청 실패:', error)
+    alert('제휴 요청에 실패했습니다. 다시 시도해주세요.')
   }
 }
 
 const fetchStores = async () => {
-  loading.value = true
   try {
-    const { data } = await api.get('/api/users')
+    loading.value = true
 
-    // 배열을 splice로 업데이트하여 반응성 보장
-    users.value.splice(
-      0,
-      users.value.length,
-      ...data.map((user) => ({
-        id: user.id,
-        name: user.businessName || user.name,
-        category: user.businessCategory || user.category,
-        partnershipExists: !!user.partnershipExists, // boolean 강제
-      })),
-    )
-  } catch (e) {
-    console.error('매장 불러오기 오류', e)
-    users.value.splice(0) // 배열 초기화
+    // API 호출로 매장 목록 가져오기
+    const response = await getPartnershipBusinesses()
+
+    // 백엔드가 직접 배열을 반환
+    if (Array.isArray(response)) {
+      stores.value = response
+      console.log(`${stores.value.length}개 매장 데이터 로드 완료`)
+    } else {
+      console.warn('예상하지 못한 API 응답 형식:', response)
+      stores.value = []
+    }
+  } catch (error) {
+    console.error('매장 목록 조회 실패:', error)
+
+    if (error.response?.status === 404) {
+      console.log('API 엔드포인트를 찾을 수 없습니다. 더미 데이터로 대체합니다.')
+      // 더미 데이터 사용
+      stores.value = [
+        {
+          businessId: 1,
+          businessName: '홍길동 카페',
+          businessCategory: '음식점업',
+          address: '서울시 강남구 테헤란로 123',
+          togetherIndex: 85.5,
+          profileImageUrl: 'https://example.com/profile1.jpg',
+          description: '맛있는 커피와 디저트를 제공하는 카페입니다.',
+          collaborationCategory: '소매업',
+        },
+        {
+          businessId: 2,
+          businessName: '김철수 베이커리',
+          businessCategory: '제조업',
+          address: '서울시 서초구 서초대로 456',
+          togetherIndex: 92.3,
+          profileImageUrl: 'https://example.com/profile2.jpg',
+          description: '신선한 빵을 매일 굽는 베이커리입니다.',
+          collaborationCategory: '음식점업',
+        },
+      ]
+    } else {
+      stores.value = []
+    }
   } finally {
     loading.value = false
   }
 }
 
-onMounted(() => {
-  fetchStores()
+// 내 비즈니스 정보 가져오기
+const fetchMyBusinessInfo = async () => {
+  try {
+    const response = await getMyBusinessInfo()
+    if (response) {
+      myBusinessInfo.value = response
+      // 내 collaboration_category를 추천 필터에 설정
+      if (response.collaborationCategory) {
+        selectedCollaborationCategories.value = [response.collaborationCategory]
+        console.log('내 협업 카테고리:', response.collaborationCategory)
+      }
+    }
+  } catch (error) {
+    console.error('내 비즈니스 정보 조회 실패:', error)
+    // 에러 시 기본값 설정 (예시)
+    selectedCollaborationCategories.value = ['음식점업'] // 기본값
+  }
+}
+
+// 라이프사이클
+onMounted(async () => {
+  await Promise.all([
+    fetchStores(),
+    fetchMyBusinessInfo(), // 내 비즈니스 정보도 함께 로드
+  ])
 })
 </script>
 
 <style scoped>
 @import '@/styles/business-partnership-page.css';
+
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  min-height: 200px;
+}
+
+.loading-spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid #f3f4f6;
+  border-top: 4px solid #3b82f6;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 1rem;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+.empty-state {
+  text-align: center;
+  padding: 3rem 1rem;
+  color: #6b7280;
+}
+
+.empty-state p {
+  font-size: 1rem;
+  margin: 0;
+}
 </style>

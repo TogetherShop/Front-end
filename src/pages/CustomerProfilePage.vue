@@ -19,7 +19,7 @@
             </div>
               <div v-else>
                 <h3 class="CustomerProfile__profile-name mb-2">{{ customerProfile.name || '고객' }}</h3>
-                <p class="CustomerProfile__profile-location mb-0">{{ customerProfile.address || '주소 정보 없음' }}</p>
+                <p class="CustomerProfile__profile-location mb-0">{{ customerProfile.email }}</p>
                 <small v-if="(!customerProfile.name || customerProfile.name === '') && (!customerProfile.address || customerProfile.address === '')" class="text-muted">
                   프로필 정보를 불러올 수 없습니다
                 </small>
@@ -43,10 +43,10 @@
     <div class="CustomerProfile__coupon-section px-4 py-4">
       <div class="d-flex justify-content-between align-items-center mb-3">
         <h2 class="CustomerProfile__section-title mb-0">내 쿠폰함</h2>
-        <a href="#" class="CustomerProfile__view-all-link text-decoration-none text-muted d-flex align-items-center">
+        <router-link to="/customer/coupon?tab=received" class="CustomerProfile__view-all-link text-decoration-none text-muted d-flex align-items-center">
           <span class="CustomerProfile__view-all-text me-1">전체 보기</span>
           <i class="material-symbols-outlined CustomerProfile__view-all-icon">chevron_right</i>
-        </a>
+        </router-link>
       </div>
       <div class="CustomerProfile__coupon-list bg-light rounded-3 p-3 shadow-sm">
         <!-- 로딩 상태 -->
@@ -264,7 +264,8 @@ export default {
         if (response) {
           customerProfile.value = {
             name: response.name || '',
-            address: response.address || ''
+            address: response.address || '',
+            email: response.email || ''
           }
         }
       } catch (error) {

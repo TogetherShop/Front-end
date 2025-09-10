@@ -10,7 +10,7 @@
           />
         </div>
         <div class="col-6 d-flex justify-content-end">
-          <i class="material-symbols-outlined fs-2">notifications</i>
+          <i class="material-symbols-outlined fs-2 notification-icon" @click="goToNotifications">notifications</i>
         </div>
       </div>
     </div>
@@ -18,8 +18,21 @@
 </template>
 
 <script>
+import { useRouter } from 'vue-router'
+
 export default {
   name: 'TopBar',
+  setup() {
+    const router = useRouter()
+    
+    const goToNotifications = () => {
+      router.push('/customer/notifications')
+    }
+    
+    return {
+      goToNotifications
+    }
+  }
 }
 </script>
 

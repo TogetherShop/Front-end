@@ -10,6 +10,16 @@
   object-fit: contain;
 }
 
+.notification-icon {
+  cursor: pointer;
+  transition: color 0.2s ease;
+  color: #666;
+}
+
+.notification-icon:hover {
+  color: #1976d2;
+}
+
 /* 반응형 디자인 */
 @media (max-width: 768px) {
   .top-bar {

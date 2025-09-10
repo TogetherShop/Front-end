@@ -88,7 +88,7 @@ const routes = [
     component: BusinessProfilePage,
   },
   {
-    path: '/business/coupon/analysis',
+    path: '/business/coupon/analysis/:templateId',
     name: 'BusinessCouponAnalysis',
     component: BusinessCouponAnalysis,
   },

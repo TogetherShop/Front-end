@@ -1,28 +1,13 @@
+// src/stores/coupons.js - 간단한 수정버전
 import { defineStore } from 'pinia'
+import { getMyCoupons } from '@/api/business-coupon'
 
-const API_BASE = 'http://localhost:3000'
-const FETCH_TIMEOUT_MS = 5000
-
-// fetch with timeout helper
-async function fetchWithTimeout(url, opts = {}, timeout = FETCH_TIMEOUT_MS) {
-  const controller = new AbortController()
-  const id = setTimeout(() => controller.abort(), timeout)
-  try {
-    const res = await fetch(url, { ...opts, signal: controller.signal })
-    clearTimeout(id)
-    return res
-  } catch (err) {
-    clearTimeout(id)
-    throw err
-  }
-}
-
-// 기존 가데이터 (fallback)
+// fallback 가데이터
 const FALLBACK_MY = [
   {
     id: 1,
     title: '아메리카노 20% 할인',
-    description: '베이커리 달콤과 1:1 교환',
+    description: '베이커리 달콤과 1:1 교환으로 작성',
     participants: 47,
     maxParticipants: 50,
     progress: 94.0,
@@ -32,40 +17,30 @@ const FALLBACK_MY = [
     businessName: '베이커리 달콤',
     discountType: 'percentage',
     discountValue: 20,
+    templateId: 1,
+    totalQuantity: 50,
+    currentQuantity: 3,
   },
   {
     id: 2,
     title: '피자마루',
+    description: '피자마루과 1:1 교환으로 작성',
     timeAgo: '2시간 전',
     status: 'exchanging',
     category: 'food',
     businessName: '피자마루',
     chatActive: true,
     partnerId: 1,
+    totalQuantity: 0,
+    currentQuantity: 0,
   },
-  {
-    id: 3,
-    title: '디저트 10% 할인',
-    description: '헤어샵 스타일과 1:1 교환',
-    participants: 50,
-    maxParticipants: 50,
-    progress: 100,
-    remainingDays: 0,
-    status: 'expired',
-    category: 'dessert',
-    businessName: '헤어샵 스타일',
-    discountType: 'percentage',
-    discountValue: 10,
-    expiredText: '1주일 전 만료',
-  },
-  // ... 필요하면 더 추가
 ]
 
 const FALLBACK_RECEIVED = [
   {
     id: 4,
     title: '피자 15% 할인',
-    description: '피자마루에서 제공',
+    description: '피자마루과 1:1 교환으로 작성',
     participants: 47,
     maxParticipants: 50,
     progress: 94.0,
@@ -75,37 +50,66 @@ const FALLBACK_RECEIVED = [
     businessName: '피자마루',
     discountType: 'percentage',
     discountValue: 15,
-  },
-  {
-    id: 5,
-    title: '디저트 10% 할인',
-    description: '헤어샵 스타일과 1:1 교환',
-    participants: 50,
-    maxParticipants: 50,
-    progress: 100,
-    remainingDays: 0,
-    status: 'expired',
-    category: 'dessert',
-    businessName: '헤어샵 스타일',
-    discountType: 'percentage',
-    discountValue: 10,
-    expiredText: '1주일 전 만료',
+    templateId: 4,
+    totalQuantity: 50,
+    currentQuantity: 3,
   },
 ]
+
+// API 데이터를 UI에 맞게 변환하는 함수
+const transformCouponData = (coupon) => {
+  const usedQuantity =
+    coupon.totalQuantity && coupon.currentQuantity
+      ? coupon.totalQuantity - coupon.currentQuantity
+      : 0
+
+  const progress = coupon.progress || 0
+  const remainingDays = coupon.remainingDays ? Math.max(0, coupon.remainingDays) : 0
+  const status = coupon.status || 'active'
+
+  let expiredText = null
+  if (status === 'expired') {
+    expiredText = coupon.expiredText || '만료됨'
+  }
+
+  return {
+    id: coupon.id,
+    templateId: coupon.templateId,
+    title: coupon.title || '제목 없음',
+    description: coupon.description || '',
+    participants: usedQuantity,
+    maxParticipants: coupon.totalQuantity || coupon.maxParticipants || 0,
+    progress: progress,
+    remainingDays: remainingDays,
+    status: status,
+    businessName: coupon.businessName || '',
+    discountValue: coupon.discountValue || 0,
+    timeAgo: coupon.timeAgo || null,
+    chatActive: coupon.chatActive || false,
+    partnerId: coupon.partnerId || null,
+    owner: coupon.owner || 'my',
+    termsAndConditions: coupon.termsAndConditions || '',
+    acceptedByRequester: coupon.acceptedByRequester || false,
+    acceptedByRecipient: coupon.acceptedByRecipient || false,
+    roomId: coupon.roomId || null,
+    expiredText: expiredText,
+    currentQuantity: coupon.currentQuantity || 0,
+    totalQuantity: coupon.totalQuantity || 0,
+    category: coupon.category || 'general',
+    discountType: coupon.discountType || 'percentage',
+    createdAt: coupon.createdAt || new Date(),
+  }
+}
 
 export const useCouponsStore = defineStore('coupons', {
   state: () => ({
     activeTab: 'my',
     loading: false,
     error: null,
-    filters: {
-      active: true,
-      expired: true,
-      exchanging: true,
-    },
+    filters: { active: true, expired: true, exchanging: true },
     searchQuery: '',
-    myCoupons: [...FALLBACK_MY], // 초기값은 fallback 가데이터
-    receivedCoupons: [...FALLBACK_RECEIVED], // 초기값
+    myCoupons: [...FALLBACK_MY],
+    receivedCoupons: [...FALLBACK_RECEIVED],
     activeChatPartner: null,
     pendingExchanges: [],
   }),
@@ -116,10 +120,10 @@ export const useCouponsStore = defineStore('coupons', {
 
     filteredCoupons: (state) => {
       const coupons = state.activeTab === 'my' ? state.myCoupons : state.receivedCoupons
-      return coupons.filter((coupon) => {
-        if (coupon.status === 'active' && !state.filters.active) return false
-        if (coupon.status === 'expired' && !state.filters.expired) return false
-        if (coupon.status === 'exchanging' && !state.filters.exchanging) return false
+      return coupons.filter((c) => {
+        if (c.status === 'active' && !state.filters.active) return false
+        if (c.status === 'expired' && !state.filters.expired) return false
+        if (c.status === 'exchanging' && !state.filters.exchanging) return false
         return true
       })
     },
@@ -151,7 +155,7 @@ export const useCouponsStore = defineStore('coupons', {
     exchangingCoupons: (state) => state.myCoupons.filter((c) => c.status === 'exchanging'),
     expiringSoonCoupons: (state) =>
       [...state.myCoupons, ...state.receivedCoupons].filter(
-        (coupon) => coupon.remainingDays && coupon.remainingDays <= 3 && coupon.status === 'active',
+        (c) => c.remainingDays && c.remainingDays <= 3 && c.status === 'active',
       ),
     couponsWithActiveChat: (state) => state.myCoupons.filter((c) => c.chatActive),
   },
@@ -176,65 +180,58 @@ export const useCouponsStore = defineStore('coupons', {
       this.error = null
     },
 
-    // ------------ 신규/변경: 서버에서 쿠폰 목록 불러오기 ------------
-    // businessId: 현재 로그인된 사업자 id
-    // 옵션: force -> 강제로 API 호출(캐시 갱신)
-    async loadCoupons(businessId = 1, { force = false } = {}) {
-      // 이미 로딩 중이면 중복 호출 방지
-      if (this.loading && !force) return
+    // 간소화된 로딩 함수
+    async loadCoupons({ force = false } = {}) {
+      // 중복 실행 방지
+      if (this.loading && !force) {
+        console.log('이미 로딩 중이므로 return')
+        return
+      }
+
+      console.log('loadCoupons 시작')
       this.loading = true
       this.error = null
 
-      const url = `${API_BASE}/api/businesses/${businessId}/coupons`
+      let apiSuccess = false
+
       try {
-        const res = await fetchWithTimeout(
-          url,
-          { method: 'GET', headers: { 'Content-Type': 'application/json' } },
-          FETCH_TIMEOUT_MS,
-        )
-        if (!res || !res.ok) throw new Error(`Network response not ok (${res && res.status})`)
-        const body = await res.json()
-        if (!body || !body.success) throw new Error('Invalid response body')
+        const data = await getMyCoupons()
+        console.log('API 호출 성공:', data)
+        apiSuccess = true
 
-        // API 스펙(권장): { success: true, myCoupons: [...], receivedCoupons: [...] }
-        if (Array.isArray(body.myCoupons)) {
-          this.myCoupons = body.myCoupons
-        } else if (Array.isArray(body.coupons)) {
-          // 만약 단일 배열로 반환된다면 서버에서 owner 필드로 분리 가능
-          // 예: coupon.owner = 'my' | 'received'
-          const my = body.coupons.filter((c) => c.owner === 'my')
-          const received = body.coupons.filter((c) => c.owner === 'received')
-          if (my.length) this.myCoupons = my
-          if (received.length) this.receivedCoupons = received
-        }
+        if (data && data.success !== false) {
+          this.myCoupons = Array.isArray(data.myCoupons)
+            ? data.myCoupons.map(transformCouponData)
+            : [...FALLBACK_MY]
 
-        if (Array.isArray(body.receivedCoupons)) {
-          this.receivedCoupons = body.receivedCoupons
-        }
-
-        // 안전장치: 만약 응답이 빈 경우 fallback 유지 또는 초기화
-        if (
-          (!Array.isArray(body.myCoupons) || body.myCoupons.length === 0) &&
-          (!Array.isArray(body.coupons) || body.coupons.length === 0)
-        ) {
-          // 서버가 빈 배열을 명시적으로 준다면 빈 목록으로 둘 것인지 판단 필요
-          // 여기서는 빈 목록도 존중 (서버가 실제로 없다고 응답했을 수 있음)
+          this.receivedCoupons = Array.isArray(data.receivedCoupons)
+            ? data.receivedCoupons.map(transformCouponData)
+            : [...FALLBACK_RECEIVED]
+        } else {
+          this.myCoupons = [...FALLBACK_MY]
+          this.receivedCoupons = [...FALLBACK_RECEIVED]
         }
       } catch (err) {
-        console.warn(
-          'Failed to load coupons from API, using fallback mock data:',
-          err && err.message,
-        )
-        // fallback: 이미 초기값으로 가데이터가 있으므로 별도 처리는 필요 없지만 안전하게 재할당
+        console.error('API 호출 실패:', err)
+        this.error = err.message
         this.myCoupons = [...FALLBACK_MY]
         this.receivedCoupons = [...FALLBACK_RECEIVED]
-        this.error = err && err.message ? String(err.message) : 'network error'
-      } finally {
-        this.loading = false
       }
+
+      // 명시적으로 loading을 false로 설정
+      console.log('loading을 false로 설정')
+      this.loading = false
+
+      console.log('loadCoupons 완료, loading:', this.loading)
+      return apiSuccess
     },
 
-    // 기존 액션들 그대로 유지 (생략하지 않고 필요시 계속 사용)
+    // 강제 로딩 해제
+    forceStopLoading() {
+      console.log('강제로 loading 해제')
+      this.loading = false
+    },
+
     addMyCoupon(couponData) {
       const newCoupon = {
         id: Date.now(),
@@ -247,6 +244,7 @@ export const useCouponsStore = defineStore('coupons', {
       this.myCoupons.unshift(newCoupon)
       return newCoupon
     },
+
     async startExchange(couponId, exchangeData) {
       const coupon = this.myCoupons.find((c) => c.id === couponId)
       if (!coupon) return false
@@ -266,6 +264,7 @@ export const useCouponsStore = defineStore('coupons', {
         return false
       }
     },
+
     cancelExchange(couponId) {
       const coupon = this.myCoupons.find((c) => c.id === couponId)
       if (coupon && coupon.status === 'exchanging') {
@@ -278,6 +277,7 @@ export const useCouponsStore = defineStore('coupons', {
       }
       return false
     },
+
     toggleChat(couponId, active = true) {
       const coupon = this.myCoupons.find((c) => c.id === couponId)
       if (coupon) {
@@ -286,6 +286,7 @@ export const useCouponsStore = defineStore('coupons', {
         else if (this.activeChatPartner === coupon.partnerId) this.activeChatPartner = null
       }
     },
+
     updateCouponStatus(couponId, status) {
       const coupon =
         this.myCoupons.find((c) => c.id === couponId) ||
@@ -298,6 +299,7 @@ export const useCouponsStore = defineStore('coupons', {
         }
       }
     },
+
     deleteCoupon(couponId) {
       const myIndex = this.myCoupons.findIndex((c) => c.id === couponId)
       const receivedIndex = this.receivedCoupons.findIndex((c) => c.id === couponId)

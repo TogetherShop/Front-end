@@ -99,11 +99,18 @@
         </div>
 
         <!-- 로딩 상태 -->
-        <div v-if="loading" class="text-center py-5">
+        <div v-if="isLoading" class="text-center py-5">
           <div class="spinner-border text-primary business-coupon-page__spinner" role="status">
             <span class="visually-hidden">로딩 중...</span>
           </div>
           <p class="mt-2 business-coupon-page__loading-text">쿠폰을 불러오는 중...</p>
+        </div>
+
+        <!-- 에러 상태 -->
+        <div v-else-if="error" class="alert alert-warning text-center">
+          <i class="material-symbols-outlined">warning</i>
+          <p>쿠폰을 불러오는 중 오류가 발생했습니다.</p>
+          <button @click="retryLoad" class="btn btn-primary btn-sm">다시 시도</button>
         </div>
 
         <div v-else>
@@ -111,7 +118,7 @@
           <div v-if="activeTab === 'my'">
             <BusinessCouponCard
               v-for="coupon in paginatedMyCoupons"
-              :key="coupon.id"
+              :key="`my-${coupon.id}`"
               :coupon="coupon"
               @chatContinue="handleChatContinue"
               @openAnalysis="handleOpenAnalysis"
@@ -122,7 +129,7 @@
           <div v-else>
             <BusinessCouponCard
               v-for="coupon in paginatedReceivedCoupons"
-              :key="coupon.id"
+              :key="`received-${coupon.id}`"
               :coupon="coupon"
               @chatContinue="handleChatContinue"
               @openAnalysis="handleOpenAnalysis"
@@ -171,7 +178,7 @@
 </template>
 
 <script>
-import { ref, computed, watch, nextTick, onMounted } from 'vue'
+import { ref, computed, watch, nextTick, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useCouponsStore } from '@/stores/coupons'
 import BusinessTopBar from '@/components/BusinessTopBar.vue'
@@ -193,6 +200,10 @@ export default {
     const currentPage = ref(1)
     const itemsPerPage = 5
 
+    // 로컬 로딩 상태 추가
+    const localLoading = ref(false)
+    const loadingTimeout = ref(false)
+
     // 탭 상태
     const activeTab = computed({
       get: () => couponsStore.activeTab,
@@ -205,18 +216,62 @@ export default {
       set: (val) => couponsStore.setSearchQuery(val),
     })
 
-    // loading from store
-    const loading = computed(() => couponsStore.loading)
+    // 로딩 상태를 더 안전하게 관리
+    const isLoading = computed(() => {
+      const storeLoading = couponsStore.loading
+      const localLoadingValue = localLoading.value
+      console.log(`Loading check - store: ${storeLoading}, local: ${localLoadingValue}`)
+      return storeLoading || localLoadingValue
+    })
+
     const error = computed(() => couponsStore.error)
 
-    // 필터링된 리스트는 기존 로직 유지 (store의 getters 사용)
-    const filteredMyCoupons = computed(() =>
-      couponsStore.searchFilteredCoupons.filter((c) => couponsStore.myCoupons.includes(c)),
-    )
+    // 필터링된 리스트는 store의 데이터를 직접 사용
+    const filteredMyCoupons = computed(() => {
+      const coupons = couponsStore.myCoupons
+      return coupons.filter((c) => {
+        // 검색 필터 적용
+        if (searchQuery.value.trim()) {
+          const q = searchQuery.value.toLowerCase()
+          const matchesSearch =
+            (c.title && c.title.toLowerCase().includes(q)) ||
+            (c.description && c.description.toLowerCase().includes(q)) ||
+            (c.businessName && c.businessName.toLowerCase().includes(q))
 
-    const filteredReceivedCoupons = computed(() =>
-      couponsStore.searchFilteredCoupons.filter((c) => couponsStore.receivedCoupons.includes(c)),
-    )
+          if (!matchesSearch) return false
+        }
+
+        // 상태 필터 적용
+        if (c.status === 'active' && !filters.value.active) return false
+        if (c.status === 'expired' && !filters.value.expired) return false
+        if (c.status === 'exchanging' && !filters.value.exchanging) return false
+
+        return true
+      })
+    })
+
+    const filteredReceivedCoupons = computed(() => {
+      const coupons = couponsStore.receivedCoupons
+      return coupons.filter((c) => {
+        // 검색 필터 적용
+        if (searchQuery.value.trim()) {
+          const q = searchQuery.value.toLowerCase()
+          const matchesSearch =
+            (c.title && c.title.toLowerCase().includes(q)) ||
+            (c.description && c.description.toLowerCase().includes(q)) ||
+            (c.businessName && c.businessName.toLowerCase().includes(q))
+
+          if (!matchesSearch) return false
+        }
+
+        // 상태 필터 적용
+        if (c.status === 'active' && !filters.value.active) return false
+        if (c.status === 'expired' && !filters.value.expired) return false
+        if (c.status === 'exchanging' && !filters.value.exchanging) return false
+
+        return true
+      })
+    })
 
     const paginatedMyCoupons = computed(() => {
       const start = (currentPage.value - 1) * itemsPerPage
@@ -269,19 +324,95 @@ export default {
       currentPage.value = 1
     })
 
+    watch(searchQuery, () => {
+      currentPage.value = 1
+    })
+
     const toggleFilter = () => {
       showFilter.value = !showFilter.value
     }
 
-    const handleOpenAnalysis = (coupon) => {
-      const templateId = coupon.template_id || coupon.templateId || coupon.id
-      router.push({ name: 'BusinessCouponAnalysis', query: { templateId: String(templateId) } })
+    const handleChatContinue = (couponId) => {
+      const coupon = [...couponsStore.myCoupons, ...couponsStore.receivedCoupons].find(
+        (c) => c.id === couponId,
+      )
+
+      if (coupon && coupon.roomId) {
+        router.push({
+          name: 'BusinessChat',
+          params: { roomId: coupon.roomId },
+          query: { partnerId: coupon.partnerId },
+        })
+      }
     }
 
-    // 페이지가 마운트되면 스토어에서 쿠폰 로드 (businessId는 실제 앱에서 로그인된 사업자 id로 대체)
+    const handleOpenAnalysis = (coupon) => {
+      const templateId = coupon.templateId || coupon.id
+
+      if (coupon.status === 'exchanging' || !templateId) {
+        alert('쿠폰이 아직 생성되지 않아 분석할 수 없습니다.')
+        return
+      }
+
+      router.push({
+        name: 'BusinessCouponAnalysis',
+        query: { templateId: String(templateId) },
+      })
+    }
+
+    const retryLoad = async () => {
+      localLoading.value = true
+      try {
+        await couponsStore.loadCoupons({ force: true })
+      } finally {
+        localLoading.value = false
+      }
+    }
+
+    // 로딩 타임아웃 설정
+    let timeoutId = null
+
+    // 페이지가 마운트되면 스토어에서 쿠폰 로드
     onMounted(async () => {
-      const businessId = 1 // 필요하면 route params 또는 인증 토큰에서 가져오세요
-      await couponsStore.loadCoupons(businessId)
+      console.log('BusinessCouponPage 마운트됨, 쿠폰 로딩 시작...')
+
+      localLoading.value = true
+
+      // 2초 후 강제로 로딩 해제
+      timeoutId = setTimeout(() => {
+        console.log('2초 타임아웃 - 강제로 모든 로딩 해제')
+        localLoading.value = false
+        loadingTimeout.value = true
+        // store의 loading도 강제로 false로 설정
+        couponsStore.loading = false
+        console.log('강제 해제 후 store loading:', couponsStore.loading)
+      }, 2000)
+
+      try {
+        await couponsStore.loadCoupons()
+        console.log('쿠폰 로딩 성공')
+        console.log('로딩 성공 후 store loading:', couponsStore.loading)
+
+        // 성공했는데도 loading이 true면 강제로 false로 설정
+        if (couponsStore.loading) {
+          console.warn('로딩 성공했는데도 store loading이 true - 강제로 false 설정')
+          couponsStore.loading = false
+        }
+      } catch (error) {
+        console.error('쿠폰 로딩 중 오류:', error)
+      } finally {
+        localLoading.value = false
+        if (timeoutId) {
+          clearTimeout(timeoutId)
+        }
+        console.log('finally에서 store loading:', couponsStore.loading)
+      }
+    })
+
+    onUnmounted(() => {
+      if (timeoutId) {
+        clearTimeout(timeoutId)
+      }
     })
 
     return {
@@ -298,8 +429,12 @@ export default {
       visiblePages,
       currentPage,
       changePage,
+      handleChatContinue,
       handleOpenAnalysis,
-      loading,
+      retryLoad,
+      isLoading,
+      localLoading,
+      loadingTimeout,
       error,
     }
   },

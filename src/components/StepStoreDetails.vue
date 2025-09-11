@@ -37,8 +37,8 @@
               <span class="text-wrapper-5">*</span>
             </p>
             <SelectBox
-              v-model="businessType"
-              :options="['음식점', '카페', '편의점', '기타']"
+              v-model="collaborationCategory"
+              :options="['서비스', '제조', '판매', '기타']"
               placeholder="협업하고 싶은 업종을 선택하세요"
             />
           </class>
@@ -50,8 +50,8 @@
               <span class="text-wrapper-5">*</span>
             </p>
             <SelectBox
-              v-model="collaborationCategory"
-              :options="['10대', '20대', '30대', '기타']"
+              v-model="mainCustomer"
+              :options="['10대', '20대', '30대', '40대', '50대', '60대', '70대', '80대', '기타']"
               placeholder="주요 고객층을 선택하세요"
             />
           </div>
@@ -59,7 +59,20 @@
           <!-- 업종 -->
           <div class="form-group">
             <p class="label">
-              <span class="span">업종 </span>
+              <span class="span">판매 채널 </span>
+              <span class="text-wrapper-5">*</span>
+            </p>
+            <SelectBox
+              v-model="businessType"
+              :options="['온라인', '오프라인']"
+              placeholder="판매 채널을 선택하세요"
+            />
+          </div>
+
+          <!-- 업종 -->
+          <div class="form-group">
+            <p class="label">
+              <span class="span">내 업종 </span>
               <span class="text-wrapper-5">*</span>
             </p>
             <SelectBox
@@ -100,10 +113,13 @@ const emit = defineEmits(['next', 'prev'])
 const businessType = ref(props.businessType || '')
 const businessCategory = ref(props.businessCategory || '')
 const collaborationCategory = ref(props.collaborationCategory || '')
-
+const mainCustomer = ref('')
 const allRequiredChecked = computed(() => {
   return (
-    businessType.value !== '' && businessCategory.value !== '' && collaborationCategory.value !== ''
+    businessType.value !== '' &&
+    businessCategory.value !== '' &&
+    collaborationCategory.value !== '' &&
+    mainCustomer.value !== '' // mainCustomer 체크 추가
   )
 })
 
@@ -113,6 +129,7 @@ const nextStep = () => {
       businessType: businessType.value,
       businessCategory: businessCategory.value,
       collaborationCategory: collaborationCategory.value,
+      mainCustomer: mainCustomer.value, // 추가
     })
   }
 }

@@ -231,7 +231,7 @@ const showSuccessToast = ref(false)
 const loading = ref(false)
 const activeTab = ref('recommended')
 const errorMessage = ref('')
-
+const router = useRouter()
 // 내 비즈니스 정보
 const myBusinessInfo = ref(null)
 
@@ -273,8 +273,8 @@ const filteredStoresAll = computed(() => {
     const q = searchQuery.value.toLowerCase()
     result = result.filter(
       (store) =>
-        store.businessName.toLowerCase().includes(query) ||
-        store.businessCategory.toLowerCase().includes(query),
+        store.businessName.toLowerCase().includes(q) ||
+        store.businessCategory.toLowerCase().includes(q),
     )
   }
 
@@ -375,10 +375,6 @@ const transformStoreData = (apiStore) => {
   }
 }
 
-const onSearchInput = () => {
-  currentPage.value = 1
-  searchUsers()
-}
 const toggleFilter = () => {
   showFilter.value = !showFilter.value
   if (showFilter.value) showSort.value = false
@@ -450,6 +446,7 @@ const confirmPartnership = async (store, message = '협업을 제안합니다.')
       // 성공 시 모달 닫고 토스트 표시
       closeModal()
       showSuccessToast.value = true
+      router.push(`/business/chats/${response.roomId}`)
     } else {
       throw new Error('제휴 요청 응답이 올바르지 않습니다.')
     }

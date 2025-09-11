@@ -1,5 +1,6 @@
 // /src/stores/reviews.js
 import { defineStore } from 'pinia'
+import { useStoresStore } from '@/stores/stores' // ✨ 추가
 
 function toYMD(datetimeString) {
   if (!datetimeString) return ''
@@ -108,7 +109,6 @@ export const useReviewsStore = defineStore('reviews', {
         const raw = localStorage.getItem('access_token') || ''
         const token = raw.replace(/^"|"$/g, '').replace(/^Bearer\s+/i, '')
 
-        // ⭐ 백엔드 POST (예시: /api/stores/{id}/reviews)
         const res = await fetch(`/api/stores/${encodeURIComponent(storeId)}/reviews`, {
           method: 'POST',
           headers: {
@@ -117,33 +117,52 @@ export const useReviewsStore = defineStore('reviews', {
             ...(token ? { Authorization: `Bearer ${token}` } : {}),
           },
           body: JSON.stringify({
-            rating: this.reviewModal.rating, // 정수여도 OK, 백엔드에서 Double로 저장
-            content: this.reviewModal.comment,
+            rating: Number(this.reviewModal.rating), // 백엔드 Double(0~5)
+            content: this.reviewModal.comment.trim(),
+            // 운영에서는 customerId를 보내지 말고 서버에서 인증으로 추출
           }),
         })
-
         if (!res.ok) throw new Error('리뷰 작성 실패')
-        const saved = await res.json?.()?.catch?.(() => null) // 백엔드가 바디를 안 주면 null
 
-        // 응답이 오면 그대로 매핑, 없으면 낙관적 업데이트
-        const addOne = (src) => {
-          const ratingRaw = Number(src.rating ?? this.reviewModal.rating ?? 0)
-          const ratingInt = Math.max(0, Math.min(5, Math.round(ratingRaw)))
-          const userName = src.displayName || '나'
-          this.reviews.unshift({
-            id: String(src.id ?? Date.now()),
-            storeId: String(storeId),
-            userName,
-            userInitial: userName.slice(0, 1).toUpperCase(),
-            rating: ratingInt,
-            ratingRaw,
-            comment: src.content ?? this.reviewModal.comment,
-            createdAt: toYMD(src.createdAt ?? new Date().toISOString()),
-          })
+        // 백엔드가 ReviewCreateResponse 반환한다고 가정(이전 답변)
+        // { id, businessId, customerId, rating, content, createdAt, displayName, updatedAvg, updatedCount }
+        let saved = null
+        try {
+          saved = await res.json()
+        } catch {
+          /* 바디 없음 대응 */
         }
 
-        if (saved) addOne(saved)
-        else addOne({})
+        // 1) 리스트에 새 리뷰 추가(낙관적 UI)
+        const ratingRaw = Number(saved?.rating ?? this.reviewModal.rating ?? 0)
+        const ratingInt = Math.max(0, Math.min(5, Math.round(ratingRaw)))
+        const userName =
+          saved?.displayName || (saved?.customerId ? `고객#${saved.customerId}` : '나')
+
+        this.reviews.unshift({
+          id: String(saved?.id ?? Date.now()),
+          storeId: String(saved?.businessId ?? storeId),
+          userName,
+          userInitial: userName.slice(0, 1).toUpperCase(),
+          rating: ratingInt, // 별(정수)
+          ratingRaw, // 실수 원본
+          comment: saved?.content ?? this.reviewModal.comment,
+          createdAt: toYMD(saved?.createdAt ?? new Date().toISOString()),
+        })
+
+        // 2) 상단 평균/총개수 즉시 동기화
+        const storesStore = useStoresStore()
+        const updatedAvg =
+          typeof saved?.updatedAvg === 'number'
+            ? saved.updatedAvg
+            : this.averageRating(String(storeId)) // 백엔드가 평균을 안 주면 로컬 평균으로 fallback
+        const updatedCount =
+          typeof saved?.updatedCount === 'number'
+            ? saved.updatedCount
+            : (storesStore.stores.find((s) => s.id === String(storeId))?.reviewCount ??
+              this.reviews.filter((r) => r.storeId === String(storeId)).length)
+
+        storesStore.patchRating(String(storeId), Number(updatedAvg), Number(updatedCount))
 
         this.closeReviewModal()
         return true

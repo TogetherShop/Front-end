@@ -115,7 +115,7 @@
         </div>
 
         <!-- 공동구매 아이템 목록 -->
-        <div v-else class="purchase-item" :class="'purchase-item--' + item.status" v-for="item in getCurrentItems()" :key="item.projectId || item.id">
+        <div v-else class="purchase-item" :class="'purchase-item--' + item.status" v-for="item in sortedCurrentItems" :key="item.projectId || item.id">
           <div class="item-header">
             <h4 class="item-title">{{ item.title }}</h4>
             <span class="status-badge" :class="getStatusBadgeClass(item.status)">{{ getStatusText(item.status) }}</span>
@@ -207,7 +207,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import BusinessTopBar from '@/components/BusinessTopBar.vue'
 import BusinessBottomNavigation from '@/components/BusinessBottomNav.vue'
 import BusinessSuccessToast from '@/components/BusinessSuccessToast.vue'
@@ -397,6 +397,25 @@ const loadRegisteredPurchases = async () => {
     loading.value = false
   }
 }
+const STATUS_ORDER = Object.freeze({
+  '모집중': 0,
+  '성공'  : 1,
+  '실패'  : 2,
+})
+
+const sortedCurrentItems = computed(() => {
+  const items = getCurrentItems() ?? []
+  return [...items].sort((a, b) => {
+    const aKey = STATUS_ORDER[getStatusText(a.status)] ?? 999
+    const bKey = STATUS_ORDER[getStatusText(b.status)] ?? 999
+    if (aKey !== bKey) return aKey - bKey
+    // (선택) 동률이면 마감일 빠른 순으로
+    const aEnd = a.endDate ? new Date(a.endDate).getTime() : Infinity
+    const bEnd = b.endDate ? new Date(b.endDate).getTime() : Infinity
+    return aEnd - bEnd
+  })
+})
+
 
 // API 상태를 UI 상태로 매핑 (백엔드 DDL 기준)
 const mapApiStatus = (apiStatus) => {

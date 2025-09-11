@@ -56,10 +56,17 @@
                 type="text"
                 placeholder="000-00-00000"
                 v-model="businessRegistrationNumber"
+                @input="formatRegistrationNumber"
               />
-              <button class="div-wrapper">
+              <button class="div-wrapper" @click="verifyBusiness">
                 <div class="text-wrapper-3">인증</div>
               </button>
+            </div>
+            <div v-if="showVerifiedPopup" class="popup-overlay" @click="closePopup">
+              <div class="popup-content">
+                <p>인증이 완료되었습니다.</p>
+                <button @click="closePopup">확인</button>
+              </div>
             </div>
             <div class="text-wrapper-2">사업자등록번호는 자동으로 검증됩니다</div>
           </div>
@@ -72,8 +79,7 @@
           </div>
           <p class="heading">신뢰할 수 있는 인증 시스템</p>
           <p class="API">
-            공공 API를 통한 사업자등록 및 실명확인으로 안전한 거래 환<br />
-            경을 제공합니다
+            공공 API를 통한 사업자등록 및 실명확인으로 안전한 거래 환경을 제공합니다
           </p>
         </div>
 
@@ -102,7 +108,7 @@ import AuthHeader from './AuthHeader.vue'
 
 const props = defineProps(['businessName', 'businessRegistrationNumber'])
 const emit = defineEmits(['next', 'prev'])
-
+const showVerifiedPopup = ref(false)
 const businessName = ref(props.businessName || '')
 const businessRegistrationNumber = ref(props.businessRegistrationNumber || '')
 
@@ -119,10 +125,34 @@ const nextStep = () => {
   }
 }
 
+const verifyBusiness = () => {
+  if (!businessRegistrationNumber.value) return
+  // 여기서 실제 API 인증 로직 호출 가능
+  showVerifiedPopup.value = true
+}
+
 const currentStep = ref(2)
 
 const goBack = () => {
   emit('prev')
+}
+
+const closePopup = () => {
+  showVerifiedPopup.value = false
+}
+
+const formatRegistrationNumber = (e) => {
+  // 숫자만 추출
+  let numbers = e.target.value.replace(/\D/g, '')
+
+  // 형식 맞춰서 - 추가
+  if (numbers.length > 5) {
+    numbers = numbers.replace(/^(\d{3})(\d{2})(\d{0,5}).*/, '$1-$2-$3')
+  } else if (numbers.length > 3) {
+    numbers = numbers.replace(/^(\d{3})(\d{0,2}).*/, '$1-$2')
+  }
+
+  businessRegistrationNumber.value = numbers
 }
 </script>
 
@@ -450,5 +480,40 @@ const goBack = () => {
   line-height: 20px;
   text-align: center;
   white-space: nowrap;
+}
+
+/* 팝업 스타일 */
+.popup-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.popup-content {
+  background-color: #fff;
+  padding: 24px;
+  border-radius: 12px;
+  text-align: center;
+  width: 300px; /* 팝업 너비 조절 */
+}
+
+.popup-content button {
+  margin-top: 16px;
+  padding: 12px 0; /* 높이 키움 */
+  width: 100%; /* 버튼을 팝업 너비에 맞춤 */
+  border: none;
+  border-radius: 8px;
+  background-color: #017f58;
+  color: white;
+  font-weight: 600;
+  font-size: 16px;
+  cursor: pointer;
 }
 </style>

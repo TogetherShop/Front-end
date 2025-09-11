@@ -29,6 +29,8 @@ export async function login(username, password) {
   localStorage.setItem('refresh_token', data.refreshToken)
   localStorage.setItem('username', username)
   localStorage.setItem('user_type', 'business')
+
+  localStorage.setItem('businessId', String(data.businessId))
   return data
 }
 

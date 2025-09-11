@@ -1,6 +1,5 @@
 <template>
   <div class="screen">
-    <CustomerTopBar />
     <div class="content">
       <!-- 로고 + 설명 -->
       <div class="overlap">
@@ -15,10 +14,9 @@
             상생 플랫폼
           </span>
         </p>
-      </div>
 
-      <!-- 큰 타이틀 -->
-      <div class="text-wrapper-3">함께가게</div>
+        <div class="text-wrapper-3">함께가게</div>
+      </div>
 
       <!-- 버튼 + 로그인 링크 -->
       <div class="bottom">
@@ -37,7 +35,6 @@
 </template>
 
 <script setup>
-import CustomerTopBar from '@/components/CustomerTopBar.vue'
 import logo from '@/assets/images/togethershop_logo.png'
 import { useRouter } from 'vue-router'
 
@@ -54,6 +51,7 @@ const goLogin = () => router.push('/login')
   width: 100vw;
   overflow: hidden;
   background-color: #fff;
+  font-family: 'Pretendard', sans-serif;
 }
 
 .content {

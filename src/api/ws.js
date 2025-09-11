@@ -136,34 +136,41 @@ export const sendText = (roomId, content) => {
 
 // 채팅 기록 가져오기 (REST 호출)
 
+// api/ws.js
 export const fetchChatHistory = async (roomId) => {
   try {
     const { data } = await api.get(`/api/partnership/rooms/${roomId}/history`)
-    return data.messages.map((m) => {
+
+    const messages = data.messages.map((m) => {
       let payload = null
 
-      // COUPON_PROPOSAL 타입인 경우 content를 JSON으로 파싱
-      if (m.type === 'COUPON_PROPOSAL' && m.content) {
+      if (m.payload) {
+        payload = typeof m.payload === 'string' ? JSON.parse(m.payload) : m.payload
+      } else if (m.type === 'COUPON_PROPOSAL' && m.content) {
         try {
           payload = JSON.parse(m.content)
         } catch (e) {
           console.error('Payload 파싱 실패:', e, m.content)
         }
-      } else if (m.payload) {
-        // 다른 메시지 타입의 payload 처리
-        payload = typeof m.payload === 'string' ? JSON.parse(m.payload) : m.payload
       }
 
       return {
         id: m.id,
         senderId: m.senderId,
+        senderName: m.senderName || '', // template에서 필요
         content: m.type === 'COUPON_PROPOSAL' ? '제휴 제안' : m.content || '',
-        timestamp: new Date(m.createdAt).getTime(),
-        type: m.type || 'CHAT',
+        type: m.type || 'TEXT',
         payload: payload,
-        createdAt: m.createdAt, // 추가: 시간 포맷용
+        createdAt: m.createdAt,
+        timestamp: new Date(m.createdAt).getTime(),
       }
     })
+
+    // roomInfo도 같이 반환
+    return {
+      messages,
+      roomInfo: data.roomInfo || {},
+    }
   } catch (err) {
     console.error('채팅 기록 불러오기 실패', err)
     throw err

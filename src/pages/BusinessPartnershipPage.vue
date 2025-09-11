@@ -29,46 +29,64 @@
 
           <!-- 필터 드롭다운 -->
           <div v-if="showFilter" class="filter-dropdown">
+            <!-- 거리 필터 -->
             <div class="filter-category">
               <h6 class="filter-title">온/오프라인</h6>
               <div class="filter-options">
                 <label class="filter-checkbox">
-                  <input type="checkbox" v-model="selectedCategories" value="온라인" />
+                  <input type="checkbox" v-model="selectedBusinessTypes" value="온라인" />
                   <span>온라인</span>
                 </label>
                 <label class="filter-checkbox">
-                  <input type="checkbox" v-model="selectedCategories" value="오프라인" />
+                  <input type="checkbox" v-model="selectedBusinessTypes" value="오프라인" />
                   <span>오프라인</span>
                 </label>
               </div>
             </div>
 
+            <!-- 카테고리 필터 -->
             <div class="filter-category">
               <h6 class="filter-title">업종</h6>
               <div class="filter-options">
                 <label class="filter-checkbox">
-                  <input type="checkbox" v-model="selectedBusinessTypes" value="음식점" />
-                  <span>음식점</span>
+                  <input type="checkbox" v-model="selectedCategories" value="음식점" />
+                  <span>소매</span>
                 </label>
                 <label class="filter-checkbox">
-                  <input type="checkbox" v-model="selectedBusinessTypes" value="카페" />
-                  <span>카페</span>
+                  <input type="checkbox" v-model="selectedCategories" value="카페" />
+                  <span>음식</span>
                 </label>
                 <label class="filter-checkbox">
-                  <input type="checkbox" v-model="selectedBusinessTypes" value="소매업" />
-                  <span>소매업</span>
+                  <input type="checkbox" v-model="selectedCategories" value="소매업" />
+                  <span>수리/개인</span>
                 </label>
                 <label class="filter-checkbox">
-                  <input type="checkbox" v-model="selectedBusinessTypes" value="미용업" />
-                  <span>미용업</span>
+                  <input type="checkbox" v-model="selectedCategories" value="미용업" />
+                  <span>예체능</span>
                 </label>
                 <label class="filter-checkbox">
-                  <input type="checkbox" v-model="selectedBusinessTypes" value="서비스업" />
-                  <span>서비스업</span>
+                  <input type="checkbox" v-model="selectedCategories" value="서비스업" />
+                  <span>교육</span>
                 </label>
                 <label class="filter-checkbox">
-                  <input type="checkbox" v-model="selectedBusinessTypes" value="기타" />
-                  <span>기타</span>
+                  <input type="checkbox" v-model="selectedCategories" value="기타" />
+                  <span>부동산</span>
+                </label>
+                <label class="filter-checkbox">
+                  <input type="checkbox" v-model="selectedCategories" value="음식점" />
+                  <span>숙박</span>
+                </label>
+                <label class="filter-checkbox">
+                  <input type="checkbox" v-model="selectedCategories" value="카페" />
+                  <span>과학/기술</span>
+                </label>
+                <label class="filter-checkbox">
+                  <input type="checkbox" v-model="selectedCategories" value="소매업" />
+                  <span>보건의료</span>
+                </label>
+                <label class="filter-checkbox">
+                  <input type="checkbox" v-model="selectedCategories" value="미용업" />
+                  <span>관리/임대</span>
                 </label>
               </div>
             </div>
@@ -91,7 +109,6 @@
             >
               <span>거리 순</span>
             </div>
-
             <div
               class="sort-option"
               :class="{ active: sortBy === 'together-score' }"
@@ -215,6 +232,9 @@ import {
   getMyBusinessInfo,
 } from '@/api/partnership'
 
+// 거리 계산 유틸리티
+import { calculateDistance, formatDistance } from '@/utils/distanceCalculator'
+
 // 반응형 데이터
 const searchQuery = ref('')
 const showFilter = ref(false)
@@ -223,15 +243,16 @@ const sortBy = ref('together-score')
 const selectedCategories = ref([])
 const selectedBusinessTypes = ref([])
 const selectedCollaborationCategories = ref([])
+const selectedMainCustomer = ref([])
 const currentPage = ref(1)
 const stores = ref([])
-const selectedStore = ref(null)
 const selectedStoreForDetail = ref(null)
+const selectedStore = ref(null)
 const showSuccessToast = ref(false)
 const loading = ref(false)
 const activeTab = ref('recommended')
 const errorMessage = ref('')
-
+const router = useRouter()
 // 내 비즈니스 정보
 const myBusinessInfo = ref(null)
 
@@ -246,22 +267,27 @@ const filteredStoresAll = computed(() => {
   if (activeTab.value === 'recommended') {
     console.log('추천 필터링 시작:', {
       myCollaborationCategory: selectedCollaborationCategories.value,
+      myMainCustomer: selectedMainCustomer.value,
       totalStores: result.length,
       myBusinessInfo: myBusinessInfo.value,
     })
 
-    // 추천 매장: 내 collaboration_category와 같은 business_category + 함께지수 60 이상
+    // 추천 매장: 내 collaboration_category와 같은 business_category + 함께지수 60 이상 + mainCustomer 일치
     result = result.filter((store) => {
       const categoryMatch = selectedCollaborationCategories.value.includes(store.businessCategory)
       const scoreMatch = (store.togetherIndex || 0) >= 60
+      const customerMatch = selectedMainCustomer.value.includes(store.mainCustomer)
 
-      if (categoryMatch && scoreMatch) {
+      // 3개 조건 모두 만족해야 추천 매장
+      const isRecommended = categoryMatch && scoreMatch && customerMatch
+
+      if (isRecommended) {
         console.log(
-          `✅ ${store.businessName}: category(${store.businessCategory}) + score(${store.togetherIndex})`,
+          `✅ ${store.businessName}: category(${store.businessCategory}) + score(${store.togetherIndex}) + customer(${store.mainCustomer})`,
         )
       }
 
-      return categoryMatch && scoreMatch
+      return isRecommended
     })
 
     console.log(`추천 매장 ${result.length}개 필터링 완료`)
@@ -273,31 +299,31 @@ const filteredStoresAll = computed(() => {
     const q = searchQuery.value.toLowerCase()
     result = result.filter(
       (store) =>
-        store.businessName.toLowerCase().includes(query) ||
-        store.businessCategory.toLowerCase().includes(query),
+        store.businessName.toLowerCase().includes(q) ||
+        store.businessCategory.toLowerCase().includes(q),
+      store.businessName.toLowerCase().includes(q) ||
+        store.businessCategory.toLowerCase().includes(q),
     )
   }
 
-  // 카테고리 필터링 (선택된 경우)
+  //업종 필터링 (선택된 경우)
+  if (selectedBusinessTypes.value.length > 0) {
+    result = result.filter((store) => selectedBusinessTypes.value.includes(store.businessType))
+  }
+  //업종 필터링 (선택된 경우)
   if (selectedCategories.value.length > 0) {
-    result = result.filter((store) =>
-      selectedCategories.value.some(
-        (category) =>
-          store.businessCategory.includes(category) ||
-          (category === '온라인' && store.isOnline) ||
-          (category === '오프라인' && !store.isOnline),
-      ),
-    )
+    result = result.filter((store) => selectedCategories.value.includes(store.businessCategory))
   }
-
-  // 업종 필터링 (선택된 경우)
-  // if (selectedBusinessTypes.value.length > 0) {
-  //   result = result.filter((store) => selectedBusinessTypes.value.includes(store.category))
-  // }
 
   // 정렬
   result.sort((a, b) => {
     switch (sortBy.value) {
+      case 'distance':
+        // 거리 정보가 없는 항목은 맨 뒤로
+        if (a.distance === null && b.distance === null) return 0
+        if (a.distance === null) return 1
+        if (b.distance === null) return -1
+        return a.distance - b.distance
       case 'together-score':
         return (b.togetherIndex || 0) - (a.togetherIndex || 0)
       case 'name':
@@ -364,6 +390,7 @@ const transformStoreData = (apiStore) => {
     businessId: apiStore.businessId,
     businessName: apiStore.businessName,
     businessCategory: apiStore.businessCategory,
+    businessType: apiStore.businessType,
     address: apiStore.address,
     latitude: apiStore.latitude,
     longitude: apiStore.longitude,
@@ -372,13 +399,12 @@ const transformStoreData = (apiStore) => {
     description: apiStore.description,
     collaborationCategory: apiStore.collaborationCategory,
     isPartnershipAvailable: true, // API에서 제공하지 않으면 기본값
+    distance: apiStore.distance, // 이미 계산된 거리 사용
+    distanceText: apiStore.distanceText, // 이미 포맷된 거리 텍스트 사용
+    mainCustomer: apiStore.mainCustomer,
   }
 }
 
-const onSearchInput = () => {
-  currentPage.value = 1
-  searchUsers()
-}
 const toggleFilter = () => {
   showFilter.value = !showFilter.value
   if (showFilter.value) showSort.value = false
@@ -409,8 +435,6 @@ const onRequestPartnership = async (store) => {
 
 const onViewDetail = async (store) => {
   try {
-    loading.value = true
-
     // API에서 상세 정보 가져오기
     const response = await getPartnershipBusinessDetail(store.businessId)
 
@@ -425,8 +449,6 @@ const onViewDetail = async (store) => {
     console.error('매장 상세 정보 조회 실패:', error)
     // 에러시에도 기본 정보로 모달 열기
     selectedStoreForDetail.value = transformStoreData(store)
-  } finally {
-    loading.value = false
   }
 }
 const closeDetailModal = () => {
@@ -450,26 +472,43 @@ const confirmPartnership = async (store, message = '협업을 제안합니다.')
       // 성공 시 모달 닫고 토스트 표시
       closeModal()
       showSuccessToast.value = true
+      router.push(`/business/chats/${response.roomId}`)
     } else {
       throw new Error('제휴 요청 응답이 올바르지 않습니다.')
     }
   } catch (error) {
     console.error('제휴 요청 실패:', error)
     alert('제휴 요청에 실패했습니다. 다시 시도해주세요.')
+  } finally {
+    loading.value = false
   }
 }
 
 const fetchStores = async () => {
   try {
-    loading.value = true
-
     // API 호출로 매장 목록 가져오기
     const response = await getPartnershipBusinesses()
 
     // 백엔드가 직접 배열을 반환
     if (Array.isArray(response)) {
-      stores.value = response
+      // 각 매장에 거리 정보 추가
+      stores.value = response.map((store) => {
+        const distance = calculateDistance(
+          myBusinessInfo.value?.latitude,
+          myBusinessInfo.value?.longitude,
+          store.latitude,
+          store.longitude,
+        )
+
+        return {
+          ...store,
+          distance: distance,
+          distanceText: formatDistance(distance),
+        }
+      })
+
       console.log(`${stores.value.length}개 매장 데이터 로드 완료`)
+      console.log('내 위치:', myBusinessInfo.value?.latitude, myBusinessInfo.value?.longitude)
     } else {
       console.warn('예상하지 못한 API 응답 형식:', response)
       stores.value = []
@@ -479,34 +518,43 @@ const fetchStores = async () => {
 
     if (error.response?.status === 404) {
       console.log('API 엔드포인트를 찾을 수 없습니다. 더미 데이터로 대체합니다.')
-      // 더미 데이터 사용
+      // 더미 데이터 사용 (거리 정보 포함)
+      const myLat = myBusinessInfo.value?.latitude || 37.5665
+      const myLng = myBusinessInfo.value?.longitude || 126.978
+
       stores.value = [
         {
           businessId: 1,
           businessName: '홍길동 카페',
           businessCategory: '음식점업',
           address: '서울시 강남구 테헤란로 123',
+          latitude: 37.501,
+          longitude: 127.0394,
           togetherIndex: 85.5,
           profileImageUrl: 'https://example.com/profile1.jpg',
           description: '맛있는 커피와 디저트를 제공하는 카페입니다.',
           collaborationCategory: '소매업',
+          distance: calculateDistance(myLat, myLng, 37.501, 127.0394),
+          distanceText: formatDistance(calculateDistance(myLat, myLng, 37.501, 127.0394)),
         },
         {
           businessId: 2,
           businessName: '김철수 베이커리',
           businessCategory: '제조업',
           address: '서울시 서초구 서초대로 456',
+          latitude: 37.4979,
+          longitude: 127.0276,
           togetherIndex: 92.3,
           profileImageUrl: 'https://example.com/profile2.jpg',
           description: '신선한 빵을 매일 굽는 베이커리입니다.',
           collaborationCategory: '음식점업',
+          distance: calculateDistance(myLat, myLng, 37.4979, 127.0276),
+          distanceText: formatDistance(calculateDistance(myLat, myLng, 37.4979, 127.0276)),
         },
       ]
     } else {
       stores.value = []
     }
-  } finally {
-    loading.value = false
   }
 }
 
@@ -515,26 +563,42 @@ const fetchMyBusinessInfo = async () => {
   try {
     const response = await getMyBusinessInfo()
     if (response) {
-      myBusinessInfo.value = response
+      // 문자열로 반환되는 경우를 대비한 파싱
+      const businessData = typeof response === 'string' ? JSON.parse(response) : response
+      myBusinessInfo.value = businessData
+
+      console.log('=== 내 비즈니스 정보 디버깅 ===')
+      console.log('원본 응답:', response)
+      console.log('파싱된 데이터:', businessData)
+      console.log('collaborationCategory:', businessData.collaborationCategory)
+      console.log('mainCustomer:', businessData.mainCustomer)
+      console.log('================================')
+
       // 내 collaboration_category를 추천 필터에 설정
-      if (response.collaborationCategory) {
-        selectedCollaborationCategories.value = [response.collaborationCategory]
-        console.log('내 협업 카테고리:', response.collaborationCategory)
+      if (businessData.collaborationCategory) {
+        selectedCollaborationCategories.value = [businessData.collaborationCategory]
+        console.log('내 협업 카테고리 설정:', businessData.collaborationCategory)
+      }
+
+      // 내 mainCustomer를 추천 필터에 설정
+      if (businessData.mainCustomer) {
+        selectedMainCustomer.value = [businessData.mainCustomer]
+        console.log('내 주요 고객층 설정:', businessData.mainCustomer)
       }
     }
   } catch (error) {
     console.error('내 비즈니스 정보 조회 실패:', error)
-    // 에러 시 기본값 설정 (예시)
-    selectedCollaborationCategories.value = ['음식점업'] // 기본값
+    // 에러 시 기본값 설정
+    selectedCollaborationCategories.value = ['음식점'] // 기본값
+    selectedMainCustomer.value = ['20대'] // 기본값
   }
 }
 
 // 라이프사이클
 onMounted(async () => {
-  await Promise.all([
-    fetchStores(),
-    fetchMyBusinessInfo(), // 내 비즈니스 정보도 함께 로드
-  ])
+  // 내 비즈니스 정보를 먼저 가져온 후에 매장 목록 조회 (거리 계산을 위해)
+  await fetchMyBusinessInfo()
+  await fetchStores()
 })
 </script>
 

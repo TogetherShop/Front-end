@@ -61,11 +61,9 @@
               class="coupon-item"
             >
               <div class="coupon-content">
-                <span class="coupon-text">{{ truncateCouponText(coupon.description) }}</span>
-                <div class="coupon-meta">
-                  <span class="coupon-quantity">{{ coupon.currentQuantity }}/{{ coupon.totalQuantity }}개 남음</span>
-                  <span v-if="coupon.endDate" class="coupon-expire">{{ formatDate(coupon.endDate) }}까지</span>
-                </div>
+                <span class="coupon-text">
+                  {{ truncateCouponText(coupon.description) }} 할인 쿠폰
+                </span>
               </div>
             </div>
           </div>

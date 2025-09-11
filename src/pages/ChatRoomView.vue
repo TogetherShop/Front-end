@@ -20,16 +20,16 @@
     <!-- 상단 지표 -->
     <div class="shop-stats">
       <div class="stat">
-        <div class="stat-value green">{{ togetherScore }}</div>
+        <div class="stat-value green">{{ togetherIndex ?? '-' }}</div>
         <div class="stat-label">함께지수</div>
       </div>
       <div class="stat">
-        <div class="stat-value">{{ distance }}km</div>
-        <div class="stat-label">거리</div>
+        <div class="stat-value">{{ businessType ?? '-' }}</div>
+        <div class="stat-label">가게 타입</div>
       </div>
       <div class="stat">
-        <div class="stat-value">{{ category }}</div>
-        <div class="stat-label">{{ address }}</div>
+        <div class="stat-value">{{ businessCategory }}</div>
+        <div class="stat-label">업종</div>
       </div>
     </div>
 
@@ -153,7 +153,8 @@ const requesterId = ref(null)
 const recipientId = ref(null)
 const partnershipStatus = ref(null)
 const currentUserId = ref(me.value.id) // me.value.id와 동일
-
+const togetherIndex = ref(null)
+const businessType = ref(null)
 const chatContainer = ref(null)
 const text = ref('')
 const messages = ref([])
@@ -172,10 +173,7 @@ try {
 
 // 샵 정보 (임시)
 const businessName = ref('')
-const category = ref('')
-const togetherScore = 4.8
-const distance = 0.8
-const address = '강남구 역삼동'
+const businessCategory = ref('')
 // 스크롤 하단 이동
 const scrollToBottom = () => {
   nextTick(() => {
@@ -279,83 +277,50 @@ onBeforeUnmount(() => {
   disconnectWS()
 })
 
-const fetchRoomInfo = async () => {
+const fetchRoomAndHistory = async () => {
   try {
-    const res = await getRoomInfo(roomId)
+    const res = await fetchChatHistory(roomId)
     if (!res) return
 
-    // API 응답에서 roomInfo 사용
-    const roomInfo = res.roomInfo || res
-    console.log('방 정보 로드됨:', roomInfo)
+    // 메시지 세팅
+    messages.value = res.messages || []
+
+    const roomInfo = res.roomInfo || {}
+
+    // roomInfo 세팅
     partnershipStatus.value = roomInfo?.status ?? null
     me.value = roomInfo.me || {}
     otherUser.value = roomInfo.otherUser || {}
     requesterId.value = roomInfo.requesterId
     recipientId.value = roomInfo.recipientId
-    partnershipStatus.value = roomInfo.status || null
+    togetherIndex.value = roomInfo.togetherIndex ?? '-'
+    businessType.value = roomInfo.businessType || '-'
+    businessCategory.value = roomInfo.businessCategory || '-'
 
-    // role 계산
     role.value = currentUserId.value === requesterId.value ? 'REQUESTER' : 'RECIPIENT'
 
-    businessName.value = otherUser.value.shopName || ''
-    category.value = otherUser.value.username || ''
+    businessName.value = otherUser.value.shopName || '-'
 
-    console.log('방 정보 로드됨:', roomInfo)
+    nextTick(() => scrollToBottom())
   } catch (err) {
-    console.error('방 정보 불러오기 실패', err)
-  }
-}
-const fetchHistory = async () => {
-  try {
-    const res = await fetchChatHistory(roomId)
-    console.log('채팅 기록 전체:', res)
-
-    // res 자체가 배열인 경우
-    if (Array.isArray(res)) {
-      messages.value = [...res]
-    }
-    // 혹시 res.messages 안에 담기는 경우도 대비
-    else if (res.messages && Array.isArray(res.messages)) {
-      messages.value = [...res.messages]
-    }
-
-    console.log('messages.value 설정됨:', messages.value.length)
-
-    nextTick(() => {
-      scrollToBottom()
-    })
-  } catch (err) {
-    console.error('채팅 기록 불러오기 실패', err)
+    console.error('채팅 기록 및 방 정보 불러오기 실패', err)
   }
 }
 
 onMounted(async () => {
-  // 1. JWT에서 사용자 ID 가져오기
   try {
     const token = localStorage.getItem('access_token')
     const decoded = token ? jwtDecode(token) : null
     currentUserId.value = decoded?.sub ? Number(decoded.sub) : null
-    console.log('현재 사용자 ID:', currentUserId.value)
-    console.log('현재 partnershipStatus:', partnershipStatus.value)
   } catch (e) {
     console.error('JWT 디코딩 실패', e)
   }
 
-  // 2. 채팅 기록 먼저 가져오기 (방 정보와 함께 오므로)
-  await fetchHistory()
-  await fetchRoomInfo()
+  await fetchRoomAndHistory()
 
-  // 3. 방 정보는 fetchHistory에서 받은 roomInfo 사용하거나 별도 호출
-  // getRoomInfo가 roomInfo만 반환하는지 확인 필요
-
-  // 4. WebSocket 연결
   connectWS(
     () => {
-      unsubscribe = subscribeRoom(roomId, (msg) => {
-        console.log('subscribeRoom 콜백 호출됨:', msg) // 메시지 들어오는지 확인
-        handleIncomingMessage(msg)
-      })
-
+      unsubscribe = subscribeRoom(roomId, handleIncomingMessage)
       console.log('WebSocket 연결됨')
     },
     (err) => console.error('WebSocket 연결 실패:', err),

@@ -81,6 +81,7 @@ export const useStoresStore = defineStore('stores', {
         if (!res.ok) throw new Error('매장 데이터를 불러올 수 없습니다')
 
         const data = await res.json()
+        console.log(data)
         const mapped = this.mapToFrontStores(data, this.currentUserLocation).sort(
           (a, b) => a.distance - b.distance,
         )
@@ -126,6 +127,9 @@ export const useStoresStore = defineStore('stores', {
                 ? Math.max(1, Math.round(distance / 67))
                 : 0
 
+          // business_id에 해당하는 이미지 찾기
+          const storeImages = this.getStoreImages(String(id))
+
           return {
             id: String(id),
             name,
@@ -155,6 +159,35 @@ export const useStoresStore = defineStore('stores', {
             openHours: b.businessHours ?? '',
           }
         })
+    },
+
+    /**
+     * business_id에 해당하는 이미지들을 찾아서 반환
+     * assets/images/thumbnail 폴더에서 business_id와 일치하는 파일명을 가진 이미지들을 찾음
+     */
+    getStoreImages(businessId) {
+      if (!businessId) return [defaultStoreImg]
+
+      // 가능한 이미지 파일 확장자들
+      const imageExtensions = ['.jpg', '.jpeg', '.png', '.webp']
+      const foundImages = []
+
+      // business_id와 정확히 일치하는 파일 찾기
+      for (const ext of imageExtensions) {
+        const imagePath = `/src/assets/images/thumbnail/${businessId}${ext}`
+        foundImages.push(imagePath)
+      }
+
+      // business_id_숫자 형태의 파일들도 찾기 (예: 99_1.jpg, 99_2.jpg)
+      for (let i = 1; i <= 5; i++) {
+        for (const ext of imageExtensions) {
+          const imagePath = `/src/assets/images/thumbnail/${businessId}_${i}${ext}`
+          foundImages.push(imagePath)
+        }
+      }
+
+      // 이미지가 있으면 해당 이미지들을, 없으면 기본 이미지 반환
+      return foundImages.length > 0 ? foundImages : [defaultStoreImg]
     },
 
     /**

@@ -18,6 +18,7 @@ import ChatRoomView from '@/pages/ChatRoomView.vue'
 import CustomerHomePage from '@/pages/CustomerHomePage.vue'
 import CustomerNotificationPage from '@/pages/CustomerNotificationPage.vue'
 import BusinessNotificationPage from '@/pages/business/BusinessNotificationPage.vue'
+import ChattingHomePage from '@/pages/ChattingHomePage.vue'
 import StoreDetailPage from '@/pages/StoreDetailPage.vue'
 
 const routes = [
@@ -54,11 +55,11 @@ const routes = [
     component: CustomerNotificationPage,
     meta: { requiresAuth: true, role: 'customer' },
   },
-  // {
-  //   path: '/business',
-  //   component: BusinessHomePage,
-  //   meta: { requiresAuth: true, role: 'business' },
-  // },
+  {
+    path: '/business',
+    component: BusinessHomePage,
+    meta: { requiresAuth: true, role: 'business' },
+  },
   {
     path: '/business/chats',
     component: ChatList,
@@ -84,6 +85,7 @@ const routes = [
     path: '/business/home',
     name: 'business-home',
     component: BusinessHomePage,
+    meta: { requiresAuth: true, role: 'business' },
   },
   {
     path: '/business/store',
@@ -95,26 +97,31 @@ const routes = [
     path: '/business/coupon',
     name: 'business-coupon',
     component: BusinessCouponPage,
+    meta: { requiresAuth: true, role: 'business' },
   },
   {
     path: '/business/groupbuy',
     name: 'business-groupbuy',
     component: BusinessGroupPurchasePage,
+    meta: { requiresAuth: true, role: 'business' },
   },
   {
     path: '/business/profile',
     name: 'business-profile',
     component: BusinessProfilePage,
+    meta: { requiresAuth: true, role: 'business' },
   },
   {
     path: '/business/profile',
     name: 'business-profile',
     component: BusinessProfilePage,
+    meta: { requiresAuth: true, role: 'business' },
   },
   {
     path: '/business/coupon/analysis/:templateId',
     name: 'BusinessCouponAnalysis',
     component: BusinessCouponAnalysis,
+    meta: { requiresAuth: true, role: 'business' },
   },
   {
     path: '/business/notifications',

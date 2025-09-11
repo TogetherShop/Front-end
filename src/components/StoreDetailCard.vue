@@ -50,8 +50,8 @@
     <div class="detail-images">
       <img class="img-main" :src="store.images?.[0] || '/images/default-store.jpg'" alt="" />
       <div class="img-col">
-        <img :src="store.images?.[1] || '/images/default-store.jpg'" alt="" />
-        <img :src="store.images?.[2] || '/images/default-store.jpg'" alt="" />
+        <img :src="getDetailImage(1)" alt="" />
+        <img :src="getDetailImage(2)" alt="" />
       </div>
     </div>
 
@@ -76,6 +76,15 @@ const displayRating = computed(() => {
   const r = props.store?.rating ?? 0
   return Number.isFinite(r) && r.toFixed ? r.toFixed(1) : r || '0.0'
 })
+
+// business_id에 따라 detail 이미지 경로 생성
+const getDetailImage = (imageNumber) => {
+  const businessId = props.store?.id
+  if (!businessId) return '/images/default-store.jpg'
+  
+  // business_id_숫자.jpg 형태로 이미지 경로 생성
+  return `/src/assets/images/thumbnail/${businessId}_${imageNumber}.jpg`
+}
 </script>
 
 <style scoped>

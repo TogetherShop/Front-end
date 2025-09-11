@@ -110,6 +110,7 @@ watch(
 
 <style scoped>
 .store-search-page {
+  font-family: 'Pretendard', sans-serif;
   --topbar-h: 56px;
   display: flex;
   flex-direction: column;

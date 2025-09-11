@@ -3,7 +3,9 @@
     <div class="container">
       <!-- Header -->
       <div class="header">
-        <div class="arrow-back-ios" @click="$router.back()">←</div>
+        <div class="back-icon" @click="handleBack">
+          <i class="fa-regular fa-less-than"></i>
+        </div>
         <div class="title">제휴 채팅</div>
       </div>
 
@@ -85,13 +87,13 @@ import api from '@/api/api'
 // 상태 매핑
 const statusMap = {
   REQUESTED: '대기',
-  NEGOTIATING: '협의중',
+  ACCEPTED: '협의중',
   COMPLETED: '협의완료',
   REJECTED: '거절',
 }
 const statusClassMap = {
   REQUESTED: 'requested',
-  NEGOTIATING: 'negotiating',
+  ACCEPTED: 'accepted',
   COMPLETED: 'completed',
   REJECTED: 'rejected',
 }
@@ -120,6 +122,9 @@ const fetchRooms = async () => {
 
 onMounted(fetchRooms)
 
+const handleBack = () => {
+  router.back()
+}
 // 필터 & 검색 적용
 const filteredRooms = computed(() => {
   return rooms.value.filter((room) => {
@@ -302,7 +307,7 @@ const formatTimeAgo = (dateStr) => {
   background-color: #f1f3f5;
   color: #495057;
 }
-.status-badge.negotiating {
+.status-badge.accepted {
   background-color: #e6f0ff;
   color: #1e64ff;
 }
@@ -399,5 +404,10 @@ const formatTimeAgo = (dateStr) => {
   content: '●';
   color: #e63946; /* 빨간 점 */
   font-size: 10px;
+}
+.back-icon {
+  font-size: 20px;
+  transform: scaleX(0.5);
+  margin-right: 10px;
 }
 </style>

@@ -29,12 +29,9 @@ const handleNext = async (data) => {
     // 마지막 스텝일 때만 회원가입
     try {
       await signup(stepData)
-      alert('회원가입 성공! 로그인해주세요.')
       store.reset()
       router.push('/login')
-    } catch (e) {
-      alert('회원가입 실패: ' + (e.response?.data?.error || e.message))
-    }
+    } catch (e) {}
   }
 }
 

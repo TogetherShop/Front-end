@@ -34,7 +34,6 @@
     </div>
 
     <!-- 메시지 영역 -->
-    <!-- 메시지 영역 -->
     <main ref="chatContainer" class="chat-container">
       <div
         v-for="m in messages"
@@ -49,15 +48,14 @@
         />
 
         <!-- 파트너십 요청 메시지 -->
-        <div v-else-if="m.type === 'PARTNERSHIP_REQUEST'" class="chat-bubble system-message">
+        <div v-else-if="m.type === 'PARTNERSHIP_REQUEST'" class="system-message">
           {{ m.content }}
-          <div class="chat-time">{{ formatTime(m.createdAt) }}</div>
         </div>
 
         <!-- 일반 텍스트 메시지 -->
         <div v-else-if="m.type === 'TEXT'" class="chat-bubble">
           {{ m.content }}
-          <div class="chat-time">{{ formatTime(m.createdAt) }}</div>
+          <div class="chat-time">{{ formatTime(m.createdAt ?? new Date().toISOString()) }}</div>
         </div>
       </div>
     </main>
@@ -188,9 +186,9 @@ const handleBack = () => {
 }
 // WebSocket 수신
 const handleIncomingMessage = (msg) => {
+  // 임시 메시지와 같은 ID이면 교체
   const idx = messages.value.findIndex((m) => m.id === msg.id)
   if (idx !== -1) {
-    // 임시 메시지 교체
     messages.value[idx] = msg
   } else {
     messages.value.push(msg)
@@ -217,12 +215,14 @@ const partnershipStatusLabel = computed(() => {
 const sendMessage = async () => {
   if (!text.value.trim()) return
   const content = text.value
+
+  scrollToBottom()
   text.value = ''
+
   try {
     await sendText(roomId, content)
   } catch (err) {
     console.error('메시지 전송 실패', err)
-    alert('메시지 전송에 실패했습니다.')
   }
 }
 
@@ -306,7 +306,6 @@ const fetchRoomAndHistory = async () => {
     console.error('채팅 기록 및 방 정보 불러오기 실패', err)
   }
 }
-
 onMounted(async () => {
   try {
     const token = localStorage.getItem('access_token')
@@ -317,6 +316,9 @@ onMounted(async () => {
   }
 
   await fetchRoomAndHistory()
+
+  // 기존 구독 제거
+  unsubscribe?.()
 
   connectWS(
     () => {
@@ -447,13 +449,24 @@ onMounted(async () => {
   color: #888;
   margin-top: 4px;
 }
-/* 시스템 메시지 (파트너십 요청) 스타일 */
-.chat-bubble.system-message {
-  background: #f3f4f6;
+/* 시스템 메시지 */
+/* 시스템 메시지 중앙 정렬 */
+.system-message {
+  background: #f3f4f6; /* 연한 회색 배경 */
   color: #374151;
-  font-style: italic;
+  font-style: normal;
+  border-radius: 20px; /* 동그랗게 */
+  padding: 6px 12px;
+  max-width: 60%;
   text-align: center;
-  border: 1px solid #d1d5db;
+  margin: 12px auto; /* 상하 마진 + 중앙 배치 */
+  display: inline-block; /* 중앙 정렬 위해 */
+  font-size: 12px;
+}
+.message-wrapper.system {
+  display: flex;
+  justify-content: center;
+  width: 100%;
 }
 
 /* 제휴 제안 카드 */

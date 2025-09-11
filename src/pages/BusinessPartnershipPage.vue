@@ -215,7 +215,6 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
-import api from '@/api/api'
 import BusinessTopBar from '@/components/BusinessTopBar.vue'
 import BusinessStoreCard from '@/components/BusinessStoreCard.vue'
 import BusinessStoreDetailModal from '@/components/BusinessStoreDetailModal.vue'
@@ -250,7 +249,6 @@ const selectedStore = ref(null)
 const showSuccessToast = ref(false)
 const loading = ref(false)
 const activeTab = ref('recommended')
-const errorMessage = ref('')
 const router = useRouter()
 // 내 비즈니스 정보
 const myBusinessInfo = ref(null)

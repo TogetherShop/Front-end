@@ -116,6 +116,7 @@ const goBack = () => {
   align-items: start;
   background-color: #ffffff;
   overflow: hidden;
+  font-family: 'Pretendard', sans-serif;
 }
 
 .screen .div {
@@ -265,7 +266,7 @@ const goBack = () => {
   flex-direction: column;
   padding: 26px 24px;
   box-sizing: border-box;
-  gap: 20px;
+  gap: 10px;
 }
 
 /* 아이콘 + 텍스트 섹션 */
@@ -360,6 +361,9 @@ const goBack = () => {
   font-weight: 400;
   letter-spacing: 0;
   line-height: 16px;
+  margin: 0; /* 기본 margin 제거 */
+  display: flex; /* flex로 바꿔서 */
+  align-items: center; /* 내부 텍스트 세로 정렬 */
 }
 
 .screen .text-wrapper-5 {
@@ -369,6 +373,9 @@ const goBack = () => {
   font-weight: 400;
   letter-spacing: 0;
   line-height: 16px;
+  margin: 0; /* 기본 margin 제거 */
+  display: flex; /* flex로 바꿔서 */
+  align-items: center; /* 내부 텍스트 세로 정렬 */
 }
 
 /* 하단 로그인 링크 */

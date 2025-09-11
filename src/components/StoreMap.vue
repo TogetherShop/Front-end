@@ -407,7 +407,7 @@ onMounted(initializeMap)
   align-items: center;
   gap: 16px;
   z-index: 10;
-  background: rgba(255, 255, 255, 0.9);
+  background: transparent;
   padding: 20px;
   border-radius: 8px;
 }

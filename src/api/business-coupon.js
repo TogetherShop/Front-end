@@ -1,5 +1,4 @@
 import api from './api'
-
 /**
  * 특정 사업자의 최신 쿠폰 1개 조회 (매장 카드용)
  * @param {number} businessId - 사업자 ID

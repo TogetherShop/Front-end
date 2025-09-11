@@ -116,26 +116,13 @@ const doLogin = async () => {
       if (fcmToken) {
         await sendFcmTokenToServer('customer', fcmToken)
       }
-      
+
       // 알림 상태 확인
       await notificationStore.checkNotificationStatus('customer')
-      
 
       router.push('/customer')
     } else {
       await login(username.value, password.value)
-
-      // FCM 토큰 발급 및 전송 (로그인 성공 후)
-      const fcmToken = await getFcmToken()
-      if (fcmToken) {
-        await sendFcmTokenToServer('business', fcmToken)
-      }
-      
-      // 알림 상태 확인
-      await notificationStore.checkNotificationStatus('business')
-      
-
-
       router.push('/business/home')
     }
   } catch (e) {

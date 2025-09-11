@@ -378,14 +378,6 @@ const visiblePages = computed(() => {
 
 // 메서드
 const transformStoreData = (apiStore) => {
-  // 내 위치와 매장 위치 간의 거리 계산
-  const distance = calculateDistance(
-    myBusinessInfo.value?.latitude,
-    myBusinessInfo.value?.longitude,
-    apiStore.latitude,
-    apiStore.longitude
-  )
-
   // API 데이터를 컴포넌트에서 기대하는 형식으로 변환
   return {
     businessId: apiStore.businessId,
@@ -400,8 +392,8 @@ const transformStoreData = (apiStore) => {
     description: apiStore.description,
     collaborationCategory: apiStore.collaborationCategory,
     isPartnershipAvailable: true, // API에서 제공하지 않으면 기본값
-    distance: distance, // 계산된 거리 (km)
-    distanceText: formatDistance(distance) // 포맷된 거리 텍스트
+    distance: apiStore.distance, // 이미 계산된 거리 사용
+    distanceText: apiStore.distanceText // 이미 포맷된 거리 텍스트 사용
   }
 }
 
@@ -583,10 +575,6 @@ const fetchMyBusinessInfo = async () => {
 
 // 라이프사이클
 onMounted(async () => {
-  await Promise.all([
-    fetchStores(),
-    fetchMyBusinessInfo(), // 내 비즈니스 정보도 함께 로드
-  ])
   // 내 비즈니스 정보를 먼저 가져온 후에 매장 목록 조회 (거리 계산을 위해)
   await fetchMyBusinessInfo()
   await fetchStores()

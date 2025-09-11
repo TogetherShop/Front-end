@@ -11,11 +11,7 @@ export const signup = async (payload) => {
 
 export const customerLogin = async (username, password) => {
   try {
-    const response = await api.post(
-      '/api/customer/auth/login',
-      { username, password },
-      { userType: 'customer' },
-    )
+    const response = await api.post('/api/customer/auth/login', { username, password })
     localStorage.setItem('access_token', response.data.accessToken)
     localStorage.setItem('refresh_token', response.data.refreshToken)
     localStorage.setItem('user_type', 'customer')
@@ -42,6 +38,7 @@ export const logout = async (refresh) => {
     await api.post('/api/customer/auth/logout', { refreshToken: refresh })
     localStorage.removeItem('access_token')
     localStorage.removeItem('refresh_token')
+    localStorage.removeItem('user_type')
   } catch (err) {
     console.error(err)
   }

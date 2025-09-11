@@ -1,514 +1,647 @@
 <template>
-  <div class="card">
-    <h3>채팅방 #{{ roomId }}</h3>
+  <div class="chat-room">
+    <!-- 상단 헤더 -->
+    <header class="chat-header">
+      <div class="header-left">
+        <div class="back-icon" @click="handleBack">
+          <i class="fa-regular fa-less-than"></i>
+        </div>
+        <div class="shop-info">
+          <h3 class="shop-name">{{ businessName }}</h3>
+          <span class="shop-status">{{ partnershipStatusLabel }}</span>
+        </div>
+      </div>
+      <div class="header-right">
+        <button class="icon-btn">📞</button>
+        <button class="icon-btn">⋮</button>
+      </div>
+    </header>
 
-    <!-- WebSocket 연결 상태 표시 -->
-    <div v-if="!wsConnected" class="status-banner disconnected">
-      연결 중... ({{ reconnectAttempts }}/{{ maxReconnectAttempts }})
+    <!-- 상단 지표 -->
+    <div class="shop-stats">
+      <div class="stat">
+        <div class="stat-value green">{{ togetherScore }}</div>
+        <div class="stat-label">함께지수</div>
+      </div>
+      <div class="stat">
+        <div class="stat-value">{{ distance }}km</div>
+        <div class="stat-label">거리</div>
+      </div>
+      <div class="stat">
+        <div class="stat-value">{{ category }}</div>
+        <div class="stat-label">{{ address }}</div>
+      </div>
     </div>
 
-    <!-- 상태 배너 -->
-    <div v-if="roomStatus === 'waiting'" class="status-banner waiting">대기 중...</div>
-    <div v-else-if="roomStatus === 'active'" class="status-banner active">협업 진행 중</div>
-    <div v-else-if="roomStatus === 'rejected'" class="status-banner rejected">거절됨</div>
-
-    <!-- 채팅 리스트 -->
-    <div ref="chatContainer" class="chat-container">
+    <!-- 메시지 영역 -->
+    <!-- 메시지 영역 -->
+    <main ref="chatContainer" class="chat-container">
       <div
         v-for="m in messages"
         :key="m.id"
-        class="chat-message-wrapper"
-        :class="{
-          'my-message': m.senderId === currentUserId,
-          'temp-message': m.isTemp,
-        }"
+        :class="['message-wrapper', { mine: m.senderId === currentUserId }]"
       >
+        <!-- 제휴 제안 메시지 -->
         <ProposalMessage
           v-if="m.type === 'COUPON_PROPOSAL'"
           :message="m"
           :currentUserId="currentUserId"
         />
-        <div
-          v-else
-          class="chat-message"
-          :class="{
-            'my-message': m.senderId === currentUserId,
-            'temp-message': m.isTemp,
-          }"
-        >
-          <div class="message-sender">{{ m.senderName || '알 수 없음' }}</div>
-          <div class="message-content">{{ m.content }}</div>
-          <div class="message-time">{{ formatTime(m.timestamp) }}</div>
-          <div v-if="m.isTemp" class="sending-indicator">전송 중...</div>
+
+        <!-- 파트너십 요청 메시지 -->
+        <div v-else-if="m.type === 'PARTNERSHIP_REQUEST'" class="chat-bubble system-message">
+          {{ m.content }}
+          <div class="chat-time">{{ formatTime(m.createdAt) }}</div>
+        </div>
+
+        <!-- 일반 텍스트 메시지 -->
+        <div v-else-if="m.type === 'TEXT'" class="chat-bubble">
+          {{ m.content }}
+          <div class="chat-time">{{ formatTime(m.createdAt) }}</div>
         </div>
       </div>
+    </main>
 
-      <div v-if="messages.length === 0" class="empty-messages">메시지가 없습니다.</div>
+    <!-- 입력창 / 버튼 -->
+    <footer class="chat-footer">
+      <!-- 요청 받은 상태 -->
+      <template v-if="partnershipStatus === 'REQUESTED'">
+        <!-- 오직 내가 받은 사람(recipient)일 때만 수락 버튼 표시 -->
+        <div v-if="role === 'RECIPIENT'">
+          <div class="request-box">
+            <p class="request-text">요청을 수락하시겠습니까?</p>
+            <div class="request-actions">
+              <button class="accept-btn" @click="accept">예</button>
+              <button class="reject-btn" @click="reject">아니오</button>
+            </div>
+          </div>
+          <div class="input-row">
+            <button class="proposal-btn" disabled>제휴 제안</button>
+            <div class="input-box disabled">
+              <input type="text" placeholder="메시지를 입력하세요..." disabled />
+              <button class="send-btn" disabled>➤</button>
+            </div>
+          </div>
+        </div>
 
-      <!-- 마지막 메시지가 상대방이 보낸 대기중 협업 요청이면 버튼 표시 -->
-      <div v-if="lastIncomingRequest" class="request-buttons-container">
-        <button @click="acceptRequest(lastIncomingRequest.id)">수락</button>
-        <button @click="rejectRequest(lastIncomingRequest.id)">거절</button>
-      </div>
-    </div>
+        <!-- 보낸 사람은 입력창 비활성화 -->
+        <div v-else class="input-row">
+          <button class="proposal-btn" disabled>제휴 제안</button>
+          <div class="input-box disabled">
+            <input type="text" placeholder="메시지를 입력하세요..." disabled />
+            <button class="send-btn" disabled>➤</button>
+          </div>
+        </div>
+      </template>
 
-    <!-- 입력창 -->
-    <div class="chat-input" v-if="roomStatus !== 'rejected'">
-      <div v-if="roomStatus === 'active'" class="partnership-button-container">
-        <button @click="openPartnershipModal">제휴 제안</button>
-      </div>
-      <input
-        v-model="text"
-        placeholder="메시지 입력..."
-        @keyup.enter="sendMessage"
-        :disabled="!wsConnected"
-      />
-      <button @click="sendMessage" :disabled="!wsConnected || !text.trim()">보내기</button>
+      <!-- 제휴 가능 상태 -->
+      <template v-else-if="partnershipStatus === 'ACCEPTED' || partnershipStatus === 'COMPLETED'">
+        <div class="input-row">
+          <button class="proposal-btn" @click="openPartnershipModal">제휴 제안</button>
+          <div class="input-box">
+            <input
+              v-model="text"
+              type="text"
+              placeholder="메시지를 입력하세요..."
+              @keyup.enter="sendMessage"
+            />
+            <button class="send-btn" @click="sendMessage">➤</button>
+            <PartnershipModal
+              :roomId="roomId"
+              :visible="partnershipModalVisible"
+              @update:visible="partnershipModalVisible = $event"
+              @proposal-sent="handleProposalSent"
+            />
+          </div>
+        </div>
+      </template>
 
-      <!-- 모달 연결 -->
-      <PartnershipModal
-        :roomId="roomId"
-        :visible="partnershipModalVisible"
-        @update:visible="partnershipModalVisible = $event"
-        @proposal-sent="handleProposalSent"
-      />
-    </div>
+      <!-- 완료 / 거절 -->
+      <template v-else-if="partnershipStatus === 'REJECTED'">
+        <div class="input-box">
+          <input type="text" placeholder="채팅이 종료되었습니다" disabled />
+        </div>
+      </template>
+    </footer>
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted, nextTick, onUnmounted, computed } from 'vue'
+import { ref, onMounted, onBeforeUnmount, nextTick, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { connectWS, disconnectWS, subscribeRoom, sendText, proposeBilateralCoupon } from '@/api/ws'
-import api from '@/api/api'
-import PartnershipModal from '../components/PartnershipModal.vue'
-import ProposalMessage from '../components/ProposalMessage.vue'
+import {
+  connectWS,
+  disconnectWS,
+  subscribeRoom,
+  sendText,
+  fetchChatHistory,
+  acceptRequest, // <-- match ws.js
+  rejectRequest, // <--
+  getRoomInfo,
+} from '@/api/ws'
+import PartnershipModal from '@/components/PartnershipModal.vue'
+import ProposalMessage from '@/components/ProposalMessage.vue'
+import { jwtDecode } from 'jwt-decode'
+
+const router = useRouter()
+const route = useRoute()
+const roomId = route.params.roomId
+
+const me = ref({ id: null, username: '', shopName: '' })
+const otherUser = ref({ id: null, username: '', shopName: '' })
+const requesterId = ref(null)
+const recipientId = ref(null)
+const partnershipStatus = ref(null)
+const currentUserId = ref(me.value.id) // me.value.id와 동일
+
+const chatContainer = ref(null)
+const text = ref('')
+const messages = ref([])
 const partnershipModalVisible = ref(false)
-const proposalMessages = ref([]) // 모달에서 보낸 메시지 추가용
+const role = ref(null)
+let unsubscribe = null
+// JWT에서 현재 사용자 ID 가져오기
+
+try {
+  const token = localStorage.getItem('access_token')
+  const decoded = token ? jwtDecode(token) : null
+  currentUserId.value = decoded?.sub ? Number(decoded.sub) : null
+} catch (e) {
+  console.error('JWT 디코딩 실패', e)
+}
+
+// 샵 정보 (임시)
+const businessName = ref('')
+const category = ref('')
+const togetherScore = 4.8
+const distance = 0.8
+const address = '강남구 역삼동'
+// 스크롤 하단 이동
+const scrollToBottom = () => {
+  nextTick(() => {
+    if (chatContainer.value) {
+      chatContainer.value.scrollTop = chatContainer.value.scrollHeight
+    }
+  })
+}
+
+const handleBack = () => {
+  router.back()
+}
+// WebSocket 수신
+const handleIncomingMessage = (msg) => {
+  const idx = messages.value.findIndex((m) => m.id === msg.id)
+  if (idx !== -1) {
+    // 임시 메시지 교체
+    messages.value[idx] = msg
+  } else {
+    messages.value.push(msg)
+  }
+  scrollToBottom()
+}
+
+const partnershipStatusLabel = computed(() => {
+  switch (partnershipStatus.value) {
+    case 'COMPLETED':
+      return '협의 완료'
+    case 'ACCEPTED':
+      return '수락됨'
+    case 'REJECTED':
+      return '거절됨'
+    case 'REQUESTED':
+      return '요청됨'
+    default:
+      return '알 수 없음'
+  }
+})
+
+// 메시지 전송
+const sendMessage = async () => {
+  if (!text.value.trim()) return
+  const content = text.value
+  text.value = ''
+  try {
+    await sendText(roomId, content)
+  } catch (err) {
+    console.error('메시지 전송 실패', err)
+    alert('메시지 전송에 실패했습니다.')
+  }
+}
+
+// 제휴 모달
 const openPartnershipModal = () => {
   partnershipModalVisible.value = true
 }
 
-const handleProposalSent = (proposalMsg) => {
-  // 1) 채팅 화면에 임시 메시지로 추가
-  messages.value = [...messages.value, proposalMsg]
-  scrollToBottom()
-
-  // 2) 서버로 제휴 제안 전송 (올바른 함수 사용)
+// 요청 수락
+const accept = async () => {
   try {
-    proposeBilateralCoupon(proposalMsg) // ✅ 전용 함수 사용
-    console.log('✅ 제휴 제안 전송 완료')
-
-    // 임시 메시지를 실제 메시지로 변환 (서버 응답이 오지 않는 경우를 대비)
-    setTimeout(() => {
-      messages.value = messages.value.map((m) =>
-        m.id === proposalMsg.id && m.isTemp ? { ...m, isTemp: false } : m,
-      )
-    }, 2000) // 2초 후
-  } catch (error) {
-    console.error('❌ 제휴 제안 전송 실패:', error)
-    // 실패시 임시 메시지 제거
-    messages.value = messages.value.filter((m) => m.id !== proposalMsg.id)
-    alert('제안 전송에 실패했습니다. 다시 시도해주세요.')
+    await acceptRequest(roomId) // currentUserId 제거
+    partnershipStatus.value = 'ACCEPTED'
+  } catch (err) {
+    console.error('요청 수락 실패', err)
   }
 }
-const route = useRoute()
-const router = useRouter()
-const roomId = route.params.roomId
-const wsConnected = ref(false)
-const reconnectAttempts = ref(0)
-const maxReconnectAttempts = 5
-const messages = ref([])
-const text = ref('')
-const chatContainer = ref(null)
-const currentUser = ref(localStorage.getItem('username') || '')
-const roomStatus = ref('waiting')
-const currentUserId = ref(Number(localStorage.getItem('userId') || 0))
 
-let unsubscribe = null
-let connectionCheckInterval = null
-let connectWebSocket = null // 함수를 변수로 선언
+// 요청 거절
+const reject = async () => {
+  try {
+    await rejectRequest(roomId, '사용자가 거절함') // currentUserId 제거
+    partnershipStatus.value = 'REJECTED'
+  } catch (err) {
+    console.error('요청 거절 실패', err)
+  }
+}
+// 제휴 제안 메시지 처리
+const handleProposalUpdated = ({ id, status }) => {
+  const msg = messages.value.find((m) => m.id === id)
+  if (msg) msg.payload.status = status
+}
 
+// 시간 포맷
+const formatTime = (ts) => {
+  if (!ts) return ''
+
+  try {
+    // createdAt은 ISO 문자열 형태이므로 바로 Date 생성자에 전달
+    const date = new Date(ts)
+    const hours = date.getHours().toString().padStart(2, '0')
+    const minutes = date.getMinutes().toString().padStart(2, '0')
+    return `${hours}:${minutes}`
+  } catch (e) {
+    console.error('시간 포맷 실패:', e)
+    return ''
+  }
+}
+
+onBeforeUnmount(() => {
+  unsubscribe?.()
+  disconnectWS()
+})
+
+const fetchRoomInfo = async () => {
+  try {
+    const res = await getRoomInfo(roomId)
+    if (!res) return
+
+    // API 응답에서 roomInfo 사용
+    const roomInfo = res.roomInfo || res
+    console.log('방 정보 로드됨:', roomInfo)
+    partnershipStatus.value = roomInfo?.status ?? null
+    me.value = roomInfo.me || {}
+    otherUser.value = roomInfo.otherUser || {}
+    requesterId.value = roomInfo.requesterId
+    recipientId.value = roomInfo.recipientId
+    partnershipStatus.value = roomInfo.status || null
+
+    // role 계산
+    role.value = currentUserId.value === requesterId.value ? 'REQUESTER' : 'RECIPIENT'
+
+    businessName.value = otherUser.value.shopName || ''
+    category.value = otherUser.value.username || ''
+
+    console.log('방 정보 로드됨:', roomInfo)
+  } catch (err) {
+    console.error('방 정보 불러오기 실패', err)
+  }
+}
 const fetchHistory = async () => {
   try {
-    const { data } = await api.get(`/api/partnership/rooms/${roomId}/history`)
-    const fetchedMessages = (data.messages || []).map((m) => ({
-      id: m.id,
-      senderId: m.senderId,
-      senderName: m.senderName || '알 수 없음',
-      content: m.content || '',
-      timestamp: new Date(m.createdAt).getTime(),
-      type: m.type || 'CHAT',
-      payload: m.payload || null,
-    }))
+    const res = await fetchChatHistory(roomId)
+    console.log('채팅 기록 전체:', res)
 
-    messages.value = fetchedMessages
-    removeDuplicateMessages() // 중복 제거
-
-    // 서버에서 받아온 roomInfo 기반으로 currentUserId 설정
-    if (!currentUserId.value && data.roomInfo?.currentUserId) {
-      currentUserId.value = data.roomInfo.currentUserId
+    // res 자체가 배열인 경우
+    if (Array.isArray(res)) {
+      messages.value = [...res]
     }
-    updateRoomStatus()
-    scrollToBottom()
-  } catch {
-    messages.value = []
-  }
-}
-
-const updateRoomStatus = () => {
-  const latest = messages.value.filter((m) => m.type === 'PARTNERSHIP_REQUEST').pop()
-  const status = latest?.payload?.status?.toUpperCase() || 'WAITING'
-  if (status === 'ACCEPTED' || status === 'IN_NEGOTIATION') roomStatus.value = 'active'
-  else if (status === 'REJECTED') roomStatus.value = 'rejected'
-  else roomStatus.value = 'waiting'
-}
-
-const scrollToBottom = () => {
-  nextTick(() => {
-    if (chatContainer.value) chatContainer.value.scrollTop = chatContainer.value.scrollHeight
-  })
-}
-
-// 메시지 중복 제거 및 정렬 함수 - 새 메시지가 올 때마다 호출
-const removeDuplicateMessages = () => {
-  const uniqueMessages = messages.value.reduce((acc, current) => {
-    const existing = acc.find((msg) => msg.id === current.id)
-    if (!existing) {
-      acc.push(current)
+    // 혹시 res.messages 안에 담기는 경우도 대비
+    else if (res.messages && Array.isArray(res.messages)) {
+      messages.value = [...res.messages]
     }
-    return acc
-  }, [])
 
-  // 시간순 정렬
-  uniqueMessages.sort((a, b) => a.timestamp - b.timestamp)
-  messages.value = uniqueMessages
-}
+    console.log('messages.value 설정됨:', messages.value.length)
 
-const sendMessage = () => {
-  if (!text.value.trim() || !wsConnected.value) return
-
-  const messageContent = text.value.trim()
-  const tempId = `temp_${Date.now()}`
-
-  // 임시 메시지를 로컬에 먼저 표시 (낙관적 업데이트)
-  const tempMsg = {
-    id: tempId,
-    senderId: currentUserId.value,
-    sender: currentUser.value,
-    content: messageContent,
-    timestamp: Date.now(),
-    type: 'TEXT',
-    payload: null,
-    isTemp: true, // 임시 메시지 표시
-  }
-
-  messages.value = [...messages.value, tempMsg]
-  text.value = ''
-  scrollToBottom()
-
-  // 서버에 메시지 전송 - Promise 체크 추가
-  try {
-    const result = sendText(roomId, messageContent)
-
-    // sendText가 Promise를 반환하는 경우
-    if (result && typeof result.then === 'function') {
-      result
-        .then(() => {
-          console.log('메시지 전송 완료')
-          // 임시 메시지는 서버에서 오는 실제 메시지로 대체됨
-        })
-        .catch((error) => {
-          console.error('메시지 전송 실패:', error)
-          // 실패시 임시 메시지 제거
-          messages.value = messages.value.filter((m) => m.id !== tempId)
-        })
-    } else {
-      // sendText가 Promise를 반환하지 않는 경우
-      console.log('메시지 전송 시도')
-
-      // 일정 시간 후 임시 메시지 정리 (서버 메시지로 대체되지 않은 경우)
-      setTimeout(() => {
-        const stillExists = messages.value.some((m) => m.id === tempId && m.isTemp)
-        if (stillExists) {
-          // 실제 서버 메시지가 아직 오지 않았다면 임시 메시지를 실제 메시지로 변환
-          messages.value = messages.value.map((m) =>
-            m.id === tempId ? { ...m, isTemp: false } : m,
-          )
-        }
-      }, 5000) // 5초 후
-    }
-  } catch (error) {
-    console.error('메시지 전송 중 오류:', error)
-    // 오류 발생시 임시 메시지 제거
-    messages.value = messages.value.filter((m) => m.id !== tempId)
-  }
-}
-
-// WebSocket 연결 함수
-connectWebSocket = () => {
-  connectWS(
-    () => {
-      console.log('WebSocket 연결됨')
-      wsConnected.value = true
-      reconnectAttempts.value = 0
-
-      unsubscribe = subscribeRoom(roomId, (parsedMsg) => {
-        // parsedMsg: 이미 JSON.parse 완료된 객체
-        // msg.body로 다시 파싱하면 안 됨
-        messages.value = messages.value.filter(
-          (m) =>
-            !(m.isTemp && m.content === parsedMsg.content && m.senderId === parsedMsg.senderId),
-        )
-
-        const existing = messages.value.find((m) => m.id === parsedMsg.id)
-        if (!existing) {
-          messages.value = [...messages.value, parsedMsg]
-          removeDuplicateMessages()
-          nextTick(() => {
-            updateRoomStatus()
-            scrollToBottom()
-          })
-        }
-      })
-    },
-    (error) => {
-      // WebSocket 연결 실패 시 재연결 시도
-      console.error('WebSocket 연결 오류:', error)
-      wsConnected.value = false
-
-      if (reconnectAttempts.value < maxReconnectAttempts) {
-        reconnectAttempts.value++
-        console.log(`재연결 시도 ${reconnectAttempts.value}/${maxReconnectAttempts}`)
-        setTimeout(() => {
-          connectWebSocket()
-        }, 3000 * reconnectAttempts.value) // 지수 백오프
-      }
-    },
-  )
-}
-
-const checkConnection = () => {
-  if (!wsConnected.value) {
-    console.log('연결이 끊어진 것을 감지, 재연결 시도...')
-    connectWebSocket()
+    nextTick(() => {
+      scrollToBottom()
+    })
+  } catch (err) {
+    console.error('채팅 기록 불러오기 실패', err)
   }
 }
 
 onMounted(async () => {
-  if (!currentUser.value) return router.push('/login')
-
-  await fetchHistory()
-  connectWebSocket()
-
-  // 주기적으로 연결 상태 체크
-  connectionCheckInterval = setInterval(checkConnection, 30000) // 30초마다 체크
-
-  // 페이지 가시성 API를 이용한 포커스 시 재연결
-  document.addEventListener('visibilitychange', () => {
-    if (document.visibilityState === 'visible' && !wsConnected.value) {
-      console.log('페이지 포커스 시 재연결 시도')
-      connectWebSocket()
-    }
-  })
-})
-
-onUnmounted(() => {
-  if (connectionCheckInterval) {
-    clearInterval(connectionCheckInterval)
+  // 1. JWT에서 사용자 ID 가져오기
+  try {
+    const token = localStorage.getItem('access_token')
+    const decoded = token ? jwtDecode(token) : null
+    currentUserId.value = decoded?.sub ? Number(decoded.sub) : null
+    console.log('현재 사용자 ID:', currentUserId.value)
+    console.log('현재 partnershipStatus:', partnershipStatus.value)
+  } catch (e) {
+    console.error('JWT 디코딩 실패', e)
   }
-  if (unsubscribe) unsubscribe()
-  disconnectWS()
 
-  // 이벤트 리스너 정리
-  document.removeEventListener('visibilitychange', () => {})
+  // 2. 채팅 기록 먼저 가져오기 (방 정보와 함께 오므로)
+  await fetchHistory()
+  await fetchRoomInfo()
+
+  // 3. 방 정보는 fetchHistory에서 받은 roomInfo 사용하거나 별도 호출
+  // getRoomInfo가 roomInfo만 반환하는지 확인 필요
+
+  // 4. WebSocket 연결
+  connectWS(
+    () => {
+      unsubscribe = subscribeRoom(roomId, (msg) => {
+        console.log('subscribeRoom 콜백 호출됨:', msg) // 메시지 들어오는지 확인
+        handleIncomingMessage(msg)
+      })
+
+      console.log('WebSocket 연결됨')
+    },
+    (err) => console.error('WebSocket 연결 실패:', err),
+  )
 })
-
-const formatTime = (timestamp) =>
-  new Date(timestamp).toLocaleTimeString('ko-KR', {
-    hour: '2-digit',
-    minute: '2-digit',
-  })
-
-// 마지막으로 온 상대방 협업 요청 메시지 (대기중)
-const lastIncomingRequest = computed(() => {
-  // 내 메시지 제외 + PARTNERSHIP_REQUEST + WAITING 상태
-  return [...messages.value]
-    .reverse()
-    .find(
-      (m) =>
-        m.senderId !== currentUserId.value &&
-        m.type === 'PARTNERSHIP_REQUEST' &&
-        m.payload?.status === 'WAITING',
-    )
-})
-
-const acceptRequest = (messageId) => {
-  const msg = messages.value.find((m) => m.id === messageId)
-  if (!msg) return
-
-  // 서버로 수락 요청 보내기
-  // 예: sendAccept(msg.id)
-  msg.payload.status = 'ACCEPTED'
-  updateRoomStatus()
-}
-
-const rejectRequest = (messageId) => {
-  const msg = messages.value.find((m) => m.id === messageId)
-  if (!msg) return
-
-  // 서버로 거절 요청 보내기
-  // 예: sendReject(msg.id)
-  msg.payload.status = 'REJECTED'
-  updateRoomStatus()
-}
 </script>
-
 <style scoped>
-.card {
-  max-width: 600px;
-  margin: 40px auto;
-  padding: 24px;
-  background: white;
-  border-radius: 16px;
-}
-.chat-container {
-  height: 400px;
-  overflow-y: auto;
-  border: 1px solid #e5e7eb;
-  padding: 16px;
-  border-radius: 12px;
-  margin-bottom: 16px;
-  background: #f8fafc;
-}
-.chat-message {
-  padding: 12px;
-  border-radius: 12px;
-  margin-bottom: 12px;
-  max-width: 70%;
-  background: #e5e7eb;
-  position: relative;
-}
-.chat-message.my-message {
-  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
-  color: white;
-  margin-left: auto;
-}
-.chat-message.temp-message {
-  opacity: 0.7;
-}
-.message-sender {
-  font-weight: bold;
-  font-size: 12px;
-  margin-bottom: 4px;
-  opacity: 0.8;
-}
-.message-content {
-  font-size: 14px;
-  line-height: 1.4;
-  margin-bottom: 4px;
-}
-.message-time {
-  font-size: 10px;
-  opacity: 0.7;
-  text-align: right;
-}
-.sending-indicator {
-  font-size: 10px;
-  opacity: 0.6;
-  font-style: italic;
-  text-align: right;
-  margin-top: 2px;
-}
-.chat-input {
+.chat-room {
   display: flex;
-  gap: 8px;
+  flex-direction: column;
+  height: 100vh;
+  background: #fff;
 }
-.chat-input input {
-  flex: 1;
-  padding: 12px;
-  border-radius: 8px;
-  border: 2px solid #e5e7eb;
+.chat-footer {
+  border-top: 1px solid #eee;
+  padding: 8px;
 }
-.chat-input input:disabled {
-  background-color: #f3f4f6;
-  cursor: not-allowed;
+
+.input-row {
+  display: flex;
+  align-items: center;
+  gap: 8px; /* 버튼과 input 사이 간격 */
 }
-.chat-input button {
-  padding: 12px 20px;
-  border-radius: 8px;
-  background: #3b82f6;
+
+.proposal-btn {
+  background: #017f58;
   color: white;
   border: none;
+  padding: 6px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 13px;
+  flex-shrink: 0; /* 버튼 크기 고정 */
+}
+
+/* 헤더 */
+.chat-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px;
+  border-bottom: 1px solid #eee;
+}
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.shop-info {
+  display: flex;
+  flex-direction: column;
+}
+.shop-name {
+  font-size: 16px;
+  margin: 0;
+}
+.shop-status {
+  font-size: 12px;
+  color: #888;
+}
+.icon-btn,
+.back-btn {
+  background: none;
+  border: none;
+  font-size: 18px;
   cursor: pointer;
 }
-.chat-input button:disabled {
-  background: #9ca3af;
-  cursor: not-allowed;
+
+/* 상단 지표 */
+.shop-stats {
+  display: flex;
+  justify-content: space-around;
+  background: #f0fdf4;
+  padding: 8px 0;
+  border-bottom: 1px solid #eee;
 }
-.status-banner {
-  padding: 12px;
-  border-radius: 8px;
-  margin-bottom: 16px;
-  text-align: center;
+.stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.stat-value {
   font-weight: bold;
 }
-.status-banner.waiting {
-  background: #fef3c7;
-  color: #d97706;
+.green {
+  color: #017f58;
 }
-.status-banner.active {
-  background: #d1fae5;
+.stat-label {
+  font-size: 12px;
+  color: #666;
+}
+
+/* 메시지 영역 */
+.chat-container {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px;
+  background: #f9fafb;
+}
+.message-wrapper {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 12px;
+  align-items: flex-start;
+}
+.message-wrapper.mine {
+  align-items: flex-end;
+}
+
+/* 일반 메시지 */
+.chat-bubble {
+  max-width: 70%;
+  padding: 10px 14px;
+  border-radius: 12px;
+  background: #e5e7eb;
+  font-size: 14px;
+}
+.message-wrapper.mine .chat-bubble {
+  background: #017f58;
+  color: #fff;
+}
+.chat-time {
+  font-size: 10px;
+  color: #888;
+  margin-top: 4px;
+}
+/* 시스템 메시지 (파트너십 요청) 스타일 */
+.chat-bubble.system-message {
+  background: #f3f4f6;
+  color: #374151;
+  font-style: italic;
+  text-align: center;
+  border: 1px solid #d1d5db;
+}
+
+/* 제휴 제안 카드 */
+.proposal-card {
+  width: 80%;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  background: #fff;
+  padding: 12px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+.proposal-header {
+  font-weight: bold;
+  margin-bottom: 8px;
+  color: #017f58;
+}
+.proposal-body {
+  font-size: 14px;
+  margin-bottom: 8px;
+}
+.proposal-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 6px;
+  font-weight: bold;
+}
+.highlight {
   color: #059669;
 }
-.status-banner.rejected {
-  background: #fee2e2;
-  color: #dc2626;
+.proposal-meta {
+  font-size: 12px;
+  color: #666;
+  display: flex;
+  justify-content: space-between;
 }
-.status-banner.disconnected {
-  background: #fef2f2;
-  color: #991b1b;
-}
-.empty-messages {
-  text-align: center;
-  color: #6b7280;
-  font-style: italic;
-  margin-top: 150px;
-}
-
-.request-buttons-container {
+.proposal-actions {
   display: flex;
   gap: 8px;
-  justify-content: flex-start; /* 왼쪽 정렬, 상대방 메시지 기준 */
   margin-top: 8px;
-  margin-bottom: 16px;
 }
-.request-buttons-container button {
-  padding: 6px 14px;
-  border-radius: 8px;
-  border: none;
-  cursor: pointer;
-  font-weight: bold;
-}
-.request-buttons-container button:first-child {
-  background-color: #3b82f6;
-  color: white;
-}
-.request-buttons-container button:last-child {
-  background-color: #e5e7eb;
-  color: #374151;
-}
-.partnership-button-container {
-  margin-bottom: 16px;
-  text-align: left; /* 왼쪽 정렬 */
-}
-.partnership-button-container button {
-  padding: 6px 14px;
-  border-radius: 8px;
-  background-color: #3b82f6;
+.accept-btn {
+  flex: 1;
+  background: #017f58;
   color: white;
   border: none;
+  padding: 6px 0;
+  border-radius: 8px;
+}
+.reject-btn {
+  flex: 1;
+  background: #e5e7eb;
+  border: none;
+  padding: 6px 0;
+  border-radius: 8px;
+}
+
+/* 입력창 */
+.chat-input {
+  display: flex;
+  align-items: center; /* 세로 중앙 정렬 */
+  gap: 8px; /* 버튼과 input 사이 간격 */
+  border-top: 1px solid #eee;
+  padding: 8px;
+}
+.proposal-btn {
+  background: #017f58;
+  color: white;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 8px;
   cursor: pointer;
-  font-weight: bold;
+  font-size: 13px;
+}
+.input-box {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 4px;
+  background: #fff;
+}
+.input-box input {
+  flex: 1;
+  border: none;
+  outline: none;
+  padding: 8px;
+}
+.send-btn {
+  background: #017f58;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  width: 36px;
+  height: 36px;
+  cursor: pointer;
+}
+/* 요청 수락/거절 카드 */
+.request-box {
+  width: 100%;
+  padding: 16px;
+  text-align: center;
+}
+
+.request-text {
+  font-size: 16px;
+  font-weight: 500;
+  margin-bottom: 12px;
+}
+
+.request-actions {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+}
+
+.request-actions .accept-btn {
+  flex: 1;
+  max-width: 120px;
+  background: #017f58;
+  color: #fff;
+  border: none;
+  padding: 10px 0;
+  border-radius: 8px;
+  font-size: 15px;
+  cursor: pointer;
+}
+
+.request-actions .reject-btn {
+  flex: 1;
+  max-width: 120px;
+  background: #fff;
+  color: #017f58;
+  border: 1px solid #e5e7eb;
+  padding: 10px 0;
+  border-radius: 8px;
+  font-size: 15px;
+  cursor: pointer;
+}
+
+/* 입력창 비활성화 스타일 */
+.input-box.disabled {
+  opacity: 0.6;
+  pointer-events: none;
+}
+.proposal-btn[disabled],
+.send-btn[disabled] {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+.back-icon {
+  font-size: 20px;
+  transform: scaleX(0.5);
+  margin-right: 10px;
 }
 </style>

@@ -9,7 +9,7 @@
         <button
           class="coupon-page__tab-button"
           :class="{ 'coupon-page__tab-button--active': activeTab === 'available' }"
-          @click="activeTab = 'available'"
+          @click="updateTab('available')"
           type="button"
         >
           발급 가능한 쿠폰
@@ -17,7 +17,7 @@
         <button
           class="coupon-page__tab-button"
           :class="{ 'coupon-page__tab-button--active': activeTab === 'received' }"
-          @click="activeTab = 'received'"
+          @click="updateTab('received')"
           type="button"
         >
           받은 쿠폰
@@ -119,6 +119,7 @@
 
 <script>
 import { ref, onMounted, computed, watch } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
 import CustomerTopBar from '@/components/CustomerTopBar.vue'
 import CustomerCouponCard from '@/components/CustomerCouponCard.vue'
 import CustomerReceivedCouponCard from '@/components/CustomerReceivedCouponCard.vue'
@@ -131,6 +132,7 @@ import {
   claimCoupon,
   useCoupon,
 } from '@/api/customer-coupon.js'
+import togethershopLogo from '@/assets/images/togethershop_logo.png'
 
 export default {
   name: 'CouponPage',
@@ -143,6 +145,8 @@ export default {
     CustomerBottomNavigation,
   },
   setup() {
+    const route = useRoute()
+    const router = useRouter()
     const activeTab = ref('available')
     const loading = ref(false)
     const searchQuery = ref('')
@@ -161,53 +165,7 @@ export default {
       return `${date.getFullYear()}.${String(date.getMonth() + 1).padStart(2, '0')}.${String(date.getDate()).padStart(2, '0')}`
     }
 
-    const receivedCoupons = ref([
-      {
-        id: 5,
-        storeName: '피자마루',
-        category: '음식점',
-        title: '10% 할인쿠폰',
-        expiryDate: '2025.10.31',
-        daysLeft: 'D-30',
-        isClaimed: true,
-      },
-      {
-        id: 6,
-        storeName: '언더라인',
-        category: '카페',
-        title: '20% 할인쿠폰',
-        expiryDate: '2025.9.30',
-        daysLeft: 'D-26',
-        isClaimed: true,
-      },
-      {
-        id: 7,
-        storeName: '조마루 감자탕',
-        category: '음식점',
-        title: '10% 할인쿠폰',
-        expiryDate: '2025.10.31',
-        daysLeft: 'D-30',
-        isClaimed: true,
-      },
-      {
-        id: 8,
-        storeName: '하이디라오',
-        category: '음식점',
-        title: '5% 할인쿠폰',
-        expiryDate: '2025.10.31',
-        daysLeft: 'D-30',
-        isClaimed: true,
-      },
-      {
-        id: 9,
-        storeName: '피자마루',
-        category: '음식점',
-        title: '10% 할인쿠폰',
-        expiryDate: '2025.10.31',
-        daysLeft: 'D-30',
-        isClaimed: true,
-      },
-    ])
+    const receivedCoupons = ref([])
 
     // API에서 데이터 로드
     const loadCoupons = async () => {
@@ -263,7 +221,7 @@ export default {
                 // title: `${coupon.discountValue}% 할인쿠폰`, orginal
                 title: `${coupon.description} 쿠폰`, //이게 출력되는곳 여기를 수정해야함
                 expiryDate: formatDate(coupon.endDate),
-                remainingCount: coupon.totalQuantity,
+                remainingCount: coupon.currentQuantity,
                 isClaimed: false,
                 businessId: coupon.businessId,
                 partnerBusinessId: coupon.partnerBusinessId,
@@ -310,7 +268,7 @@ export default {
                   // title: `${coupon.discountValue}% 할인쿠폰`, orginal
                   title: `${coupon.description} 쿠폰`, //이게 출력되는곳 여기를 수정해야함
                   expiryDate: formatDate(coupon.endDate),
-                  remainingCount: coupon.totalQuantity,
+                  remainingCount: coupon.currentQuantity,
                   isClaimed: false,
                   businessId: coupon.businessId,
                   partnerBusinessId: coupon.partnerBusinessId,
@@ -331,8 +289,40 @@ export default {
           })
           availableCoupons.value = allFlattenedCoupons
         }
-        if (receivedData && receivedData.data) {
-          receivedCoupons.value = receivedData.data
+        
+        // 받은 쿠폰 데이터 처리
+        console.log('receivedData:', receivedData)
+        if (receivedData && Array.isArray(receivedData) && receivedData.length > 0) {
+          // 받은 쿠폰 데이터를 CustomerReceivedCouponCard에 맞는 형태로 변환
+          receivedCoupons.value = receivedData.map(coupon => {
+            // 만료일까지 남은 일수 계산
+            const calculateDaysLeft = (expireDate) => {
+              if (!expireDate) return 'D-0'
+              const today = new Date()
+              const expire = new Date(expireDate)
+              const diffTime = expire - today
+              const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
+              return diffDays > 0 ? `D-${diffDays}` : '만료됨'
+            }
+
+            return {
+              id: coupon.couponId,
+              couponId: coupon.couponId,
+              templateId: coupon.templateId,
+              couponCode: coupon.couponCode,
+              storeName: coupon.businessName,
+              category: coupon.businessCategory,
+              title: `${coupon.description} 쿠폰`,
+              expiryDate: formatDate(coupon.expireDate),
+              daysLeft: calculateDaysLeft(coupon.expireDate),
+              isClaimed: true,
+              status: coupon.status,
+              issueDate: coupon.issueDate,
+              usedDate: coupon.usedDate,
+              pinCode: coupon.pinCode,
+              qrCodeData: coupon.qrCodeData
+            }
+          })
         }
 
         console.log('쿠폰 데이터 로드 완료')
@@ -382,8 +372,10 @@ export default {
       if (coupon && coupon.remainingCount > 0) {
         selectedCoupon.value = {
           ...coupon,
-          storeAvatar: 'http://localhost:3845/assets/4f7728b6d02dc64fde3fb8a6f0b1d01507e046a5.svg', // 기본 아바타
+          storeAvatar: togethershopLogo, // Togethershop 로고
         }
+        console.log('selectedCoupon:', selectedCoupon.value)
+        console.log('storeAvatar:', selectedCoupon.value.storeAvatar)
         showModal.value = true
       }
     }
@@ -406,7 +398,16 @@ export default {
         for (const business of businessCoupons.value) {
           const couponIndex = business.coupons.findIndex((c) => c.templateId === couponId || c.id === couponId)
           if (couponIndex !== -1) {
+            // 발급된 쿠폰은 발급 완료 상태로 변경
             business.coupons[couponIndex].remainingCount--
+            business.coupons[couponIndex].isClaimed = true
+            
+            // 같은 매장의 다른 쿠폰들을 비활성화
+            business.coupons.forEach((c, index) => {
+              if (index !== couponIndex && c.businessId === coupon.businessId) {
+                c.isDisabled = true
+              }
+            })
             break
           }
         }
@@ -415,6 +416,14 @@ export default {
         const couponIndex = availableCoupons.value.findIndex((c) => c.templateId === couponId || c.id === couponId)
         if (couponIndex !== -1) {
           availableCoupons.value[couponIndex].remainingCount--
+          availableCoupons.value[couponIndex].isClaimed = true
+          
+          // 같은 매장의 다른 쿠폰들을 비활성화
+          availableCoupons.value.forEach((c, index) => {
+            if (index !== couponIndex && c.businessId === coupon.businessId) {
+              c.isDisabled = true
+            }
+          })
         }
 
         console.log('쿠폰 다운로드 성공:', coupon.title)
@@ -452,8 +461,38 @@ export default {
         }
         const receivedData = await getReceivedCoupons(params)
 
-        if (receivedData && receivedData.data) {
-          receivedCoupons.value = receivedData.data
+        console.log('loadReceivedCoupons receivedData:', receivedData)
+        if (receivedData && Array.isArray(receivedData) && receivedData.length > 0) {
+          // 받은 쿠폰 데이터를 CustomerReceivedCouponCard에 맞는 형태로 변환
+          receivedCoupons.value = receivedData.map(coupon => {
+            // 만료일까지 남은 일수 계산
+            const calculateDaysLeft = (expireDate) => {
+              if (!expireDate) return 'D-0'
+              const today = new Date()
+              const expire = new Date(expireDate)
+              const diffTime = expire - today
+              const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
+              return diffDays > 0 ? `D-${diffDays}` : '만료됨'
+            }
+
+            return {
+              id: coupon.couponId,
+              couponId: coupon.couponId,
+              templateId: coupon.templateId,
+              couponCode: coupon.couponCode,
+              storeName: coupon.businessName,
+              category: coupon.businessCategory,
+              title: `${coupon.description} 쿠폰`,
+              expiryDate: formatDate(coupon.expireDate),
+              daysLeft: calculateDaysLeft(coupon.expireDate),
+              isClaimed: true,
+              status: coupon.status,
+              issueDate: coupon.issueDate,
+              usedDate: coupon.usedDate,
+              pinCode: coupon.pinCode,
+              qrCodeData: coupon.qrCodeData
+            }
+          })
         }
       } catch (error) {
         console.error('받은 쿠폰 목록 로드 실패:', error)
@@ -467,7 +506,7 @@ export default {
       if (coupon) {
         selectedReceivedCoupon.value = {
           ...coupon,
-          storeAvatar: 'http://localhost:3845/assets/4f7728b6d02dc64fde3fb8a6f0b1d01507e046a5.svg', // 기본 아바타
+          storeAvatar: togethershopLogo, // Togethershop 로고
         }
         showReceivedCouponModal.value = true
       }
@@ -518,8 +557,37 @@ export default {
       }
     })
 
+    // 라우트 변경 감지
+    watch(() => route.query.tab, (newTab) => {
+      if (newTab === 'received') {
+        activeTab.value = 'received'
+      } else {
+        activeTab.value = 'available'
+      }
+    })
+
+    // URL 쿼리 파라미터 처리
+    const initializeActiveTab = () => {
+      const tabParam = route.query.tab
+      if (tabParam === 'received') {
+        activeTab.value = 'received'
+      } else {
+        activeTab.value = 'available'
+      }
+    }
+
+    // 탭 변경 시 URL 업데이트
+    const updateTab = (tab) => {
+      activeTab.value = tab
+      router.push({
+        path: '/customer/coupon',
+        query: { tab: tab }
+      })
+    }
+
     // 컴포넌트 마운트 시 데이터 로드
     onMounted(() => {
+      initializeActiveTab()
       loadCoupons()
     })
 
@@ -545,6 +613,7 @@ export default {
       loadReceivedCoupons,
       loadCoupons,
       formatDate,
+      updateTab,
     }
   },
 }

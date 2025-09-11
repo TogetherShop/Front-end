@@ -1,6 +1,10 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import routes from './modules/public'
 import { jwtDecode } from 'jwt-decode'
+
+import publicRoutes from './modules/public'
+import { useNotificationStore } from '@/stores/notifications'
+
+const routes = publicRoutes
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -25,12 +29,17 @@ router.beforeEach((to, from, next) => {
       localStorage.removeItem('access_token')
       localStorage.removeItem('refresh_token')
       localStorage.removeItem('user_type')
+      
+      // 알림 상태 초기화
+      const notificationStore = useNotificationStore()
+      notificationStore.clearNotifications()
+      
       return next('/login')
     }
 
     // 권한(role) 체크
     if (to.meta.role && to.meta.role !== userType) {
-      return next(userType === 'customer' ? '/customer' : '/business')
+      return next(userType === 'customer' ? '/customer' : '/business/home')
     }
   }
 

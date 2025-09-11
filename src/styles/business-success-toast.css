@@ -1,0 +1,85 @@
+.toast-overlay {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 1002;
+  pointer-events: none;
+}
+
+.success-toast {
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+  border: 1px solid #e5e7eb;
+  min-width: 280px;
+  animation: slideIn 0.3s ease-out;
+}
+
+.toast-content {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 20px 24px;
+}
+
+.success-icon {
+  flex-shrink: 0;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: #017f58;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.success-icon .material-symbols-outlined {
+  font-size: 22px;
+  color: white;
+  font-weight: 600;
+  font-variation-settings: 'FILL' 1;
+}
+
+.success-message {
+  font-size: 16px;
+  font-family: 'Pretendard', sans-serif;
+  font-weight: 600;
+  color: #111827;
+}
+
+/* 애니메이션 */
+@keyframes slideIn {
+  0% {
+    opacity: 0;
+    transform: scale(0.85);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* 반응형 디자인 */
+@media (max-width: 480px) {
+  .success-toast {
+    min-width: 260px;
+  }
+
+  .toast-content {
+    padding: 18px 20px;
+  }
+
+  .success-icon {
+    width: 32px;
+    height: 32px;
+  }
+
+  .success-icon .material-symbols-outlined {
+    font-size: 20px;
+  }
+
+  .success-message {
+    font-size: 15px;
+  }
+}

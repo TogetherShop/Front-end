@@ -189,9 +189,22 @@ export const createQRcode = async (couponId) => {
   try {
     const response = await api.get(`/api/customer/coupons/${couponId}/qr-code`, {
       userType: 'customer',
+      responseType: 'blob', // 이미지 데이터를 Blob으로 받기
     })
     console.log('내가 발급한 쿠폰 QR 코드 생성:', response.data)
-    return response.data
+
+    // Blob을 Base64로 변환
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader()
+      reader.onload = () => {
+        resolve({
+          qrCodeData: reader.result, // data:image/png;base64,... 형태
+          blob: response.data,
+        })
+      }
+      reader.onerror = reject
+      reader.readAsDataURL(response.data)
+    })
   } catch (error) {
     console.error(`쿠폰 QR 코드 생성 실패 (ID: ${couponId}):`, error)
     throw error

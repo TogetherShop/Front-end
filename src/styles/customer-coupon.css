@@ -65,6 +65,24 @@
   animation: fadeInUp 0.6s ease-out;
 }
 
+/* 비활성화된 쿠폰 카드 스타일 */
+.coupon-card--disabled {
+  opacity: 0.6;
+  filter: grayscale(0.3);
+}
+
+.coupon-card--disabled .coupon-card__container {
+  background: #f8f9fa;
+  border-color: #dee2e6;
+}
+
+.coupon-card--disabled .coupon-card__store-name,
+.coupon-card--disabled .coupon-card__category-badge,
+.coupon-card--disabled .coupon-card__coupon-title,
+.coupon-card--disabled .coupon-card__expiry-date {
+  color: #6c757d !important;
+}
+
 @keyframes fadeInUp {
   from {
     opacity: 0;
@@ -160,6 +178,12 @@
 .coupon-card__action-area--clickable {
   cursor: pointer;
   transition: all 0.3s ease;
+}
+
+.coupon-card__action-area--disabled {
+  background: #6c757d;
+  cursor: not-allowed;
+  opacity: 0.7;
 }
 
 

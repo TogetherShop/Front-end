@@ -17,8 +17,8 @@
 .coupon-page {
   background: #ffffff;
   min-height: 100vh;
+  font-family: 'Pretendard', sans-serif;
 }
-
 
 /* 탭 섹션 스타일 */
 .coupon-page__tab-section {
@@ -55,7 +55,9 @@
 
 .coupon-page__tab-button--active {
   background: white;
-  box-shadow: 0px 1px 3px 0px rgba(0,0,0,0.1), 0px 1px 2px -1px rgba(0,0,0,0.1);
+  box-shadow:
+    0px 1px 3px 0px rgba(0, 0, 0, 0.1),
+    0px 1px 2px -1px rgba(0, 0, 0, 0.1);
   color: var(--text-light);
   z-index: 2;
 }
@@ -98,15 +100,15 @@
   background: white;
   border: 1px solid var(--main-color);
   border-radius: 12px;
-  box-shadow: 0px 1px 3px 0px rgba(0,0,0,0.1), 0px 1px 2px -1px rgba(0,0,0,0.1);
+  box-shadow:
+    0px 1px 3px 0px rgba(0, 0, 0, 0.1),
+    0px 1px 2px -1px rgba(0, 0, 0, 0.1);
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
-
 
 .coupon-card__body {
   padding: 0;
 }
-
 
 .coupon-card__header {
   margin-bottom: 8px;
@@ -128,7 +130,7 @@
   font-size: 11px;
   font-style: normal;
   font-weight: 400;
-  line-height: 16px; 
+  line-height: 16px;
 }
 
 .coupon-card__coupon-info {
@@ -154,7 +156,6 @@
 
 .coupon-card__expiry .material-symbols-outlined {
   color: var(--text-color);
-  
 }
 
 .coupon-card__expiry-date {
@@ -185,7 +186,6 @@
   cursor: not-allowed;
   opacity: 0.7;
 }
-
 
 .coupon-card__remaining-icon {
   position: absolute;
@@ -219,8 +219,6 @@
   font-size: 10px;
   font-weight: 500;
 }
-
-
 
 .coupon-card__claimed-status {
   display: flex;
@@ -256,19 +254,19 @@
   transition: all 0.3s ease;
 }
 
-
 .coupon-card__claim-button:disabled {
   opacity: 0.7;
 }
 
-
 /* 안내 메시지 박스 */
 .coupon-page__info-box {
-  background: #F0FDF4;
-  border: 1px solid #B9F8CF;
+  background: #f0fdf4;
+  border: 1px solid #b9f8cf;
   border-radius: 12px;
   padding: 15px;
-  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.10), 0 1px 2px -1px rgba(0, 0, 0, 0.10);
+  box-shadow:
+    0 1px 3px 0 rgba(0, 0, 0, 0.1),
+    0 1px 2px -1px rgba(0, 0, 0, 0.1);
 }
 
 .coupon-page__info-text {
@@ -301,14 +299,12 @@
     padding-left: 15px;
     padding-right: 15px;
   }
-  
+
   .coupon-page__tab-button {
     font-size: 11px;
     padding: 0 12px;
   }
-  
 
-  
   .coupon-card__action-area {
     min-height: 80px;
   }
@@ -341,7 +337,7 @@
   background: white;
   border: 1px solid #f8f8f8;
   border-radius: 5px;
-  box-shadow: 0px 1px 2px 0px rgba(0,0,0,0.2);
+  box-shadow: 0px 1px 2px 0px rgba(0, 0, 0, 0.2);
   height: 41px;
   display: flex;
   align-items: center;
@@ -358,7 +354,7 @@
   border: none;
   outline: none;
   flex: 1;
-  color: var(--, #B0B1B3);
+  color: var(--, #b0b1b3);
   font-family: Pretendard;
   font-size: 15px;
   font-style: normal;
@@ -384,11 +380,12 @@
   background: white;
   border: 1px solid var(--main-color);
   border-radius: 12px;
-  box-shadow: 0px 1px 3px 0px rgba(0,0,0,0.1), 0px 1px 2px -1px rgba(0,0,0,0.1);
+  box-shadow:
+    0px 1px 3px 0px rgba(0, 0, 0, 0.1),
+    0px 1px 2px -1px rgba(0, 0, 0, 0.1);
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   cursor: pointer;
 }
-
 
 .received-coupon-card__body {
   padding: 0;
@@ -443,7 +440,6 @@
   font-size: 11px;
   font-weight: 600;
 }
-
 
 .received-coupon-card__days-text {
   color: var(--main-color);

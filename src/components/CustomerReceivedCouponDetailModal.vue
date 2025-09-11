@@ -42,9 +42,7 @@
         </div>
 
         <!-- QR 코드 버튼 -->
-        <button class="received-coupon-modal__qr-btn" @click="showQRCode">
-          QR코드
-        </button>
+        <button class="received-coupon-modal__qr-btn" @click="showQRCode">QR코드</button>
       </div>
 
       <!-- QR 코드 화면 -->
@@ -77,9 +75,7 @@
         </div>
 
         <!-- 사용 완료 버튼 -->
-        <button class="received-coupon-modal__use-btn" @click="confirmUse">
-          사용 완료
-        </button>
+        <button class="received-coupon-modal__use-btn" @click="confirmUse">사용 완료</button>
       </div>
     </div>
 
@@ -89,17 +85,12 @@
         <div class="use-confirm-modal__content">
           <h3 class="use-confirm-modal__title">직원 전용 확인 버튼입니다</h3>
           <p class="use-confirm-modal__message">
-            확인 버튼 클릭 시 쿠폰이 즉시 사용처리 되며,<br>
+            확인 버튼 클릭 시 쿠폰이 즉시 사용처리 되며,<br />
             다시 되돌릴 수 없습니다.
           </p>
           <div class="use-confirm-modal__buttons">
-
-            <button class="use-confirm-modal__confirm-btn" @click="handleConfirmUse">
-              확인
-            </button>
-            <button class="use-confirm-modal__cancel-btn" @click="closeConfirmModal">
-              취소
-            </button>
+            <button class="use-confirm-modal__confirm-btn" @click="handleConfirmUse">확인</button>
+            <button class="use-confirm-modal__cancel-btn" @click="closeConfirmModal">취소</button>
           </div>
         </div>
       </div>
@@ -117,7 +108,7 @@ export default {
   props: {
     isVisible: {
       type: Boolean,
-      default: false
+      default: false,
     },
     coupon: {
       type: Object,
@@ -128,9 +119,9 @@ export default {
         title: '',
         expiryDate: '',
         storeAvatar: togethershopLogo,
-        daysLeft: ''
-      })
-    }
+        daysLeft: '',
+      }),
+    },
   },
   emits: ['close', 'showQR', 'useCoupon'],
   setup(props, { emit }) {
@@ -152,10 +143,10 @@ export default {
     const showQRCode = async () => {
       showQRView.value = true
       remainingTime.value = 5 * 60 // 5분으로 리셋
-      
+
       // QR 코드 생성
       await generateQRCode()
-      
+
       // 1초마다 시간 업데이트
       timeInterval = setInterval(() => {
         if (remainingTime.value > 0) {
@@ -172,13 +163,13 @@ export default {
       try {
         qrCodeLoading.value = true
         qrCodeData.value = null
-        
+
         // 쿠폰 ID 사용 (couponId 또는 id)
         const couponId = props.coupon.couponId || props.coupon.id
         const response = await createQRcode(couponId)
-        
+
         console.log('QR 코드 API 응답:', response)
-        
+
         // API에서 이미 Base64 data URL로 변환된 데이터 사용
         if (response && response.qrCodeData) {
           qrCodeData.value = response.qrCodeData
@@ -240,9 +231,9 @@ export default {
       confirmUse,
       closeConfirmModal,
       handleConfirmUse,
-      closeModal
+      closeModal,
     }
-  }
+  },
 }
 </script>
 
@@ -257,6 +248,11 @@ export default {
   justify-content: center;
   padding: 2rem;
   text-align: center;
+}
+
+.qr-loading p {
+  white-space: nowrap; /* 줄바꿈 금지 */
+  margin-top: 0.5rem;
 }
 
 .qr-loading .spinner-border {

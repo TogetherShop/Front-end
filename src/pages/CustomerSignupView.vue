@@ -616,7 +616,7 @@ const handleSignup = async () => {
   padding-left: 17px;
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 20px;
 }
 
 .screen .agreement-item {
@@ -624,6 +624,10 @@ const handleSignup = async () => {
   align-items: center;
   position: relative;
   width: 100%;
+}
+
+.screen .agreement-item p {
+  margin: 0; /* ✅ 기본 16px margin 제거 */
 }
 
 .screen .checkbox-2,

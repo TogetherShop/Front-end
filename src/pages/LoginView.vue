@@ -145,6 +145,7 @@ const goSignup = () => {
   align-items: center;
   padding: 24px 16px;
   box-sizing: border-box;
+  font-family: 'Pretendard', sans-serif;
 }
 
 .logo-section {

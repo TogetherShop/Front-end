@@ -3,7 +3,7 @@
     <div class="store-image">
       <img
         :src="store.images?.[0] || '/images/default-store.jpg'"
-        :alt="store.name"
+        :alt="store.businessName"
         @error="handleImageError"
       />
     </div>
@@ -53,7 +53,7 @@ const props = defineProps({
     required: true,
   },
 })
-
+console.log('[StoreCard] store:', props.store)
 // Emits 정의
 const emit = defineEmits(['click', 'getCoupon'])
 

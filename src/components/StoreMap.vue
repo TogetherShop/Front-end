@@ -357,6 +357,7 @@ onBeforeUnmount(() => {
 
 watch(
   () => props.stores,
+
   () => {
     createStoreMarkers()
     fitOnceToAllMarkers()

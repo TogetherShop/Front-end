@@ -125,9 +125,19 @@ export const useStoresStore = defineStore('stores', {
             lng,
             distance,
             walkTime,
-            rating: 0, // DB에 없으므로 기본값
-            reviewCount: 0, // DB에 없으므로 기본값
-            hasDiscount: false, // 쿠폰 시스템 붙을 때 교체
+            rating:
+              typeof b.rating === 'number'
+                ? b.rating
+                : typeof b.avgRating === 'number'
+                  ? b.avgRating
+                  : null,
+            reviewCount:
+              typeof b.reviewCount === 'number'
+                ? b.reviewCount
+                : typeof b.cnt === 'number'
+                  ? b.cnt
+                  : 0,
+            hasDiscount: false,
             images: [defaultStoreImg],
             tags: [],
             phone: b.phoneNumber ?? '',

@@ -12,13 +12,13 @@ import LoginView from '@/pages/LoginView.vue'
 import OnboardingView from '@/pages/OnboardingView.vue'
 import SignupView from '@/pages/SignupView.vue'
 import CustomerSignupView from '@/pages/CustomerSignupView.vue'
-// import ChatList from '@/pages/ChatList.vue'
-// import ChatUserListView from '@/pages/ChatUserListView.vue'
-// import ChatRoomView from '@/pages/ChatRoomView.vue'
+import ChatList from '@/pages/ChatList.vue'
+import ChatUserListView from '@/pages/ChatUserListView.vue'
+import ChatRoomView from '@/pages/ChatRoomView.vue'
 import CustomerHomePage from '@/pages/CustomerHomePage.vue'
 import CustomerNotificationPage from '@/pages/CustomerNotificationPage.vue'
 import BusinessNotificationPage from '@/pages/business/BusinessNotificationPage.vue'
-// import ChattingHomePage from '@/pages/ChattingHomePage.vue'
+import ChattingHomePage from '@/pages/ChattingHomePage.vue'
 import StoreDetailPage from '@/pages/StoreDetailPage.vue'
 
 const routes = [
@@ -55,27 +55,27 @@ const routes = [
     component: CustomerNotificationPage,
     meta: { requiresAuth: true, role: 'customer' },
   },
-  // {
-  //   path: '/business',
-  //   component: BusinessHomePage,
-  //   meta: { requiresAuth: true, role: 'business' },
-  // },
-  // {
-  //   path: '/business/chats',
-  //   component: ChatList,
-  //   meta: { requiresAuth: true, role: 'business' },
-  // },
-  // {
-  //   path: '/business/chats/new',
-  //   component: ChatUserListView,
-  //   meta: { requiresAuth: true, role: 'business' },
-  // },
-  // {
-  //   path: '/business/chats/:roomId',
-  //   component: ChatRoomView,
-  //   meta: { requiresAuth: true, role: 'business' },
-  //   props: true,
-  // },
+  {
+    path: '/business',
+    component: BusinessHomePage,
+    meta: { requiresAuth: true, role: 'business' },
+  },
+  {
+    path: '/business/chats',
+    component: ChatList,
+    meta: { requiresAuth: true, role: 'business' },
+  },
+  {
+    path: '/business/chats/new',
+    component: ChatUserListView,
+    meta: { requiresAuth: true, role: 'business' },
+  },
+  {
+    path: '/business/chats/:roomId',
+    component: ChatRoomView,
+    meta: { requiresAuth: true, role: 'business' },
+    props: true,
+  },
   {
     path: '/business/partnership',
     component: BusinessPartnershipPage,
@@ -85,6 +85,7 @@ const routes = [
     path: '/business/home',
     name: 'business-home',
     component: BusinessHomePage,
+    meta: { requiresAuth: true, role: 'business' },
   },
   {
     path: '/business/store',
@@ -96,26 +97,31 @@ const routes = [
     path: '/business/coupon',
     name: 'business-coupon',
     component: BusinessCouponPage,
+    meta: { requiresAuth: true, role: 'business' },
   },
   {
     path: '/business/groupbuy',
     name: 'business-groupbuy',
     component: BusinessGroupPurchasePage,
+    meta: { requiresAuth: true, role: 'business' },
   },
   {
     path: '/business/profile',
     name: 'business-profile',
     component: BusinessProfilePage,
+    meta: { requiresAuth: true, role: 'business' },
   },
   {
     path: '/business/profile',
     name: 'business-profile',
     component: BusinessProfilePage,
+    meta: { requiresAuth: true, role: 'business' },
   },
   {
     path: '/business/coupon/analysis/:templateId',
     name: 'BusinessCouponAnalysis',
     component: BusinessCouponAnalysis,
+    meta: { requiresAuth: true, role: 'business' },
   },
   {
     path: '/business/notifications',

@@ -72,21 +72,21 @@
                   <input type="checkbox" v-model="selectedCategories" value="기타" />
                   <span>부동산</span>
                 </label>
-                  <label class="filter-checkbox">
-                    <input type="checkbox" v-model="selectedCategories" value="음식점" />
-                    <span>숙박</span>
-                  </label>
-                  <label class="filter-checkbox">
-                    <input type="checkbox" v-model="selectedCategories" value="카페" />
-                    <span>과학/기술</span>
-                  </label>
-                  <label class="filter-checkbox">
-                    <input type="checkbox" v-model="selectedCategories" value="소매업" />
-                    <span>보건의료</span>
-                  </label>
-                  <label class="filter-checkbox">
-                    <input type="checkbox" v-model="selectedCategories" value="미용업" />
-                    <span>관리/임대</span>
+                <label class="filter-checkbox">
+                  <input type="checkbox" v-model="selectedCategories" value="음식점" />
+                  <span>숙박</span>
+                </label>
+                <label class="filter-checkbox">
+                  <input type="checkbox" v-model="selectedCategories" value="카페" />
+                  <span>과학/기술</span>
+                </label>
+                <label class="filter-checkbox">
+                  <input type="checkbox" v-model="selectedCategories" value="소매업" />
+                  <span>보건의료</span>
+                </label>
+                <label class="filter-checkbox">
+                  <input type="checkbox" v-model="selectedCategories" value="미용업" />
+                  <span>관리/임대</span>
                 </label>
               </div>
             </div>
@@ -252,7 +252,7 @@ const showSuccessToast = ref(false)
 const loading = ref(false)
 const activeTab = ref('recommended')
 const errorMessage = ref('')
-
+const router = useRouter()
 // 내 비즈니스 정보
 const myBusinessInfo = ref(null)
 
@@ -301,9 +301,10 @@ const filteredStoresAll = computed(() => {
       (store) =>
         store.businessName.toLowerCase().includes(q) ||
         store.businessCategory.toLowerCase().includes(q),
+      store.businessName.toLowerCase().includes(q) ||
+        store.businessCategory.toLowerCase().includes(q),
     )
   }
-
 
   //업종 필터링 (선택된 경우)
   if (selectedBusinessTypes.value.length > 0) {
@@ -400,13 +401,10 @@ const transformStoreData = (apiStore) => {
     isPartnershipAvailable: true, // API에서 제공하지 않으면 기본값
     distance: apiStore.distance, // 이미 계산된 거리 사용
     distanceText: apiStore.distanceText, // 이미 포맷된 거리 텍스트 사용
-    mainCustomer : apiStore.mainCustomer,
+    mainCustomer: apiStore.mainCustomer,
   }
 }
 
-const onSearchInput = () => {
-  currentPage.value = 1
-}
 const toggleFilter = () => {
   showFilter.value = !showFilter.value
   if (showFilter.value) showSort.value = false
@@ -474,39 +472,38 @@ const confirmPartnership = async (store, message = '협업을 제안합니다.')
       // 성공 시 모달 닫고 토스트 표시
       closeModal()
       showSuccessToast.value = true
+      router.push(`/business/chats/${response.roomId}`)
     } else {
       throw new Error('제휴 요청 응답이 올바르지 않습니다.')
     }
   } catch (error) {
     console.error('제휴 요청 실패:', error)
     alert('제휴 요청에 실패했습니다. 다시 시도해주세요.')
-  }
-  finally {
+  } finally {
     loading.value = false
   }
 }
 
 const fetchStores = async () => {
   try {
-
     // API 호출로 매장 목록 가져오기
     const response = await getPartnershipBusinesses()
 
     // 백엔드가 직접 배열을 반환
     if (Array.isArray(response)) {
       // 각 매장에 거리 정보 추가
-      stores.value = response.map(store => {
+      stores.value = response.map((store) => {
         const distance = calculateDistance(
           myBusinessInfo.value?.latitude,
           myBusinessInfo.value?.longitude,
           store.latitude,
-          store.longitude
+          store.longitude,
         )
 
         return {
           ...store,
           distance: distance,
-          distanceText: formatDistance(distance)
+          distanceText: formatDistance(distance),
         }
       })
 
@@ -523,7 +520,7 @@ const fetchStores = async () => {
       console.log('API 엔드포인트를 찾을 수 없습니다. 더미 데이터로 대체합니다.')
       // 더미 데이터 사용 (거리 정보 포함)
       const myLat = myBusinessInfo.value?.latitude || 37.5665
-      const myLng = myBusinessInfo.value?.longitude || 126.9780
+      const myLng = myBusinessInfo.value?.longitude || 126.978
 
       stores.value = [
         {
@@ -531,14 +528,14 @@ const fetchStores = async () => {
           businessName: '홍길동 카페',
           businessCategory: '음식점업',
           address: '서울시 강남구 테헤란로 123',
-          latitude: 37.5010,
+          latitude: 37.501,
           longitude: 127.0394,
           togetherIndex: 85.5,
           profileImageUrl: 'https://example.com/profile1.jpg',
           description: '맛있는 커피와 디저트를 제공하는 카페입니다.',
           collaborationCategory: '소매업',
-          distance: calculateDistance(myLat, myLng, 37.5010, 127.0394),
-          distanceText: formatDistance(calculateDistance(myLat, myLng, 37.5010, 127.0394))
+          distance: calculateDistance(myLat, myLng, 37.501, 127.0394),
+          distanceText: formatDistance(calculateDistance(myLat, myLng, 37.501, 127.0394)),
         },
         {
           businessId: 2,
@@ -552,7 +549,7 @@ const fetchStores = async () => {
           description: '신선한 빵을 매일 굽는 베이커리입니다.',
           collaborationCategory: '음식점업',
           distance: calculateDistance(myLat, myLng, 37.4979, 127.0276),
-          distanceText: formatDistance(calculateDistance(myLat, myLng, 37.4979, 127.0276))
+          distanceText: formatDistance(calculateDistance(myLat, myLng, 37.4979, 127.0276)),
         },
       ]
     } else {

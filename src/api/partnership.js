@@ -49,10 +49,14 @@ export const getMyBusinessInfo = async () => {
 // 3.1 제휴 요청
 export const requestPartnership = async (recipientId, message = '협업을 제안합니다.') => {
   try {
-    const response = await api.post(`/api/partnership/request/${recipientId}`, {}, {
-      params: { message },
-      userType: 'business',
-    })
+    const response = await api.post(
+      `/api/partnership/request/${recipientId}`,
+      {},
+      {
+        params: { message },
+        userType: 'business',
+      },
+    )
     console.log('제휴 요청:', response.data)
     return response.data
   } catch (error) {
@@ -64,9 +68,13 @@ export const requestPartnership = async (recipientId, message = '협업을 제�
 // 3.2 제휴 요청 수락
 export const acceptPartnership = async (roomId) => {
   try {
-    const response = await api.post(`/api/partnership/accept/${roomId}`, {}, {
-      userType: 'business',
-    })
+    const response = await api.post(
+      `/api/partnership/accept/${roomId}`,
+      {},
+      {
+        userType: 'business',
+      },
+    )
     console.log('제휴 요청 수락:', response.data)
     return response.data
   } catch (error) {
@@ -78,10 +86,9 @@ export const acceptPartnership = async (roomId) => {
 // 3.3 제휴 요청 거절
 export const rejectPartnership = async (roomId, reason = '') => {
   try {
-    const response = await api.post(`/api/partnership/reject/${roomId}`,
-      reason ? { reason } : {},
-      { userType: 'business' }
-    )
+    const response = await api.post(`/api/partnership/reject/${roomId}`, reason ? { reason } : {}, {
+      userType: 'business',
+    })
     console.log('제휴 요청 거절:', response.data)
     return response.data
   } catch (error) {

@@ -71,7 +71,7 @@ const localRejected = ref(false)
 const acceptProposal = async () => {
   try {
     await acceptBilateralCoupon(props.message.id) // WS 전송
-    payload.value.status = 'COMPLETED' // 로컬 업데이트
+    payload.value.status = 'ACCEPTED' // 로컬 업데이트
   } catch (err) {
     console.error('수락 실패', err)
   }

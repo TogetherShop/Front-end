@@ -29,45 +29,47 @@
 
           <!-- 필터 드롭다운 -->
           <div v-if="showFilter" class="filter-dropdown">
+            <!-- 거리 필터 -->
             <div class="filter-category">
               <h6 class="filter-title">온/오프라인</h6>
               <div class="filter-options">
                 <label class="filter-checkbox">
-                  <input type="checkbox" v-model="selectedCategories" value="온라인" />
+                  <input type="checkbox" v-model="selectedBusinessTypes" value="온라인" />
                   <span>온라인</span>
                 </label>
                 <label class="filter-checkbox">
-                  <input type="checkbox" v-model="selectedCategories" value="오프라인" />
+                  <input type="checkbox" v-model="selectedBusinessTypes" value="오프라인" />
                   <span>오프라인</span>
                 </label>
               </div>
             </div>
 
+            <!-- 카테고리 필터 -->
             <div class="filter-category">
               <h6 class="filter-title">업종</h6>
               <div class="filter-options">
                 <label class="filter-checkbox">
-                  <input type="checkbox" v-model="selectedBusinessTypes" value="음식점" />
+                  <input type="checkbox" v-model="selectedCategories" value="음식점" />
                   <span>음식점</span>
                 </label>
                 <label class="filter-checkbox">
-                  <input type="checkbox" v-model="selectedBusinessTypes" value="카페" />
+                  <input type="checkbox" v-model="selectedCategories" value="카페" />
                   <span>카페</span>
                 </label>
                 <label class="filter-checkbox">
-                  <input type="checkbox" v-model="selectedBusinessTypes" value="소매업" />
+                  <input type="checkbox" v-model="selectedCategories" value="소매업" />
                   <span>소매업</span>
                 </label>
                 <label class="filter-checkbox">
-                  <input type="checkbox" v-model="selectedBusinessTypes" value="미용업" />
+                  <input type="checkbox" v-model="selectedCategories" value="미용업" />
                   <span>미용업</span>
                 </label>
                 <label class="filter-checkbox">
-                  <input type="checkbox" v-model="selectedBusinessTypes" value="서비스업" />
+                  <input type="checkbox" v-model="selectedCategories" value="서비스업" />
                   <span>서비스업</span>
                 </label>
                 <label class="filter-checkbox">
-                  <input type="checkbox" v-model="selectedBusinessTypes" value="기타" />
+                  <input type="checkbox" v-model="selectedCategories" value="기타" />
                   <span>기타</span>
                 </label>
               </div>
@@ -91,7 +93,6 @@
             >
               <span>거리 순</span>
             </div>
-
             <div
               class="sort-option"
               :class="{ active: sortBy === 'together-score' }"
@@ -205,6 +206,9 @@ import {
   getMyBusinessInfo,
 } from '@/api/partnership'
 
+// 거리 계산 유틸리티
+import { calculateDistance, formatDistance } from '@/utils/distanceCalculator'
+
 // 반응형 데이터
 const searchQuery = ref('')
 const showFilter = ref(false)
@@ -215,8 +219,8 @@ const selectedBusinessTypes = ref([])
 const selectedCollaborationCategories = ref([])
 const currentPage = ref(1)
 const stores = ref([])
-const selectedStore = ref(null)
 const selectedStoreForDetail = ref(null)
+const selectedStore = ref(null)
 const showSuccessToast = ref(false)
 const loading = ref(false)
 const activeTab = ref('recommended') // 'recommended' 또는 'all'
@@ -265,26 +269,21 @@ const filteredStoresAll = computed(() => {
     )
   }
 
-  // 카테고리 필터링 (선택된 경우)
-  if (selectedCategories.value.length > 0) {
-    result = result.filter((store) =>
-      selectedCategories.value.some(
-        (category) =>
-          store.businessCategory.includes(category) ||
-          (category === '온라인' && store.isOnline) ||
-          (category === '오프라인' && !store.isOnline),
-      ),
-    )
-  }
 
-  // 업종 필터링 (선택된 경우)
-  // if (selectedBusinessTypes.value.length > 0) {
-  //   result = result.filter((store) => selectedBusinessTypes.value.includes(store.category))
-  // }
+  //업종 필터링 (선택된 경우)
+  if (selectedCategories.value.length > 0) {
+    result = result.filter((store) => selectedCategories.value.includes(store.businessCategory))
+  }
 
   // 정렬
   result.sort((a, b) => {
     switch (sortBy.value) {
+      case 'distance':
+        // 거리 정보가 없는 항목은 맨 뒤로
+        if (a.distance === null && b.distance === null) return 0
+        if (a.distance === null) return 1
+        if (b.distance === null) return -1
+        return a.distance - b.distance
       case 'together-score':
         return (b.togetherIndex || 0) - (a.togetherIndex || 0)
       case 'name':
@@ -346,6 +345,14 @@ const visiblePages = computed(() => {
 
 // 메서드
 const transformStoreData = (apiStore) => {
+  // 내 위치와 매장 위치 간의 거리 계산
+  const distance = calculateDistance(
+    myBusinessInfo.value?.latitude,
+    myBusinessInfo.value?.longitude,
+    apiStore.latitude,
+    apiStore.longitude
+  )
+
   // API 데이터를 컴포넌트에서 기대하는 형식으로 변환
   return {
     businessId: apiStore.businessId,
@@ -359,6 +366,8 @@ const transformStoreData = (apiStore) => {
     description: apiStore.description,
     collaborationCategory: apiStore.collaborationCategory,
     isPartnershipAvailable: true, // API에서 제공하지 않으면 기본값
+    distance: distance, // 계산된 거리 (km)
+    distanceText: formatDistance(distance) // 포맷된 거리 텍스트
   }
 }
 
@@ -388,12 +397,12 @@ const setSortBy = (value) => {
 
 const getSortText = () => {
   switch (sortBy.value) {
-    case 'distance':
-      return '거리 순'
     case 'together-score':
       return '함께지수 순'
-    default:
+    case 'distance':
       return '거리 순'
+    default:
+      return '함께지수 순'
   }
 }
 
@@ -429,8 +438,6 @@ const onViewDetail = async (store) => {
     console.error('매장 상세 정보 조회 실패:', error)
     // 에러시에도 기본 정보로 모달 열기
     selectedStoreForDetail.value = transformStoreData(store)
-  } finally {
-    loading.value = false
   }
 }
 
@@ -475,8 +482,24 @@ const fetchStores = async () => {
 
     // 백엔드가 직접 배열을 반환
     if (Array.isArray(response)) {
-      stores.value = response
+      // 각 매장에 거리 정보 추가
+      stores.value = response.map(store => {
+        const distance = calculateDistance(
+          myBusinessInfo.value?.latitude,
+          myBusinessInfo.value?.longitude,
+          store.latitude,
+          store.longitude
+        )
+
+        return {
+          ...store,
+          distance: distance,
+          distanceText: formatDistance(distance)
+        }
+      })
+
       console.log(`${stores.value.length}개 매장 데이터 로드 완료`)
+      console.log('내 위치:', myBusinessInfo.value?.latitude, myBusinessInfo.value?.longitude)
     } else {
       console.warn('예상하지 못한 API 응답 형식:', response)
       stores.value = []
@@ -486,27 +509,38 @@ const fetchStores = async () => {
 
     if (error.response?.status === 404) {
       console.log('API 엔드포인트를 찾을 수 없습니다. 더미 데이터로 대체합니다.')
-      // 더미 데이터 사용
+      // 더미 데이터 사용 (거리 정보 포함)
+      const myLat = myBusinessInfo.value?.latitude || 37.5665
+      const myLng = myBusinessInfo.value?.longitude || 126.9780
+
       stores.value = [
         {
           businessId: 1,
           businessName: '홍길동 카페',
           businessCategory: '음식점업',
           address: '서울시 강남구 테헤란로 123',
+          latitude: 37.5010,
+          longitude: 127.0394,
           togetherIndex: 85.5,
           profileImageUrl: 'https://example.com/profile1.jpg',
           description: '맛있는 커피와 디저트를 제공하는 카페입니다.',
           collaborationCategory: '소매업',
+          distance: calculateDistance(myLat, myLng, 37.5010, 127.0394),
+          distanceText: formatDistance(calculateDistance(myLat, myLng, 37.5010, 127.0394))
         },
         {
           businessId: 2,
           businessName: '김철수 베이커리',
           businessCategory: '제조업',
           address: '서울시 서초구 서초대로 456',
+          latitude: 37.4979,
+          longitude: 127.0276,
           togetherIndex: 92.3,
           profileImageUrl: 'https://example.com/profile2.jpg',
           description: '신선한 빵을 매일 굽는 베이커리입니다.',
           collaborationCategory: '음식점업',
+          distance: calculateDistance(myLat, myLng, 37.4979, 127.0276),
+          distanceText: formatDistance(calculateDistance(myLat, myLng, 37.4979, 127.0276))
         },
       ]
     } else {
@@ -538,10 +572,9 @@ const fetchMyBusinessInfo = async () => {
 
 // 라이프사이클
 onMounted(async () => {
-  await Promise.all([
-    fetchStores(),
-    fetchMyBusinessInfo()  // 내 비즈니스 정보도 함께 로드
-  ])
+  // 내 비즈니스 정보를 먼저 가져온 후에 매장 목록 조회 (거리 계산을 위해)
+  await fetchMyBusinessInfo()
+  await fetchStores()
 })
 </script>
 

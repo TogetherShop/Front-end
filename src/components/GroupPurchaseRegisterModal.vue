@@ -92,7 +92,7 @@
             <input
               id="endDate"
               v-model="formData.endDate"
-              type="datetime-local"
+              type="date"
               class="form-input"
               :min="minDateTime"
               required
@@ -125,7 +125,7 @@ const formData = reactive({
   targetMoney: null,
   accountNumber: '',
   accountHost: '',
-  endDate: ''
+  endDate: '',
 })
 
 // 최소 날짜/시간 (현재 시간 + 1시간)
@@ -169,7 +169,7 @@ const handleSubmit = async () => {
       targetMoney: formData.targetMoney,
       accountNumber: formData.accountNumber.trim(),
       accountHost: formData.accountHost.trim(),
-      endDate: formData.endDate
+      endDate: formData.endDate,
     }
 
     // API 호출
@@ -213,7 +213,7 @@ onMounted(() => {
 .form-textarea {
   width: 100%;
   padding: 12px;
-  border: 1px solid #d1d5db;
+  border: 1px solid #e5e7eb;
   border-radius: 8px;
   font-size: 14px;
   font-family: inherit;
@@ -251,6 +251,8 @@ onMounted(() => {
 }
 
 @keyframes spin {
-  to { transform: rotate(360deg); }
+  to {
+    transform: rotate(360deg);
+  }
 }
 </style>

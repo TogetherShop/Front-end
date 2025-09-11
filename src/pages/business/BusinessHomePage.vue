@@ -3,7 +3,7 @@
     <div class="container d-flex flex-column bg-white min-vh-100 shadow mx-auto app-wrapper p-0">
       <BusinessTopBar />
 
-      <div class="container-fluid px-3 py-3">
+      <div class="container-fluid px-4 py-4">
         <!-- 함께지수 카드 -->
         <section class="mb-3">
           <div class="score-card">

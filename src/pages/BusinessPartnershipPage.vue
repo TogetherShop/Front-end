@@ -50,27 +50,43 @@
               <div class="filter-options">
                 <label class="filter-checkbox">
                   <input type="checkbox" v-model="selectedCategories" value="음식점" />
-                  <span>음식점</span>
+                  <span>소매</span>
                 </label>
                 <label class="filter-checkbox">
                   <input type="checkbox" v-model="selectedCategories" value="카페" />
-                  <span>카페</span>
+                  <span>음식</span>
                 </label>
                 <label class="filter-checkbox">
                   <input type="checkbox" v-model="selectedCategories" value="소매업" />
-                  <span>소매업</span>
+                  <span>수리/개인</span>
                 </label>
                 <label class="filter-checkbox">
                   <input type="checkbox" v-model="selectedCategories" value="미용업" />
-                  <span>미용업</span>
+                  <span>예체능</span>
                 </label>
                 <label class="filter-checkbox">
                   <input type="checkbox" v-model="selectedCategories" value="서비스업" />
-                  <span>서비스업</span>
+                  <span>교육</span>
                 </label>
                 <label class="filter-checkbox">
                   <input type="checkbox" v-model="selectedCategories" value="기타" />
-                  <span>기타</span>
+                  <span>부동산</span>
+                </label>
+                  <label class="filter-checkbox">
+                    <input type="checkbox" v-model="selectedCategories" value="음식점" />
+                    <span>숙박</span>
+                  </label>
+                  <label class="filter-checkbox">
+                    <input type="checkbox" v-model="selectedCategories" value="카페" />
+                    <span>과학/기술</span>
+                  </label>
+                  <label class="filter-checkbox">
+                    <input type="checkbox" v-model="selectedCategories" value="소매업" />
+                    <span>보건의료</span>
+                  </label>
+                  <label class="filter-checkbox">
+                    <input type="checkbox" v-model="selectedCategories" value="미용업" />
+                    <span>관리/임대</span>
                 </label>
               </div>
             </div>
@@ -277,12 +293,16 @@ const filteredStoresAll = computed(() => {
     const q = searchQuery.value.toLowerCase()
     result = result.filter(
       (store) =>
-        store.businessName.toLowerCase().includes(query) ||
-        store.businessCategory.toLowerCase().includes(query),
+        store.businessName.toLowerCase().includes(q) ||
+        store.businessCategory.toLowerCase().includes(q),
     )
   }
 
 
+  //업종 필터링 (선택된 경우)
+  if (selectedBusinessTypes.value.length > 0) {
+    result = result.filter((store) => selectedBusinessTypes.value.includes(store.businessType))
+  }
   //업종 필터링 (선택된 경우)
   if (selectedCategories.value.length > 0) {
     result = result.filter((store) => selectedCategories.value.includes(store.businessCategory))
@@ -371,6 +391,7 @@ const transformStoreData = (apiStore) => {
     businessId: apiStore.businessId,
     businessName: apiStore.businessName,
     businessCategory: apiStore.businessCategory,
+    businessType: apiStore.businessType,
     address: apiStore.address,
     latitude: apiStore.latitude,
     longitude: apiStore.longitude,
@@ -386,7 +407,6 @@ const transformStoreData = (apiStore) => {
 
 const onSearchInput = () => {
   currentPage.value = 1
-  searchUsers()
 }
 const toggleFilter = () => {
   showFilter.value = !showFilter.value
@@ -418,8 +438,6 @@ const onRequestPartnership = async (store) => {
 
 const onViewDetail = async (store) => {
   try {
-    loading.value = true
-
     // API에서 상세 정보 가져오기
     const response = await getPartnershipBusinessDetail(store.businessId)
 
@@ -464,11 +482,13 @@ const confirmPartnership = async (store, message = '협업을 제안합니다.')
     console.error('제휴 요청 실패:', error)
     alert('제휴 요청에 실패했습니다. 다시 시도해주세요.')
   }
+  finally {
+    loading.value = false
+  }
 }
 
 const fetchStores = async () => {
   try {
-    loading.value = true
 
     // API 호출로 매장 목록 가져오기
     const response = await getPartnershipBusinesses()
@@ -539,8 +559,6 @@ const fetchStores = async () => {
     } else {
       stores.value = []
     }
-  } finally {
-    loading.value = false
   }
 }
 

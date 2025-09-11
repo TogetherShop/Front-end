@@ -326,39 +326,6 @@ onMounted(async () => {
     (err) => console.error('WebSocket 연결 실패:', err),
   )
 })
-
-onMounted(async () => {
-  // 1. JWT에서 사용자 ID 가져오기
-  try {
-    const token = localStorage.getItem('access_token')
-    const decoded = token ? jwtDecode(token) : null
-    currentUserId.value = decoded?.sub ? Number(decoded.sub) : null
-    console.log('현재 사용자 ID:', currentUserId.value)
-    console.log('현재 partnershipStatus:', partnershipStatus.value)
-  } catch (e) {
-    console.error('JWT 디코딩 실패', e)
-  }
-
-  // 2. 채팅 기록 먼저 가져오기 (방 정보와 함께 오므로)
-  await fetchHistory()
-  await fetchRoomInfo()
-
-  // 3. 방 정보는 fetchHistory에서 받은 roomInfo 사용하거나 별도 호출
-  // getRoomInfo가 roomInfo만 반환하는지 확인 필요
-
-  // 4. WebSocket 연결
-  connectWS(
-    () => {
-      unsubscribe = subscribeRoom(roomId, (msg) => {
-        console.log('subscribeRoom 콜백 호출됨:', msg) // 메시지 들어오는지 확인
-        handleIncomingMessage(msg)
-      })
-
-      console.log('WebSocket 연결됨')
-    },
-    (err) => console.error('WebSocket 연결 실패:', err),
-  )
-})
 </script>
 <style scoped>
 .chat-room {

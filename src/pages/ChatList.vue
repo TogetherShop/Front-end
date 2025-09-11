@@ -87,13 +87,13 @@ import api from '@/api/api'
 // 상태 매핑
 const statusMap = {
   REQUESTED: '대기',
-  NEGOTIATING: '협의중',
+  ACCEPTED: '협의중',
   COMPLETED: '협의완료',
   REJECTED: '거절',
 }
 const statusClassMap = {
   REQUESTED: 'requested',
-  NEGOTIATING: 'negotiating',
+  ACCEPTED: 'accepted',
   COMPLETED: 'completed',
   REJECTED: 'rejected',
 }
@@ -307,7 +307,7 @@ const formatTimeAgo = (dateStr) => {
   background-color: #f1f3f5;
   color: #495057;
 }
-.status-badge.negotiating {
+.status-badge.accepted {
   background-color: #e6f0ff;
   color: #1e64ff;
 }

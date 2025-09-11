@@ -130,12 +130,13 @@
       <!-- 맵은 탭 전환 시 새로 마운트되도록 v-if 사용 (카카오맵 사이즈 문제 방지) -->
       <div class="partner-map-wrap" v-if="activeTab === 'partner'">
         <StoreMap
-          :stores="partnerStores"
+          :stores="partnerStoresWithBase"
           :selected-store="selectedPartner"
           :center="storeCenter"
           :show-search="false"
           :panel-expanded="false"
           :show-panel="false"
+          :show-user-marker="false"
           @select-store="(s) => (selectedPartner = s)"
           @update:panelExpanded="(v) => (partnerPanelExpanded = v)"
         />
@@ -244,6 +245,21 @@ const partnerStores = computed(() => {
     })
     .sort((a, b) => a.distance - b.distance)
 })
+
+// ✅ 현재 매장을 맵 마커로도 함께 보여주기 위한 가짜(프론트 전용) 마커
+const baseMarker = computed(() => {
+  const s = store.value
+  if (!s?.lat || !s?.lng) return null
+  // id 충돌 방지용 prefix, 구분을 위한 flag(isBase)
+  return { ...s, id: `base-${s.id}`, isBase: true }
+})
+
+// ✅ 제휴가게 + 현재 매장 마커를 함께 전달
+const partnerStoresWithBase = computed(() => {
+  const arr = partnerStores.value || []
+  return baseMarker.value ? [baseMarker.value, ...arr] : arr
+})
+
 // StoreMap과 바인딩할 상태
 const selectedPartner = ref(null)
 const partnerPanelExpanded = ref(true)
@@ -253,6 +269,17 @@ const openReview = () => {
   if (!store.value) return
   reviewsStore.openReviewModal(id.value, store.value.name || '매장')
 }
+
+// ✅ 파트너 탭 들어갈 때 현재 매장을 기본 선택 & 센터 고정
+watch(
+  () => activeTab.value,
+  (v) => {
+    if (v === 'partner' && baseMarker.value) {
+      selectedPartner.value = baseMarker.value
+    }
+  },
+  { immediate: true },
+)
 </script>
 
 <style scoped>
@@ -528,8 +555,9 @@ const openReview = () => {
   color: #111827;
 }
 .partner-map-wrap {
-  height: 60vh; /* 맵+패널 높이 */
-  min-height: 420px; /* 너무 작아지지 않게 */
+  height: 25vh; /* 기존보다 살짝 낮게 */
+  min-height: 230px; /* 모바일에서도 답답하지 않게 */
+  max-height: 520px; /* 데스크톱에서 과하게 길어지는 것 방지 */
   padding: 0 12px; /* 좌우 살짝 여백 (디자인 맞춤) */
 }
 

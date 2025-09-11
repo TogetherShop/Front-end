@@ -243,6 +243,7 @@ const sortBy = ref('together-score')
 const selectedCategories = ref([])
 const selectedBusinessTypes = ref([])
 const selectedCollaborationCategories = ref([])
+const selectedMainCustomer = ref([])
 const currentPage = ref(1)
 const stores = ref([])
 const selectedStoreForDetail = ref(null)
@@ -266,22 +267,27 @@ const filteredStoresAll = computed(() => {
   if (activeTab.value === 'recommended') {
     console.log('추천 필터링 시작:', {
       myCollaborationCategory: selectedCollaborationCategories.value,
+      myMainCustomer: selectedMainCustomer.value,
       totalStores: result.length,
       myBusinessInfo: myBusinessInfo.value,
     })
 
-    // 추천 매장: 내 collaboration_category와 같은 business_category + 함께지수 60 이상
+    // 추천 매장: 내 collaboration_category와 같은 business_category + 함께지수 60 이상 + mainCustomer 일치
     result = result.filter((store) => {
       const categoryMatch = selectedCollaborationCategories.value.includes(store.businessCategory)
       const scoreMatch = (store.togetherIndex || 0) >= 60
+      const customerMatch = selectedMainCustomer.value.includes(store.mainCustomer)
 
-      if (categoryMatch && scoreMatch) {
+      // 3개 조건 모두 만족해야 추천 매장
+      const isRecommended = categoryMatch && scoreMatch && customerMatch
+
+      if (isRecommended) {
         console.log(
-          `✅ ${store.businessName}: category(${store.businessCategory}) + score(${store.togetherIndex})`,
+          `✅ ${store.businessName}: category(${store.businessCategory}) + score(${store.togetherIndex}) + customer(${store.mainCustomer})`,
         )
       }
 
-      return categoryMatch && scoreMatch
+      return isRecommended
     })
 
     console.log(`추천 매장 ${result.length}개 필터링 완료`)
@@ -393,7 +399,8 @@ const transformStoreData = (apiStore) => {
     collaborationCategory: apiStore.collaborationCategory,
     isPartnershipAvailable: true, // API에서 제공하지 않으면 기본값
     distance: apiStore.distance, // 이미 계산된 거리 사용
-    distanceText: apiStore.distanceText // 이미 포맷된 거리 텍스트 사용
+    distanceText: apiStore.distanceText, // 이미 포맷된 거리 텍스트 사용
+    mainCustomer : apiStore.mainCustomer,
   }
 }
 
@@ -559,17 +566,34 @@ const fetchMyBusinessInfo = async () => {
   try {
     const response = await getMyBusinessInfo()
     if (response) {
-      myBusinessInfo.value = response
+      // 문자열로 반환되는 경우를 대비한 파싱
+      const businessData = typeof response === 'string' ? JSON.parse(response) : response
+      myBusinessInfo.value = businessData
+
+      console.log('=== 내 비즈니스 정보 디버깅 ===')
+      console.log('원본 응답:', response)
+      console.log('파싱된 데이터:', businessData)
+      console.log('collaborationCategory:', businessData.collaborationCategory)
+      console.log('mainCustomer:', businessData.mainCustomer)
+      console.log('================================')
+
       // 내 collaboration_category를 추천 필터에 설정
-      if (response.collaborationCategory) {
-        selectedCollaborationCategories.value = [response.collaborationCategory]
-        console.log('내 협업 카테고리:', response.collaborationCategory)
+      if (businessData.collaborationCategory) {
+        selectedCollaborationCategories.value = [businessData.collaborationCategory]
+        console.log('내 협업 카테고리 설정:', businessData.collaborationCategory)
+      }
+
+      // 내 mainCustomer를 추천 필터에 설정
+      if (businessData.mainCustomer) {
+        selectedMainCustomer.value = [businessData.mainCustomer]
+        console.log('내 주요 고객층 설정:', businessData.mainCustomer)
       }
     }
   } catch (error) {
     console.error('내 비즈니스 정보 조회 실패:', error)
-    // 에러 시 기본값 설정 (예시)
-    selectedCollaborationCategories.value = ['음식점업'] // 기본값
+    // 에러 시 기본값 설정
+    selectedCollaborationCategories.value = ['음식점'] // 기본값
+    selectedMainCustomer.value = ['20대'] // 기본값
   }
 }
 

@@ -50,7 +50,8 @@ export const getBusinessCoupons = async (businessId, limit = null) => {
     return response.data || []
   } catch (error) {
     console.error('사업자 쿠폰 조회 실패:', error)
-    
+  }
+}
 /**
  * 내 쿠폰 목록 조회 (사업자)
  */

@@ -1,5 +1,4 @@
 import api from './api'
-
 /**
  * 특정 사업자의 최신 쿠폰 1개 조회 (매장 카드용)
  * @param {number} businessId - 사업자 ID
@@ -52,6 +51,7 @@ export const getBusinessCoupons = async (businessId, limit = null) => {
     console.error('사업자 쿠폰 조회 실패:', error)
   }
 }
+
 /**
  * 내 쿠폰 목록 조회 (사업자)
  */

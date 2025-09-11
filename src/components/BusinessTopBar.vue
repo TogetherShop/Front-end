@@ -12,7 +12,10 @@
         <button class="business-top-bar__action-btn" @click="handleChatClick">
           <i class="material-symbols-outlined">chat</i>
         </button>
-        <button class="business-top-bar__action-btn notification-container" @click="handleNotificationClick">
+        <button
+          class="business-top-bar__action-btn notification-container"
+          @click="handleNotificationClick"
+        >
           <i class="material-symbols-outlined">notifications</i>
           <span v-if="hasUnread" class="notification-badge"></span>
         </button>
@@ -33,7 +36,7 @@ export default {
 
     const handleChatClick = () => {
       console.log('채팅 버튼 클릭')
-      // 채팅 페이지로 이동 로직
+      router.push('/business/chats') // 채팅 페이지로 이동
     }
 
     const handleNotificationClick = () => {
@@ -44,7 +47,7 @@ export default {
     return {
       handleChatClick,
       handleNotificationClick,
-      hasUnread: notificationStore.hasUnread
+      hasUnread: notificationStore.hasUnread,
     }
   },
 }

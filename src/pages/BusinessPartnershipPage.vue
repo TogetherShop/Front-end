@@ -147,7 +147,16 @@
           :store="transformStoreData(store)"
           @request-partnership="onRequestPartnership"
           @view-detail="onViewDetail"
-        />
+        >
+          <template #actions>
+            <!-- partnershipExists true면 요청 완료 상태로 -->
+            <button v-if="store.partnershipExists" disabled class="requested-button">요청됨</button>
+
+            <button v-else @click="$emit('request-partnership', store)" class="request-button">
+              협의 요청
+            </button>
+          </template>
+        </BusinessStoreCard>
       </div>
 
       <!-- 페이지네이션 -->
@@ -190,12 +199,13 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
+import api from '@/api/api'
 import BusinessTopBar from '@/components/BusinessTopBar.vue'
 import BusinessStoreCard from '@/components/BusinessStoreCard.vue'
 import BusinessStoreDetailModal from '@/components/BusinessStoreDetailModal.vue'
 import BusinessPartnershipModal from '@/components/BusinessPartnershipModal.vue'
 import BusinessSuccessToast from '@/components/BusinessSuccessToast.vue'
-
 import BusinessBottomNav from '@/components/BusinessBottomNav.vue'
 
 // API 가져오기
@@ -223,7 +233,8 @@ const selectedStoreForDetail = ref(null)
 const selectedStore = ref(null)
 const showSuccessToast = ref(false)
 const loading = ref(false)
-const activeTab = ref('recommended') // 'recommended' 또는 'all'
+const activeTab = ref('recommended')
+const errorMessage = ref('')
 
 // 내 비즈니스 정보
 const myBusinessInfo = ref(null)
@@ -240,7 +251,7 @@ const filteredStoresAll = computed(() => {
     console.log('추천 필터링 시작:', {
       myCollaborationCategory: selectedCollaborationCategories.value,
       totalStores: result.length,
-      myBusinessInfo: myBusinessInfo.value
+      myBusinessInfo: myBusinessInfo.value,
     })
 
     // 추천 매장: 내 collaboration_category와 같은 business_category + 함께지수 60 이상
@@ -249,7 +260,9 @@ const filteredStoresAll = computed(() => {
       const scoreMatch = (store.togetherIndex || 0) >= 60
 
       if (categoryMatch && scoreMatch) {
-        console.log(`✅ ${store.businessName}: category(${store.businessCategory}) + score(${store.togetherIndex})`)
+        console.log(
+          `✅ ${store.businessName}: category(${store.businessCategory}) + score(${store.togetherIndex})`,
+        )
       }
 
       return categoryMatch && scoreMatch
@@ -261,7 +274,7 @@ const filteredStoresAll = computed(() => {
 
   // 검색 필터링
   if (searchQuery.value.trim()) {
-    const query = searchQuery.value.toLowerCase()
+    const q = searchQuery.value.toLowerCase()
     result = result.filter(
       (store) =>
         store.businessName.toLowerCase().includes(query) ||
@@ -372,45 +385,27 @@ const transformStoreData = (apiStore) => {
 }
 
 const onSearchInput = () => {
-  currentPage.value = 1 // 검색 시 첫 페이지로 리셋
+  currentPage.value = 1
+  searchUsers()
 }
-
 const toggleFilter = () => {
   showFilter.value = !showFilter.value
-  if (showFilter.value) {
-    showSort.value = false
-  }
+  if (showFilter.value) showSort.value = false
 }
-
 const toggleSort = () => {
   showSort.value = !showSort.value
-  if (showSort.value) {
-    showFilter.value = false
-  }
+  if (showSort.value) showFilter.value = false
 }
-
 const setSortBy = (value) => {
   sortBy.value = value
   showSort.value = false
-  currentPage.value = 1 // 정렬 변경 시 첫 페이지로 리셋
+  currentPage.value = 1
 }
-
-const getSortText = () => {
-  switch (sortBy.value) {
-    case 'together-score':
-      return '함께지수 순'
-    case 'distance':
-      return '거리 순'
-    default:
-      return '함께지수 순'
-  }
-}
-
+const getSortText = () => (sortBy.value === 'distance' ? '거리 순' : '함께지수 순')
 const setActiveTab = (tab) => {
   activeTab.value = tab
-  currentPage.value = 1 // 탭 변경 시 첫 페이지로 리셋
+  currentPage.value = 1
 }
-
 const setCurrentPage = (page) => {
   currentPage.value = page
 }
@@ -418,6 +413,7 @@ const setCurrentPage = (page) => {
 const onRequestPartnership = async (store) => {
   selectedStoreForDetail.value = null // 상세 모달 닫기
   selectedStore.value = store
+  selectedStoreForDetail.value = null
 }
 
 const onViewDetail = async (store) => {
@@ -440,15 +436,12 @@ const onViewDetail = async (store) => {
     selectedStoreForDetail.value = transformStoreData(store)
   }
 }
-
 const closeDetailModal = () => {
   selectedStoreForDetail.value = null
 }
-
 const closeModal = () => {
   selectedStore.value = null
 }
-
 const hideSuccessToast = () => {
   showSuccessToast.value = false
 }
@@ -566,12 +559,16 @@ const fetchMyBusinessInfo = async () => {
   } catch (error) {
     console.error('내 비즈니스 정보 조회 실패:', error)
     // 에러 시 기본값 설정 (예시)
-    selectedCollaborationCategories.value = ['음식점업']  // 기본값
+    selectedCollaborationCategories.value = ['음식점업'] // 기본값
   }
 }
 
 // 라이프사이클
 onMounted(async () => {
+  await Promise.all([
+    fetchStores(),
+    fetchMyBusinessInfo(), // 내 비즈니스 정보도 함께 로드
+  ])
   // 내 비즈니스 정보를 먼저 가져온 후에 매장 목록 조회 (거리 계산을 위해)
   await fetchMyBusinessInfo()
   await fetchStores()
@@ -601,8 +598,12 @@ onMounted(async () => {
 }
 
 @keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
 }
 
 .empty-state {

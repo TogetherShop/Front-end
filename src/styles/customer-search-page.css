@@ -2,6 +2,7 @@
 .search-page {
   min-height: 100vh;
   padding-bottom: 72px; /* 하단 네비게이션 공간 */
+  font-family: 'Pretendard', sans-serif;
 }
 
 /* 메인 제목 섹션 */
@@ -59,7 +60,7 @@
   outline: none;
   padding: 0 18px 0 50px;
   background: transparent;
-  color: var(--, #B0B1B3);
+  color: var(--, #b0b1b3);
   font-family: Pretendard;
   font-size: 15px;
   font-style: normal;
@@ -110,7 +111,9 @@
 .customer-search__hotplace-card {
   background-color: #f8f8f8;
   border: 1px solid rgba(228, 228, 228, 0.5);
-  box-shadow: 0px 4px 6px -1px rgba(0, 0, 0, 0.1), 0px 2px 4px -2px rgba(0, 0, 0, 0.1);
+  box-shadow:
+    0px 4px 6px -1px rgba(0, 0, 0, 0.1),
+    0px 2px 4px -2px rgba(0, 0, 0, 0.1);
   width: 300px;
 }
 
@@ -130,28 +133,27 @@
   right: 0;
   margin: 0.5rem;
   color: #222;
-font-family: Pretendard;
-font-size: 14px;
-font-style: normal;
-font-weight: 500;
-line-height: 16px; /* 133.333% */
+  font-family: Pretendard;
+  font-size: 14px;
+  font-style: normal;
+  font-weight: 500;
+  line-height: 16px; /* 133.333% */
 }
 
 .customer-search__hotplace-card-name {
   font-size: 14px;
   margin-bottom: 0;
   color: #222;
-font-family: Pretendard;
-font-size: 14px;
-font-style: normal;
-font-weight: 700;
-line-height: 17.5px; /* 125% */
+  font-family: Pretendard;
+  font-size: 14px;
+  font-style: normal;
+  font-weight: 700;
+  line-height: 17.5px; /* 125% */
 }
 
 .customer-search__hotplace-card-description {
   font-size: 12px;
   margin-bottom: 0;
-  
 }
 
 .customer-search__hotplace-card-rating-icon {
@@ -168,22 +170,21 @@ line-height: 17.5px; /* 125% */
   transform-origin: center;
 }
 
-
 .customer-search__hotplace-card-visitor-count {
-  color: var(--primary, #017F58);
+  color: var(--primary, #017f58);
   font-family: Pretendard;
   font-size: 12px;
   font-style: normal;
   font-weight: 600;
   line-height: 16px; /* 133.333% */
 }
-.text-muted{
+.text-muted {
   color: #717171;
-font-family: Pretendard;
-font-size: 12px;
-font-style: normal;
-font-weight: 400;
-line-height: 16px; /* 133.333% */
+  font-family: Pretendard;
+  font-size: 12px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: 16px; /* 133.333% */
 }
 
 /* 관련 매장 섹션 */
@@ -197,7 +198,7 @@ line-height: 16px; /* 133.333% */
 }
 
 .customer-search__related-title-highlight {
-  color: var(--primary, #017F58);
+  color: var(--primary, #017f58);
   font-family: Pretendard;
   font-size: 18px;
   font-style: normal;
@@ -215,7 +216,7 @@ line-height: 16px; /* 133.333% */
 }
 
 .customer-search__related-subtitle {
-  color: var(--, #017F58);
+  color: var(--, #017f58);
   font-family: Pretendard;
   font-size: 12px;
   font-style: normal;
@@ -230,7 +231,9 @@ line-height: 16px; /* 133.333% */
 .customer-search__related-card {
   background-color: #f8f8f8;
   border: 1px solid rgba(228, 228, 228, 0.5);
-  box-shadow: 0px 4px 6px -1px rgba(0, 0, 0, 0.1), 0px 2px 4px -2px rgba(0, 0, 0, 0.1);
+  box-shadow:
+    0px 4px 6px -1px rgba(0, 0, 0, 0.1),
+    0px 2px 4px -2px rgba(0, 0, 0, 0.1);
   width: 224px;
 }
 
@@ -259,11 +262,8 @@ line-height: 16px; /* 133.333% */
   background-color: #017f58 !important;
 }
 
-
-
-
 .customer-search__related-card-category {
-  color: var(--, #017F58);
+  color: var(--, #017f58);
   font-family: Pretendard;
   font-size: 12px;
   font-style: normal;
@@ -275,11 +275,11 @@ line-height: 16px; /* 133.333% */
 
 .customer-search__related-card-category.bg-light-green {
   background-color: #f0f9f4;
-  color: #017F58;
+  color: #017f58;
 }
 
 .customer-search__related-card-percentage {
-  color: var(--, #017F58);
+  color: var(--, #017f58);
   font-family: Geist;
   font-size: 12px;
   font-style: normal;
@@ -403,7 +403,7 @@ line-height: 16px; /* 133.333% */
 }
 
 .customer-search__result-status {
-  color: var(--gray0, #6F797A);
+  color: var(--gray0, #6f797a);
   font-family: Pretendard;
   font-size: 12px;
   font-style: normal;
@@ -426,14 +426,14 @@ line-height: 16px; /* 133.333% */
 }
 
 .customer-search__result-rating i {
-  fill: var(--, #017F58);
+  fill: var(--, #017f58);
   font-size: 16px;
   color: #017f58;
   font-variation-settings: 'FILL' 1;
 }
 
 .customer-search__result-category {
-  color: var(--gray0, #6F797A);
+  color: var(--gray0, #6f797a);
   font-family: Pretendard;
   font-size: 12px;
   font-style: normal;
@@ -445,7 +445,7 @@ line-height: 16px; /* 133.333% */
   display: flex;
   align-items: center;
   gap: 4px;
-  color: var(--gray0, #6F797A);
+  color: var(--gray0, #6f797a);
   font-family: Pretendard;
   font-size: 12px;
   font-style: normal;
@@ -455,7 +455,7 @@ line-height: 16px; /* 133.333% */
 
 .customer-search__result-address i {
   font-size: 16px;
-  color: var(--gray0, #6F797A);
+  color: var(--gray0, #6f797a);
 }
 
 /* 매칭도 섹션 */
@@ -481,7 +481,7 @@ line-height: 16px; /* 133.333% */
 }
 
 .customer-search__result-match-percentage {
-  color: #017F58;
+  color: #017f58;
   font-family: Pretendard;
   font-size: 12px;
   font-style: normal;
@@ -498,7 +498,7 @@ line-height: 16px; /* 133.333% */
 
 .customer-search__result-match-progress-bar {
   height: 100%;
-  background: #017F58;
+  background: #017f58;
   border-radius: 3px;
   transition: width 0.3s ease;
 }
@@ -520,16 +520,15 @@ line-height: 16px; /* 133.333% */
   .search-page {
     padding-bottom: 68px;
   }
-  
+
   .customer-search__title {
     font-size: 24px;
   }
-  
-  
+
   .customer-search__hotplace-card {
     width: 280px;
   }
-  
+
   .customer-search__related-card {
     width: 240px;
   }
@@ -539,12 +538,11 @@ line-height: 16px; /* 133.333% */
   .search-page {
     padding-bottom: 64px;
   }
-  
+
   .customer-search__title {
     font-size: 24px;
   }
-  
-  
+
   .customer-search__related-card {
     width: 240px;
   }

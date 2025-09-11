@@ -40,6 +40,16 @@ export const useStoresStore = defineStore('stores', {
   },
 
   actions: {
+    // 상단 카드/리스트의 평균/개수 즉시 반영
+    patchRating(storeId, newAvg, newCount) {
+      const s = this.stores.find((x) => x.id === String(storeId))
+      if (s) {
+        if (typeof newAvg === 'number') s.rating = Math.round(newAvg * 10) / 10
+        if (typeof newCount === 'number') s.reviewCount = newCount
+      }
+      this.applyFilters()
+    },
+
     /**
      * 백엔드의 /api/stores/nearby (인증 필요) 호출
      * 응답: Business(또는 DTO) 리스트 → 프론트 표시용으로 매핑
@@ -129,10 +139,20 @@ export const useStoresStore = defineStore('stores', {
             lng,
             distance,
             walkTime,
-            rating: 0, // DB에 없으므로 기본값
-            reviewCount: 0, // DB에 없으므로 기본값
-            hasDiscount: false, // 쿠폰 시스템 붙을 때 교체
-            images: storeImages,
+            rating:
+              typeof b.rating === 'number'
+                ? b.rating
+                : typeof b.avgRating === 'number'
+                  ? b.avgRating
+                  : null,
+            reviewCount:
+              typeof b.reviewCount === 'number'
+                ? b.reviewCount
+                : typeof b.cnt === 'number'
+                  ? b.cnt
+                  : 0,
+            hasDiscount: false,
+            images: [defaultStoreImg],
             tags: [],
             phone: b.phoneNumber ?? '',
             address,

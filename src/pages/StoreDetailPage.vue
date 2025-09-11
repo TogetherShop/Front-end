@@ -39,7 +39,7 @@
             />
           </svg>
           <b>{{ fmtRating(displayRating) }}</b>
-          <span class="count">({{ storeReviews.length }})</span>
+          <span class="count">({{ store?.reviewCount ?? storeReviews.length }})</span>
         </div>
       </div>
     </section>
@@ -130,18 +130,23 @@
       <!-- 맵은 탭 전환 시 새로 마운트되도록 v-if 사용 (카카오맵 사이즈 문제 방지) -->
       <div class="partner-map-wrap" v-if="activeTab === 'partner'">
         <StoreMap
-          :stores="partnerStores"
+          :stores="partnerStoresWithBase"
           :selected-store="selectedPartner"
           :center="storeCenter"
           :show-search="false"
           :panel-expanded="false"
           :show-panel="false"
+          :show-user-marker="false"
           @select-store="(s) => (selectedPartner = s)"
           @update:panelExpanded="(v) => (partnerPanelExpanded = v)"
         />
       </div>
 
-      <div v-if="!partnerStores.length" class="empty">제휴가게 정보가 없습니다.</div>
+      <!-- ✅ 실제 제휴가게가 비어도 더미로 리스트 표시 -->
+      <div v-if="partnerList.length" class="partner-list">
+        <StoreCard v-for="ps in partnerList" :key="ps.id" :store="ps" />
+      </div>
+      <div v-else class="empty">제휴가게 정보가 없습니다.</div>
     </section>
     <ReviewModal />
     <CustomerBottomNavigation />
@@ -154,7 +159,8 @@ import { useRoute, useRouter } from 'vue-router'
 import { useStoresStore } from '@/stores/stores'
 import SegmentedTabs from '@/components/SegmentedTabs.vue'
 import CustomerBottomNavigation from '@/components/CustomerBottomNavigation.vue' // ⬅ 추가
-import StoreMap from '@/components/StoreMap.vue' // ⬅ 추가
+import StoreMap from '@/components/StoreMap.vue'
+import StoreCard from '@/components/StoreCard.vue'
 import { useReviewsStore } from '@/stores/reviews' // ⬅ 추가
 import ReviewModal from '@/components/ReviewModal.vue' // ⬅ 추가
 
@@ -244,6 +250,102 @@ const partnerStores = computed(() => {
     })
     .sort((a, b) => a.distance - b.distance)
 })
+
+// ✅ 백엔드를 쓰지 않는 더미 제휴 매장들(현재 매장 주변에 배치)
+const dummyPartners = computed(() => {
+  const base = store.value
+  if (!base?.lat || !base?.lng) return []
+  const center = { lat: base.lat, lng: base.lng }
+  const seeds = [
+    {
+      id: 'p1',
+      name: '카페 브라운',
+      type: 'cafe',
+      category: '카페',
+      off: [0.001, 0.0008],
+      rating: 4.5,
+      reviewCount: 120,
+    },
+    {
+      id: 'p2',
+      name: '태현 치킨 24',
+      type: 'restaurant',
+      category: '치킨',
+      off: [-0.0007, 0.0014],
+      rating: 4.2,
+      reviewCount: 87,
+    },
+    {
+      id: 'p3',
+      name: '남다른 감자탕',
+      type: 'retail',
+      category: '편의점',
+      off: [0.0012, -0.0006],
+      rating: 4.1,
+      reviewCount: 45,
+    },
+    {
+      id: 'p4',
+      name: '아카루이 디저트숍',
+      type: 'cafe',
+      category: '디저트',
+      off: [-0.0009, -0.0009],
+      rating: 4.6,
+      reviewCount: 73,
+    },
+    {
+      id: 'p5',
+      name: '오그리 피자하우스',
+      type: 'restaurant',
+      category: '피자',
+      off: [0.0006, -0.0014],
+      rating: 4.3,
+      reviewCount: 56,
+    },
+  ]
+  return seeds.map((s) => {
+    const lat = center.lat + s.off[0]
+    const lng = center.lng + s.off[1]
+    const d = Math.round(distM(center, { lat, lng }))
+    return {
+      id: s.id,
+      name: s.name,
+      type: s.type,
+      category: s.category,
+      lat,
+      lng,
+      distance: d,
+      walkTime: Math.max(1, Math.round(d / 67)),
+      rating: s.rating,
+      reviewCount: s.reviewCount,
+      hasDiscount: true,
+      images: ['/images/default-store.jpg'],
+      address: base.address || '근처 제휴 매장',
+      phone: '',
+      openHours: '10:00-22:00',
+    }
+  })
+})
+
+// ✅ 실제 검색 결과가 없으면 더미 사용
+const partnerList = computed(() =>
+  partnerStores.value && partnerStores.value.length > 0 ? partnerStores.value : dummyPartners.value,
+)
+
+// ✅ 현재 매장을 맵 마커로도 함께 보여주기 위한 가짜(프론트 전용) 마커
+const baseMarker = computed(() => {
+  const s = store.value
+  if (!s?.lat || !s?.lng) return null
+  // id 충돌 방지용 prefix, 구분을 위한 flag(isBase)
+  return { ...s, id: `base-${s.id}`, isBase: true }
+})
+
+// ✅ 제휴가게 + 현재 매장 마커를 함께 전달
+const partnerStoresWithBase = computed(() => {
+  const arr = partnerList.value || []
+  return baseMarker.value ? [baseMarker.value, ...arr] : arr
+})
+
 // StoreMap과 바인딩할 상태
 const selectedPartner = ref(null)
 const partnerPanelExpanded = ref(true)
@@ -253,6 +355,17 @@ const openReview = () => {
   if (!store.value) return
   reviewsStore.openReviewModal(id.value, store.value.name || '매장')
 }
+
+// ✅ 파트너 탭 들어갈 때 현재 매장을 기본 선택 & 센터 고정
+watch(
+  () => activeTab.value,
+  (v) => {
+    if (v === 'partner' && baseMarker.value) {
+      selectedPartner.value = baseMarker.value
+    }
+  },
+  { immediate: true },
+)
 </script>
 
 <style scoped>
@@ -528,8 +641,9 @@ const openReview = () => {
   color: #111827;
 }
 .partner-map-wrap {
-  height: 60vh; /* 맵+패널 높이 */
-  min-height: 420px; /* 너무 작아지지 않게 */
+  height: 25vh; /* 기존보다 살짝 낮게 */
+  min-height: 230px; /* 모바일에서도 답답하지 않게 */
+  max-height: 520px; /* 데스크톱에서 과하게 길어지는 것 방지 */
   padding: 0 12px; /* 좌우 살짝 여백 (디자인 맞춤) */
 }
 
@@ -538,5 +652,12 @@ const openReview = () => {
   padding: 24px 16px;
   text-align: center;
   color: #9ca3af;
+}
+/* ✅ 제휴 리스트 스타일 */
+.partner-list {
+  padding: 8px 12px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
 }
 </style>

@@ -304,9 +304,7 @@ const filteredStoresAll = computed(() => {
     result = result.filter(
       (store) =>
         store.businessName.toLowerCase().includes(q) ||
-        store.businessCategory.toLowerCase().includes(q),
-      store.businessName.toLowerCase().includes(q) ||
-        store.businessCategory.toLowerCase().includes(q),
+        store.businessCategory.toLowerCase().includes(q)
     )
   }
 

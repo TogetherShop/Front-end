@@ -39,7 +39,7 @@
             />
           </svg>
           <b>{{ fmtRating(displayRating) }}</b>
-          <span class="count">({{ storeReviews.length }})</span>
+          <span class="count">({{ store?.reviewCount ?? storeReviews.length }})</span>
         </div>
       </div>
     </section>

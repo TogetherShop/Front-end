@@ -69,6 +69,7 @@
 <script setup></script>
 
 <style scoped>
+
 .screen {
   align-items: start;
   background-color: #ffffff;

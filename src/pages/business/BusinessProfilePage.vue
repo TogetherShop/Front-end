@@ -219,6 +219,7 @@
 <script>
 import BusinessTopBar from '@/components/BusinessTopBar.vue'
 import BusinessBottomNavigation from '@/components/BusinessBottomNav.vue'
+import { fetchProfileSummary } from '@/api/business'
 
 export default {
   name: 'BusinessProfilePage',
@@ -256,14 +257,71 @@ export default {
         { title: '포장재 1000개 공동구매', joined: 6, target: 10, dday: 0, status: 'pending' },
         { title: '포장재 1000개 공동구매', joined: 10, target: 10, dday: 0, status: 'success' },
       ],
+      loadingProfile: false,
+      profileError: null,
     }
   },
+  mounted() {
+    this.loadProfile()
+  },
   methods: {
+    async loadProfile() {
+      try {
+        this.loadingProfile = true
+        this.profileError = null
+
+        const data = await fetchProfileSummary()
+
+        // 프로필
+        const name = data?.businessName ?? this.profile.storeName
+        const category = data?.businessCategory ?? this.profile.category
+        const address = data?.address ?? this.profile.address
+        const together = data?.togetherScore ?? this.profile.togetherScore
+
+        this.profile = {
+          ...this.profile,
+          storeName: name,
+          category,
+          address,
+          imageUrl: data?.profileImageUrl ?? this.profile.imageUrl,
+          togetherScore:
+            typeof together === 'number'
+              ? Math.round(together)
+              : Math.round(Number(together)) || this.profile.togetherScore,
+          rankPercent: data?.rankPercent ?? this.profile.rankPercent,
+          accumulatedDonations:
+            typeof data?.accumulatedDonations === 'number'
+              ? data.accumulatedDonations
+              : this.profile.accumulatedDonations,
+        }
+
+        // 메트릭
+        if (data?.metrics) {
+          this.metrics = { ...this.metrics, ...data.metrics }
+        }
+
+        // 제휴 요청함
+        if (Array.isArray(data?.sentRequests)) this.sentRequests = data.sentRequests
+        if (Array.isArray(data?.receivedRequests)) this.receivedRequests = data.receivedRequests
+
+        // 공동구매
+        if (Array.isArray(data?.groupApply)) this.groupApply = data.groupApply
+        if (Array.isArray(data?.groupOwned)) this.groupOwned = data.groupOwned
+      } catch (e) {
+        console.error('[Profile] load error', e)
+        this.profileError = '프로필 정보를 불러오지 못했어요.'
+      } finally {
+        this.loadingProfile = false
+      }
+    },
     numberWithCommas(x) {
       return String(x).replace(/\B(?=(\d{3})+(?!\d))/g, ',')
     },
     percent(item) {
-      return Math.round((item.joined / item.target) * 100)
+      const joined = Number(item?.joined ?? 0)
+      const target = Number(item?.target ?? 0)
+      if (!target) return 0
+      return Math.round((joined / target) * 100)
     },
     statusClass(st) {
       return (

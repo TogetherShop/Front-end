@@ -13,7 +13,7 @@
       <div class="store-info">
         <div class="store-header">
           <div class="store-name-category">
-            <h3 class="store-name">{{ store.businessName }}</h3>
+            <h3 class="store-name">{{ BusinessnameText(store.businessName) }}</h3>
             <span class="store-category">{{ store.businessCategory }}</span>
           </div>
         </div>
@@ -22,7 +22,9 @@
           <!-- 거리 정보 -->
           <div class="detail-item">
             <span class="material-symbols-outlined">location_on</span>
-            <span class="detail-text">{{ formatDistance(store.address).slice(0, 6) + '...' }}</span>
+            <span class="detail-text">
+              {{ store.distanceText || formatAddressDistance() }}
+            </span>
           </div>
 
           <!-- 함께지수 정보 -->
@@ -92,12 +94,25 @@ const loadLatestCoupon = async () => {
   }
 }
 
-// 거리 포맷팅
-const formatDistance = (distance) => {
-  if (distance >= 1000) {
-    return `${(distance / 1000).toFixed(1)}km`
+// 거리 포맷팅 (실제 거리가 없을 경우 주소로 대체)
+const formatAddressDistance = () => {
+  if (!props.store?.address) return '거리 정보 없음'
+
+  const address = props.store.address
+  if (address.length > 15) {
+    return address.slice(0, 12) + '...'
   }
-  return `${distance}m`
+  return address
+}
+
+const BusinessnameText = (text) => {
+  if (!text) return ''
+  // 최대 길이 설정 (카드 크기에 맞게 조정)
+  const maxLength = 9
+  if (text.length <= maxLength) {
+    return text
+  }
+  return text.substring(0, 7) + '...'
 }
 
 // 쿠폰 텍스트 축약 함수

@@ -9,7 +9,7 @@ const MAX_ATTEMPTS = 6 // 1s,2s,4s,8s,16s,32s
 const LOAD_TIMEOUT_MS = 6000 // load 이후 maps.services 준비 대기
 const SCRIPT_ID = 'kakao-maps-sdk-script'
 
-const APP_KEY = 'b98b58381e6cd98e1bf8f6542b97d036'
+const APP_KEY = 'e908139d3cea166b8ca68f924078218d'
 const LIBS = 'services'
 
 function removeExistingScript() {

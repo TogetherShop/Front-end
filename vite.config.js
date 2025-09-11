@@ -16,12 +16,12 @@ export default defineConfig({
     port: 5173,
     proxy: {
       '/ws-chat': {
-        target: 'http://localhost:8080',
+        target: 'http://localhost:8081',
         ws: true,
         changeOrigin: true,
       },
       '/api': {
-        target: 'http://localhost:8080',
+        target: 'http://localhost:8081',
         changeOrigin: true,
         configure: (proxy) => {
           proxy.on('proxyReq', (proxyReq, req) => {

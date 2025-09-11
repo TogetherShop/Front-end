@@ -43,50 +43,49 @@
                 </label>
               </div>
             </div>
-
             <!-- 카테고리 필터 -->
             <div class="filter-category">
               <h6 class="filter-title">업종</h6>
               <div class="filter-options">
                 <label class="filter-checkbox">
-                  <input type="checkbox" v-model="selectedCategories" value="음식점" />
+                  <input type="checkbox" v-model="selectedCategories" value="소매" />
                   <span>소매</span>
                 </label>
                 <label class="filter-checkbox">
-                  <input type="checkbox" v-model="selectedCategories" value="카페" />
+                  <input type="checkbox" v-model="selectedCategories" value="음식" />
                   <span>음식</span>
                 </label>
                 <label class="filter-checkbox">
-                  <input type="checkbox" v-model="selectedCategories" value="소매업" />
+                  <input type="checkbox" v-model="selectedCategories" value="수리/개인" />
                   <span>수리/개인</span>
                 </label>
                 <label class="filter-checkbox">
-                  <input type="checkbox" v-model="selectedCategories" value="미용업" />
+                  <input type="checkbox" v-model="selectedCategories" value="예체능" />
                   <span>예체능</span>
                 </label>
                 <label class="filter-checkbox">
-                  <input type="checkbox" v-model="selectedCategories" value="서비스업" />
+                  <input type="checkbox" v-model="selectedCategories" value="교육" />
                   <span>교육</span>
                 </label>
                 <label class="filter-checkbox">
-                  <input type="checkbox" v-model="selectedCategories" value="기타" />
+                  <input type="checkbox" v-model="selectedCategories" value="부동산" />
                   <span>부동산</span>
                 </label>
-                <label class="filter-checkbox">
-                  <input type="checkbox" v-model="selectedCategories" value="음식점" />
-                  <span>숙박</span>
-                </label>
-                <label class="filter-checkbox">
-                  <input type="checkbox" v-model="selectedCategories" value="카페" />
-                  <span>과학/기술</span>
-                </label>
-                <label class="filter-checkbox">
-                  <input type="checkbox" v-model="selectedCategories" value="소매업" />
-                  <span>보건의료</span>
-                </label>
-                <label class="filter-checkbox">
-                  <input type="checkbox" v-model="selectedCategories" value="미용업" />
-                  <span>관리/임대</span>
+                  <label class="filter-checkbox">
+                    <input type="checkbox" v-model="selectedCategories" value="숙박" />
+                    <span>숙박</span>
+                  </label>
+                  <label class="filter-checkbox">
+                    <input type="checkbox" v-model="selectedCategories" value="과학/기술" />
+                    <span>과학/기술</span>
+                  </label>
+                  <label class="filter-checkbox">
+                    <input type="checkbox" v-model="selectedCategories" value="보건의료" />
+                    <span>보건의료</span>
+                  </label>
+                  <label class="filter-checkbox">
+                    <input type="checkbox" v-model="selectedCategories" value="관리/임대" />
+                    <span>관리/임대</span>
                 </label>
               </div>
             </div>
@@ -216,7 +215,6 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
-import api from '@/api/api'
 import BusinessTopBar from '@/components/BusinessTopBar.vue'
 import BusinessStoreCard from '@/components/BusinessStoreCard.vue'
 import BusinessStoreDetailModal from '@/components/BusinessStoreDetailModal.vue'
@@ -251,7 +249,6 @@ const selectedStore = ref(null)
 const showSuccessToast = ref(false)
 const loading = ref(false)
 const activeTab = ref('recommended')
-const errorMessage = ref('')
 const router = useRouter()
 // 내 비즈니스 정보
 const myBusinessInfo = ref(null)
@@ -262,6 +259,11 @@ const itemsPerPage = 5
 // 필터링된 전체 매장 목록 (페이지네이션 적용 전)
 const filteredStoresAll = computed(() => {
   let result = [...stores.value]
+
+  // 내 매장 제외
+  if (myBusinessInfo.value?.id) {
+    result = result.filter(store => store.businessId !== myBusinessInfo.value.id)
+  }
 
   // 탭에 따른 기본 필터링
   if (activeTab.value === 'recommended') {
@@ -300,9 +302,7 @@ const filteredStoresAll = computed(() => {
     result = result.filter(
       (store) =>
         store.businessName.toLowerCase().includes(q) ||
-        store.businessCategory.toLowerCase().includes(q),
-      store.businessName.toLowerCase().includes(q) ||
-        store.businessCategory.toLowerCase().includes(q),
+        store.businessCategory.toLowerCase().includes(q)
     )
   }
 

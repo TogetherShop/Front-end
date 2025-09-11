@@ -12,17 +12,7 @@
 
         <!-- 폼 -->
         <form @submit.prevent="handleSubmit" class="register-form">
-          <div class="form-group">
-            <label for="title" class="form-label">공동구매 제목</label>
-            <input
-              id="title"
-              v-model="formData.title"
-              type="text"
-              class="form-input"
-              placeholder="예: 카페 원두 공동구매"
-              required
-            />
-          </div>
+
 
           <div class="form-group">
             <label for="description" class="form-label">설명</label>
@@ -119,7 +109,6 @@ const emit = defineEmits(['close', 'confirm'])
 const loading = ref(false)
 
 const formData = reactive({
-  title: '',
   description: '',
   targetQuantity: null,
   targetMoney: null,
@@ -138,7 +127,6 @@ const minDateTime = computed(() => {
 // 폼 유효성 검사
 const isFormValid = computed(() => {
   return (
-    formData.title.trim() &&
     formData.description.trim() &&
     formData.targetQuantity > 0 &&
     formData.targetMoney > 0 &&
@@ -163,7 +151,6 @@ const handleSubmit = async () => {
   try {
     // API 명세서에 맞춰 데이터 변환
     const projectData = {
-      title: formData.title.trim(),
       description: formData.description.trim(),
       targetQuantity: formData.targetQuantity,
       targetMoney: formData.targetMoney,

@@ -3,7 +3,6 @@
     <div class="received-coupon-card__container">
       <div class="received-coupon-card__body">
         <div class="row g-0">
-          <!-- ÄíÆù Á¤º¸ ¿µ¿ª -->
           <div class="col-12 p-3">
             <div class="received-coupon-card__header d-flex align-items-center mb-0">
               <h6 class="received-coupon-card__store-name mb-0 ">{{ coupon.storeName }}</h6>
@@ -15,13 +14,11 @@
                 <i class="material-symbols-outlined me-2 received-coupon-card__coupon-icon" style="font-size: 16px">local_play</i>
                 <span class="received-coupon-card__coupon-title ">{{ coupon.title }}</span>
               </div>
-              <!-- ¸¸·áÀÏ±îÁö ³²Àº ÀÏ¼ö (ÄíÆù Á¦¸ñ°ú °°Àº ÁÙ) -->
               <div class="received-coupon-card__days-left">
                 <span class="received-coupon-card__days-text">{{ coupon.daysLeft }}</span>
               </div>
             </div>
 
-            <!-- ¸¸·áÀÏ (¿À¸¥ÂÊ ÇÏ´Ü) -->
             <div class="received-coupon-card__expiry-right">
               <i class="material-symbols-outlined me-1" style="font-size: 16px">access_time</i>
               <small class="received-coupon-card__expiry-date">{{ coupon.expiryDate }}</small>
@@ -56,5 +53,5 @@ export default {
 </script>
 
 <style scoped>
-/* ¹ÞÀº ÄíÆù Ä«µå ½ºÅ¸ÀÏÀº coupon.css¿¡¼­ °ü¸® */
+/* ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ Ä«ï¿½ï¿½ ï¿½ï¿½Å¸ï¿½ï¿½ï¿½ï¿½ coupon.cssï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ */
 </style>

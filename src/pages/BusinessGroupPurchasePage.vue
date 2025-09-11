@@ -29,7 +29,7 @@
               <img src="@/assets/images/first.png" alt="1위" class="rank-icon" />
             </div>
             <div class="user-stats">
-              <span class="score">함께지수 {{ Math.round(rankingData[0].togetherScore) }}</span>
+              <span class="score">함께지수 {{ rankingData[0].togetherScore }}</span>
             </div>
           </div>
         </div>
@@ -44,7 +44,7 @@
               <img src="@/assets/images/second.png" alt="2위" class="rank-icon" />
             </div>
             <div class="user-stats">
-              <span class="score">함께지수 {{ Math.round(rankingData[1].togetherScore) }}</span>
+              <span class="score">함께지수 {{ rankingData[1].togetherScore }}</span>
             </div>
           </div>
         </div>
@@ -59,7 +59,7 @@
               <img src="@/assets/images/third.png" alt="3위" class="rank-icon" />
             </div>
             <div class="user-stats">
-              <span class="score">함께지수 {{ Math.round(rankingData[2].togetherScore) }}</span>
+              <span class="score">함께지수 {{ rankingData[2].togetherScore }}</span>
             </div>
           </div>
         </div>

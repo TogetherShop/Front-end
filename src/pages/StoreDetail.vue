@@ -189,7 +189,7 @@
     <!-- 오류 상태 -->
     <div v-else class="error-section">
       <p>매장 정보를 찾을 수 없습니다.</p>
-      <button @click="$router.back()" class="back-button">돌아가기</button>
+      <button @click="router.back()" class="back-button">돌아가기</button>
     </div>
 
     <!-- 하단 네비게이션 -->

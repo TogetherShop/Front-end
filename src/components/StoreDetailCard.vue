@@ -1,6 +1,6 @@
 <!-- /src/components/StoreDetailCard.vue -->
 <template>
-  <div class="detail-card">
+  <div class="detail-card" @click="$emit('open', store)">
     <!-- 제목/카테고리 -->
     <div class="detail-title-row">
       <h2 class="detail-name">{{ store.name }}</h2>
@@ -66,6 +66,7 @@ import { computed } from 'vue'
 const props = defineProps({
   store: { type: Object, required: true },
 })
+defineEmits(['open'])
 
 const categoryName = computed(() => {
   const map = { restaurant: '음식점', cafe: '카페', retail: '소매점', store: '매장' }
@@ -80,6 +81,7 @@ const displayRating = computed(() => {
 <style scoped>
 .detail-card {
   padding: 14px 6px 16px;
+  cursor: pointer;
 }
 .detail-title-row {
   display: flex;

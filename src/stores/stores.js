@@ -100,7 +100,6 @@ export const useStoresStore = defineStore('stores', {
           const address = b.address ?? ''
           const lat = Number(b.latitude ?? b.lat)
           const lng = Number(b.longitude ?? b.lng)
-
           const category = b.businessCategory ?? b.business_category ?? '매장'
           // type(맵 아이콘/필터용) 대략 맵핑
           const type = this.mapCategoryToType(b.businessType ?? b.business_type, category, name)
@@ -129,7 +128,7 @@ export const useStoresStore = defineStore('stores', {
             rating: 0, // DB에 없으므로 기본값
             reviewCount: 0, // DB에 없으므로 기본값
             hasDiscount: false, // 쿠폰 시스템 붙을 때 교체
-            images: [defaultStoreImg], // ✅ 여기! 통일된 이미지로 고정
+            images: [defaultStoreImg],
             tags: [],
             phone: b.phoneNumber ?? '',
             address,

@@ -15,6 +15,7 @@
         v-model:panelExpanded="bottomExpanded"
         @select-store="handleSelectStore"
         @map-ready="handleMapReady"
+        @viewport-change="handleViewportChange"
       />
       <div v-else class="error-section">
         <p>위치 정보를 가져올 수 없습니다</p>
@@ -68,6 +69,15 @@ const handleMapReady = () => {
   mapReady.value = true
 }
 
+const handleViewportChange = async ({ center /*, level, bounds */ }) => {
+  // 선택된 가게 상세는 닫고 목록 모드로
+  selectedStore.value = null
+  bottomExpanded.value = true
+  // 현재 내 위치가 아니라 '지도 중심' 기준으로 새로 불러오기
+  await storesStore.fetchNearbyStores(center.lat, center.lng)
+  // 검색어 필터는 기존과 동일하게 storesStore 내부/filteredStores에서 반영됨
+}
+
 const loadNearbyStores = async () => {
   if (currentLocation.value?.latitude) {
     await storesStore.fetchNearbyStores(
@@ -106,7 +116,8 @@ watch(
   height: 100vh; /* ← 고정 높이 */
   overflow: hidden; /* ← 스크롤 차단 */
   background: #fff;
-  padding-bottom: 0; /* ← 여백 제거(이게 페이지 스크롤 원인) */
+  /* padding-bottom: 0; ← 여백 제거(이게 페이지 스크롤 원인) */
+  padding-bottom: var(--bottom-nav-height, 64px);
 }
 
 /* 고정 상단바 */

@@ -1,3 +1,4 @@
+StoreMap.vue]
 <!-- /src/components/StoreMap.vue -->
 <template>
   <div class="store-map">
@@ -5,6 +6,11 @@
       <div v-if="isLoading" class="map-loading">
         <div class="loading-spinner"></div>
         <p>지도 로딩 중...</p>
+      </div>
+      <div v-else-if="initFailed" class="map-error">
+        <p>지도를 불러오지 못했어요.</p>
+        <p class="error-detail">{{ initErrorMsg }}</p>
+        <button class="retry-button" @click="initializeMap">다시 시도</button>
       </div>
       <div id="kakao-map" class="kakao-map" ref="mapElRef"></div>
     </div>
@@ -27,7 +33,13 @@
     </div>
 
     <!-- 바텀시트 -->
-    <div class="nearby-stores-panel" :class="panelClass" :style="panelStyle">
+    <div
+      v-if="props.showPanel"
+      class="nearby-stores-panel"
+      :class="panelClass"
+      :style="panelStyle"
+      ref="panelRef"
+    >
       <!-- ⬇ 헤더 분리 -->
       <StorePanelHeader
         :selected="selected"
@@ -39,7 +51,7 @@
       <div class="panel-content">
         <!-- ⬇ 디테일 카드 분리 -->
         <template v-if="selected">
-          <StoreDetailCard :store="selected" />
+          <StoreDetailCard :store="selected" @open="openStoreDetail" />
         </template>
 
         <!-- 리스트 -->
@@ -60,12 +72,14 @@
 </template>
 
 <script setup>
+import { useRouter } from 'vue-router'
 import markerIconUrl from '@/assets/images/togethershop_cursor.png'
 import StoreCard from '@/components/StoreCard.vue'
 import StorePanelHeader from '@/components/StorePanelHeader.vue'
 import StoreDetailCard from '@/components/StoreDetailCard.vue'
-import { ref, onMounted, watch, nextTick, computed } from 'vue'
+import { ref, onMounted, onBeforeUnmount, watch, nextTick, computed } from 'vue'
 import { useLocationStore } from '@/stores/location'
+import { waitKakaoReady } from '@/utils/waitKakaoReady'
 
 /* props / emits */
 const props = defineProps({
@@ -75,16 +89,82 @@ const props = defineProps({
   searchQuery: { type: String, default: '' },
   showSearch: { type: Boolean, default: true },
   panelExpanded: { type: Boolean, default: false },
+  showPanel: { type: Boolean, default: true }, // ⬅ 패널 숨기기 옵션
 })
-const emit = defineEmits(['selectStore', 'mapReady', 'update:searchQuery', 'update:panelExpanded'])
-
+const emit = defineEmits([
+  'selectStore',
+  'mapReady',
+  'update:searchQuery',
+  'update:panelExpanded',
+  'viewport-change',
+])
 /* 상태 */
+const router = useRouter()
 const isLoading = ref(true)
 const map = ref(null)
 const mapElRef = ref(null)
 const markers = ref([])
 const currentLocationMarker = ref(null)
 const infoWindow = ref(null)
+const panelRef = ref(null)
+const initFailed = ref(false)
+const initErrorMsg = ref('')
+
+// ✅ 초기 1회만 화면 맞춤
+const didInitialFit = ref(false)
+// ✅ 첫 사용자 상호작용 전까지만 현재위치 마커 노출
+const showCurrentLocationMarker = ref(true)
+const userHasInteracted = ref(false)
+
+// 초기 1회: 현재 위치 + 모든 매장을 화면에 보이도록
+const fitOnceToAllMarkers = async () => {
+  if (!map.value || didInitialFit.value) return
+  await nextTick()
+  const bounds = new kakao.maps.LatLngBounds()
+  let added = 0
+
+  const loc = locationStore.currentLocation
+  if (loc?.latitude && loc?.longitude) {
+    bounds.extend(new kakao.maps.LatLng(loc.latitude, loc.longitude))
+    added++
+  }
+  ;(props.stores || []).forEach((s) => {
+    if (Number.isFinite(s.lat) && Number.isFinite(s.lng)) {
+      bounds.extend(new kakao.maps.LatLng(s.lat, s.lng))
+      added++
+    }
+  })
+  if (added > 0) {
+    // 패널/검색창 여백 감안하고 싶으면 padding 조절 가능
+    map.value.setBounds(bounds /*, 32*/)
+    didInitialFit.value = true
+  }
+}
+
+// 사용자 상호작용(드래그/줌) → 부모에 뷰포트 전달
+const emitViewportChange = () => {
+  if (!map.value) return
+  const c = map.value.getCenter()
+  const b = map.value.getBounds()
+  emit('viewport-change', {
+    center: { lat: c.getLat(), lng: c.getLng() },
+    level: map.value.getLevel(),
+    bounds: {
+      sw: { lat: b.getSouthWest().getLat(), lng: b.getSouthWest().getLng() },
+      ne: { lat: b.getNorthEast().getLat(), lng: b.getNorthEast().getLng() },
+    },
+  })
+}
+
+// 드래그/줌 핸들러
+const onUserViewportChange = () => {
+  if (!userHasInteracted.value) return
+  if (showCurrentLocationMarker.value && currentLocationMarker.value) {
+    currentLocationMarker.value.setMap(null)
+    showCurrentLocationMarker.value = false
+  }
+  emitViewportChange()
+}
 
 /* 패널 상태: selected 유무 + panelExpanded 불린만 사용 */
 const selected = computed(() => props.selectedStore)
@@ -93,6 +173,11 @@ const panelClass = computed(() => ({
   'is-detail': !!selected.value,
 }))
 const panelStyle = computed(() => ({})) // 변수 계산 없이 심플하게
+
+const openStoreDetail = (store) => {
+  if (!store?.id) return
+  router.push({ name: 'store-detail', params: { id: String(store.id) } })
+}
 
 /* 검색 입력 → 부모에 위임 */
 const localSearch = ref(props.searchQuery)
@@ -110,35 +195,6 @@ const panelStores = computed(() =>
     .slice(0, 50),
 )
 
-// // 카테고리 한글명 매핑
-// const getCategoryName = (type) => {
-//   const map = {
-//     restaurant: '음식점',
-//     cafe: '카페',
-//     retail: '소매점',
-//     store: '매장',
-//   }
-//   return map[type] || '매장'
-// }
-
-/* 지도 로딩 대기 */
-const waitForKakaoMaps = () =>
-  new Promise((resolve, reject) => {
-    if (typeof kakao !== 'undefined' && kakao.maps) return resolve()
-    let tries = 0
-    const timer = setInterval(() => {
-      tries++
-      if (typeof kakao !== 'undefined' && kakao.maps) {
-        clearInterval(timer)
-        resolve()
-      } else if (tries > 50) {
-        clearInterval(timer)
-        reject(new Error('카카오맵 API 로드 실패'))
-      }
-    }, 100)
-  })
-
-/* 마커 생성/정리 */
 const clearMarkers = () => {
   markers.value.forEach((m) => m.setMap(null))
   markers.value = []
@@ -160,7 +216,6 @@ const createStoreMarkers = () => {
       emit('selectStore', store)
       emit('update:panelExpanded', true)
       showStoreInfo(store, marker)
-      centerSelectedOnMap(store)
     })
     marker.setMap(map.value)
     markers.value.push(marker)
@@ -187,27 +242,42 @@ const createCurrentLocationMarker = () => {
   const loc = locationStore.currentLocation
   if (!loc?.latitude || !loc?.longitude || !map.value) return
   if (currentLocationMarker.value) currentLocationMarker.value.setMap(null)
+  if (!showCurrentLocationMarker.value) return
+
   currentLocationMarker.value = new kakao.maps.Marker({
     position: new kakao.maps.LatLng(loc.latitude, loc.longitude),
-    image: new kakao.maps.MarkerImage(
-      'data:image/svg+xml;base64,' +
-        btoa(
-          `<svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-           <circle cx="10" cy="10" r="8" fill="#007AFF" stroke="white" stroke-width="2"/>
-           <circle cx="10" cy="10" r="3" fill="white"/>
-         </svg>`,
-        ),
-      new kakao.maps.Size(20, 20),
-      { offset: new kakao.maps.Point(10, 10) },
-    ),
+    // 이미지 지정 안 하면 카카오맵의 기본 마커가 사용됩니다.
+    zIndex: 9999, // 가게 마커보다 위로
+    clickable: false, // 현재 위치 마커는 클릭 불가(원하면 true로)
   })
+
+  // currentLocationMarker.value = new kakao.maps.Marker({
+  //   position: new kakao.maps.LatLng(loc.latitude, loc.longitude),
+  //   image: new kakao.maps.MarkerImage(
+  //     'data:image/svg+xml;base64,' +
+  //       btoa(
+  //         `<svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+  //          <circle cx="10" cy="10" r="8" fill="#007AFF" stroke="white" stroke-width="2"/>
+  //          <circle cx="10" cy="10" r="3" fill="white"/>
+  //        </svg>`,
+  //       ),
+  //     new kakao.maps.Size(20, 20),
+  //     { offset: new kakao.maps.Point(10, 10) },
+  //   ),
+  // })
+
   currentLocationMarker.value.setMap(map.value)
 }
 
 /* 지도 초기화 (불필요 리스너 제거, 심플) */
 const initializeMap = async () => {
+  if (map.value) return
+  isLoading.value = true
+  initFailed.value = false
+  initErrorMsg.value = ''
+
   try {
-    await waitForKakaoMaps()
+    await waitKakaoReady()
     await nextTick()
     const el = mapElRef.value || document.getElementById('kakao-map')
     if (!el) throw new Error('지도 요소를 찾을 수 없습니다')
@@ -225,29 +295,28 @@ const initializeMap = async () => {
 
     createStoreMarkers()
     createCurrentLocationMarker()
+    await fitOnceToAllMarkers()
+    kakao.maps.event.addListener(map.value, 'dragstart', () => {
+      userHasInteracted.value = true
+    })
+    kakao.maps.event.addListener(map.value, 'dragend', onUserViewportChange)
+    kakao.maps.event.addListener(map.value, 'zoom_changed', onUserViewportChange)
+
     emit('mapReady', map.value)
   } catch (e) {
     console.error('지도 초기화 실패:', e)
+    initFailed.value = true
+    initErrorMsg.value = e?.message || '지도를 불러오지 못했습니다'
   } finally {
     isLoading.value = false
   }
 }
 
-/* 선택 → 지도 중앙으로 살짝 올려 보이게 */
-const centerSelectedOnMap = async (store) => {
-  if (!map.value || !store?.lat || !store?.lng) return
-  await nextTick()
-  const ll = new kakao.maps.LatLng(store.lat, store.lng)
-  map.value.setCenter(ll)
-  // 디테일 모드일 때 아래 패널 만큼 위로 살짝 이동
-  map.value.panBy(0, -Math.round(window.innerHeight * 0.25))
-}
-
 const handleSelectFromList = (store) => {
   emit('selectStore', store)
   emit('update:panelExpanded', true)
-  centerSelectedOnMap(store)
 }
+
 const onHeaderClick = () => {
   // 상세 모드면 패널 토글하지 않음
   if (selected.value) return
@@ -261,18 +330,49 @@ const closeDetail = () => {
   emit('update:panelExpanded', true) // 목록 모드로 돌아갈 때는 펼쳐진 상태 유지
   closeInfoWindow()
 }
+// 패널 상태가 바뀌면 보이는 영역 중앙으로 재정렬
+const relayoutOnly = async () => {
+  if (!map.value) return
+  map.value.relayout?.()
+}
 
-/* watch (필요한 것만 유지) */
+watch(
+  () => props.panelExpanded,
+  async () => {
+    await nextTick()
+    await relayoutOnly()
+  },
+)
+
+// 2) 패널 애니메이션 종료 후 보정
+onMounted(() => {
+  panelRef.value?.addEventListener('transitionend', relayoutOnly, { passive: true })
+  mapElRef.value?.addEventListener('pointerdown', () => (userHasInteracted.value = true), {
+    once: true,
+  })
+})
+onBeforeUnmount(() => {
+  panelRef.value?.removeEventListener('transitionend', relayoutOnly)
+})
+
 watch(
   () => props.stores,
-  () => createStoreMarkers(),
+  () => {
+    createStoreMarkers()
+    fitOnceToAllMarkers()
+  },
   { deep: true },
 )
+
+/* 현재 위치가 바뀌면 마커 갱신 & 화면 살짝 위로 올리기 */
 watch(
-  () => props.center,
-  (c) => {
-    if (map.value && c) map.value.setCenter(new kakao.maps.LatLng(c.lat, c.lng))
+  () => locationStore.currentLocation,
+  (n) => {
+    if (!n?.latitude || !n?.longitude || !map.value) return
+    createCurrentLocationMarker()
+    fitOnceToAllMarkers()
   },
+  { deep: true },
 )
 
 onMounted(initializeMap)
@@ -363,9 +463,9 @@ onMounted(initializeMap)
 
 /* 바텀시트 */
 .nearby-stores-panel {
-  --collapsedHeight: 170px;
-  --expandedHeight: 65vh;
-  --detailHeight: 60vh;
+  --collapsedHeight: 60px;
+  --expandedHeight: 54vh;
+  --detailHeight: 50vh;
   --raise: var(--collapsedHeight);
   position: absolute;
   bottom: 0;
@@ -396,7 +496,7 @@ onMounted(initializeMap)
 
 .panel-header {
   position: relative;
-  padding: 16px 20px;
+  padding: 15px 20px;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -505,5 +605,28 @@ onMounted(initializeMap)
   padding: 24px 8px;
   color: #6b7280;
   text-align: center;
+}
+.map-error {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  background: rgba(255, 255, 255, 0.9);
+  z-index: 10;
+  text-align: center;
+}
+.map-error .error-detail {
+  font-size: 12px;
+  color: #888;
+}
+.retry-button {
+  padding: 8px 16px;
+  background: #017f58;
+  color: #fff;
+  border: 0;
+  border-radius: 6px;
 }
 </style>

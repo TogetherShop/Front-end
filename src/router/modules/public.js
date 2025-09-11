@@ -12,6 +12,7 @@ import CustomerSignupView from '@/pages/CustomerSignupView.vue'
 import CustomerHomePage from '@/pages/CustomerHomePage.vue'
 import BusinessHomePage from '@/pages/BusinessHomePage.vue'
 import ChattingHomePage from '@/pages/ChattingHomePage.vue'
+import StoreDetailPage from '@/pages/StoreDetailPage.vue'
 
 const routes = [
   // 인증 필요 ❌
@@ -52,6 +53,12 @@ const routes = [
     path: '/business/chats',
     component: ChattingHomePage,
     meta: { requiresAuth: true, role: 'business' },
+  },
+  {
+    path: '/store/:id',
+    name: 'store-detail',
+    component: StoreDetailPage,
+    meta: { requiresAuth: true, role: 'customer' },
   },
 ]
 

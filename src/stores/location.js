@@ -1,4 +1,5 @@
 import { defineStore } from 'pinia'
+import { waitKakaoReady } from '@/utils/waitKakaoReady'
 
 export const useLocationStore = defineStore('location', {
   state: () => ({
@@ -97,8 +98,7 @@ export const useLocationStore = defineStore('location', {
 
     async getAddressFromCoords(lat, lng) {
       try {
-        // 카카오맵 API가 로드될 때까지 대기
-        await this.waitForKakaoMaps()
+        await waitKakaoReady()
 
         return new Promise((resolve) => {
           const geocoder = new kakao.maps.services.Geocoder()
@@ -131,32 +131,6 @@ export const useLocationStore = defineStore('location', {
         console.error('주소 변환 오류:', error)
         return this.getApproximateAddress(lat, lng)
       }
-    },
-
-    // 카카오맵 API 로드 대기
-    waitForKakaoMaps() {
-      return new Promise((resolve, reject) => {
-        if (typeof kakao !== 'undefined' && kakao.maps && kakao.maps.services) {
-          resolve()
-          return
-        }
-
-        let attempts = 0
-        const maxAttempts = 50 // 5초 대기
-
-        const checkKakao = () => {
-          attempts++
-          if (typeof kakao !== 'undefined' && kakao.maps && kakao.maps.services) {
-            resolve()
-          } else if (attempts >= maxAttempts) {
-            reject(new Error('카카오맵 API 로드 실패'))
-          } else {
-            setTimeout(checkKakao, 100)
-          }
-        }
-
-        checkKakao()
-      })
     },
 
     getApproximateAddress(lat, lng) {
@@ -216,8 +190,7 @@ export const useLocationStore = defineStore('location', {
     // 특정 주소를 좌표로 변환 (검색 기능용)
     async getCoordinatesFromAddress(address) {
       try {
-        await this.waitForKakaoMaps()
-
+        await waitKakaoReady()
         return new Promise((resolve, reject) => {
           const geocoder = new kakao.maps.services.Geocoder()
 
@@ -243,8 +216,7 @@ export const useLocationStore = defineStore('location', {
     // 키워드로 장소 검색
     async searchPlaces(keyword) {
       try {
-        await this.waitForKakaoMaps()
-
+        await waitKakaoReady()
         return new Promise((resolve, reject) => {
           const places = new kakao.maps.services.Places()
 

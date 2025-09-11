@@ -66,7 +66,7 @@ const modalConfig = computed(() => {
   } else {
     return {
       title: '정말 취소하시겠습니까?',
-      description: '취소하시면 다시 참여하실 수 없습니다.\n신중하게 결정해 주세요.',
+      description: '취소하시면 되돌릴 수 없습니다..\n신중하게 결정해 주세요.',
       buttonText: '취소하기',
       loadingText: '취소 중...',
       buttonClass: 'cancel-button'

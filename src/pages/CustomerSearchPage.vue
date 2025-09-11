@@ -154,13 +154,13 @@
                 <div class="progress customer-search__related-card-progress-bar">
                   <div 
                     class="progress-bar customer-search__related-card-progress-fill bg-primary"
-                    :style="{ width: `${(store.associationRate || 0) * 100}%` }"
+                    :style="{ width: `${(store.associationRate || 0) * 1240}%` }"
                   ></div>
                 </div>
               </div>
               <span 
                 class="fw-semibold customer-search__related-card-percentage text-primary"
-              >{{ Math.round((store.associationRate || 0) * 100) }}%</span>
+              >{{ Math.round((store.associationRate || 0) * 1240) }}%</span>
             </div>
           </div>
 
